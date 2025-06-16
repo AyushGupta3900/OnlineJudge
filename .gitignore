@@ -7,9 +7,6 @@ node_modules/
 # Logs
 *.log
 
-# Environment variables
-.env
-
 # Build output
 /build
 /dist
@@ -27,3 +24,7 @@ frontend/build/
 
 # Backend-specific
 backend/node_modules/
+
+# .env
+frontend/.env
+backend/.env
