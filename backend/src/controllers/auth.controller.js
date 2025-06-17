@@ -16,7 +16,7 @@ export async function signupUser(req, res) {
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
-    const existingUser = User.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
         .status(400)
@@ -43,6 +43,7 @@ export async function signupUser(req, res) {
       sameSite: "strict", 
       secure: process.env.NODE_ENV === "production",
     });
+    res.status(201).json({ success: true, user: newUser });
   } catch (error) {
     console.log("Error in signupUser controller ", error);
   }
