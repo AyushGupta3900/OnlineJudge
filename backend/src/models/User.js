@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "", 
     },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
+    },
     rating: {
       type: Number,
       default: 1500,

@@ -14,7 +14,7 @@ node_modules/
 # OS-specific
 .DS_Store
 
-# IDEs
+# IDEsx
 .vscode/
 .idea/
 
