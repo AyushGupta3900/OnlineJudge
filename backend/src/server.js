@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js"
+import userRoutes from "./routes/user.routes.js"
+import problemRoutes from "./routes/problem.routes.js"
 import {connectDB} from "./utils/db.js"
 
 dotenv.config();
@@ -27,6 +29,8 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/api/v1/auth",authRoutes);
+app.use("/api/v1/user",userRoutes);
+app.use("/api/v1/problem",problemRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
