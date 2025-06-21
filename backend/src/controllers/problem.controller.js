@@ -1,6 +1,6 @@
 import Problem from "../models/Problem.js";
 
-export async function getAllProblems(req, res) {
+export async function  getAllProblems(req, res) {
     try {
         const problems = await Problem.find({});
         return res.status(200).json({
