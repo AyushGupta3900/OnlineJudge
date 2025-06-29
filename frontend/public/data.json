@@ -1,0 +1,956 @@
+{
+  "problems": [
+    {
+      "id": "1",
+      "title": "Two Sum #1",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "2",
+      "title": "Reverse String #2",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "3",
+      "title": "Valid Parentheses #3",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "4",
+      "title": "Merge Sorted Arrays #4",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "5",
+      "title": "Median of Two Sorted Arrays #5",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    },
+    {
+      "id": "6",
+      "title": "Two Sum #6",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "7",
+      "title": "Reverse String #7",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "8",
+      "title": "Valid Parentheses #8",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "9",
+      "title": "Merge Sorted Arrays #9",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "10",
+      "title": "Median of Two Sorted Arrays #10",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    },
+    {
+      "id": "11",
+      "title": "Two Sum #11",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "12",
+      "title": "Reverse String #12",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "13",
+      "title": "Valid Parentheses #13",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "14",
+      "title": "Merge Sorted Arrays #14",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "15",
+      "title": "Median of Two Sorted Arrays #15",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    },
+    {
+      "id": "16",
+      "title": "Two Sum #16",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "17",
+      "title": "Reverse String #17",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "18",
+      "title": "Valid Parentheses #18",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "19",
+      "title": "Merge Sorted Arrays #19",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "20",
+      "title": "Median of Two Sorted Arrays #20",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    },
+    {
+      "id": "21",
+      "title": "Two Sum #21",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "22",
+      "title": "Reverse String #22",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "23",
+      "title": "Valid Parentheses #23",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "24",
+      "title": "Merge Sorted Arrays #24",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "25",
+      "title": "Median of Two Sorted Arrays #25",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    },
+    {
+      "id": "26",
+      "title": "Two Sum #26",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": [
+        "Array",
+        "HashMap"
+      ],
+      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
+      "inputFormat": "nums = [2,7,11,15], target = 9",
+      "outputFormat": "Output: [0,1]",
+      "sampleTestCases": [
+        {
+          "input": "nums = [2,7,11,15], target = 9",
+          "output": "[0,1]",
+          "explanation": "nums[0] + nums[1] == 9"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums = [3,2,4], target = 6",
+          "output": "[1,2]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "27",
+      "title": "Reverse String #27",
+      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+      "difficulty": "Easy",
+      "tags": [
+        "String",
+        "Two Pointers"
+      ],
+      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
+      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
+      "sampleTestCases": [
+        {
+          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
+          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+          "explanation": "Reverse the array in place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "28",
+      "title": "Valid Parentheses #28",
+      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+      "difficulty": "Easy",
+      "tags": [
+        "Stack",
+        "String"
+      ],
+      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
+      "inputFormat": "s = \"()[]{}\"",
+      "outputFormat": "Output: true",
+      "sampleTestCases": [
+        {
+          "input": "\"()[]{}\"",
+          "output": "true",
+          "explanation": "All brackets are closed in correct order."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "\"(]\"",
+          "output": "false"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "29",
+      "title": "Merge Sorted Arrays #29",
+      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
+      "difficulty": "Medium",
+      "tags": [
+        "Two Pointers",
+        "Array"
+      ],
+      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
+      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+      "outputFormat": "Output: [1,2,2,3,5,6]",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+          "output": "[1,2,2,3,5,6]",
+          "explanation": "Merged two arrays in-place."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+          "output": "[1]"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256,
+      "createdBy": "user123"
+    },
+    {
+      "id": "30",
+      "title": "Median of Two Sorted Arrays #30",
+      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+      "difficulty": "Hard",
+      "tags": [
+        "Binary Search",
+        "Divide & Conquer"
+      ],
+      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
+      "inputFormat": "nums1 = [1,3], nums2 = [2]",
+      "outputFormat": "Output: 2.0",
+      "sampleTestCases": [
+        {
+          "input": "nums1 = [1,3], nums2 = [2]",
+          "output": "2.0",
+          "explanation": "Combined array is [1,2,3]; median is 2."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "nums1 = [1,2], nums2 = [3,4]",
+          "output": "2.5"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 512,
+      "createdBy": "user123"
+    }
+  ],
+  "courses": [
+    {
+      "id": 1,
+      "title": "Data Structures",
+      "description": "Learn about Data Structures in depth.",
+      "icon": "\ud83d\udce6",
+      "difficulty": "Advanced",
+      "link": "/courses/data-structures"
+    },
+    {
+      "id": 2,
+      "title": "Algorithms",
+      "description": "Learn about Algorithms in depth.",
+      "icon": "\u2699\ufe0f",
+      "difficulty": "Advanced",
+      "link": "/courses/algorithms"
+    },
+    {
+      "id": 3,
+      "title": "Operating Systems",
+      "description": "Learn about Operating Systems in depth.",
+      "icon": "\ud83d\udda5\ufe0f",
+      "difficulty": "Advanced",
+      "link": "/courses/operating-systems"
+    },
+    {
+      "id": 4,
+      "title": "Database Systems",
+      "description": "Learn about Database Systems in depth.",
+      "icon": "\ud83d\uddc4\ufe0f",
+      "difficulty": "Beginner",
+      "link": "/courses/database-systems"
+    },
+    {
+      "id": 5,
+      "title": "Computer Networks",
+      "description": "Learn about Computer Networks in depth.",
+      "icon": "\ud83c\udf10",
+      "difficulty": "Intermediate",
+      "link": "/courses/computer-networks"
+    },
+    {
+      "id": 6,
+      "title": "System Design",
+      "description": "Learn about System Design in depth.",
+      "icon": "\ud83c\udfd7\ufe0f",
+      "difficulty": "Beginner",
+      "link": "/courses/system-design"
+    },
+    {
+      "id": 7,
+      "title": "Machine Learning",
+      "description": "Learn about Machine Learning in depth.",
+      "icon": "\ud83e\udd16",
+      "difficulty": "Intermediate",
+      "link": "/courses/machine-learning"
+    },
+    {
+      "id": 8,
+      "title": "Web Development",
+      "description": "Learn about Web Development in depth.",
+      "icon": "\ud83c\udf0d",
+      "difficulty": "Intermediate",
+      "link": "/courses/web-development"
+    },
+    {
+      "id": 9,
+      "title": "Mobile App Development",
+      "description": "Learn about Mobile App Development in depth.",
+      "icon": "\ud83d\udcf1",
+      "difficulty": "Beginner",
+      "link": "/courses/mobile-app-development"
+    },
+    {
+      "id": 10,
+      "title": "Cloud Computing",
+      "description": "Learn about Cloud Computing in depth.",
+      "icon": "\u2601\ufe0f",
+      "difficulty": "Intermediate",
+      "link": "/courses/cloud-computing"
+    }
+  ]
+}
