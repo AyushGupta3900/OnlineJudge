@@ -28,3 +28,8 @@ backend/node_modules/
 # .env
 frontend/.env
 backend/.env
+
+compiler/node_modules/
+compiler/.env
+compiler/codes
+compiler/outputs
