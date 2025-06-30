@@ -20,7 +20,7 @@ export async function  getAllProblems(req, res) {
 
 export async function getProblem(req, res) {
   try {
-    const { problemId } = req.params;
+    const problemId = req.params.id;
     if (!problemId) {
       return res.status(400).json({
         success: false,
@@ -152,6 +152,91 @@ export async function editProblem(req, res) {
     return res.status(500).json({
       success: false,
       message: "Server error while editing problem",
+    });
+  }
+}
+
+export async function createProblemFromArray(req, res) {
+  try {
+    const problemsArray = req.body;
+
+    if (!Array.isArray(problemsArray) || problemsArray.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body must be a non-empty array of problems.",
+      });
+    }
+
+    const createdProblems = [];
+    const skippedProblems = [];
+
+    for (const problem of problemsArray) {
+      const {
+        title,
+        description,
+        difficulty,
+        tags,
+        constraints,
+        inputFormat,
+        outputFormat,
+        sampleTestCases,
+        hiddenTestCases,
+        timeLimit,
+        memoryLimit
+      } = problem;
+
+      // Basic validation
+      if (!title || !description || !sampleTestCases || sampleTestCases.length === 0) {
+        skippedProblems.push({
+          title,
+          reason: "Missing required fields: title, description, or sampleTestCases",
+        });
+        continue;
+      }
+
+      // Check for existing problem with the same title
+      const existing = await Problem.findOne({ title });
+      if (existing) {
+        skippedProblems.push({
+          title,
+          reason: "Duplicate title",
+        });
+        continue;
+      }
+
+      const newProblem = new Problem({
+        title,
+        description,
+        difficulty,
+        tags,
+        constraints,
+        inputFormat,
+        outputFormat,
+        sampleTestCases,
+        hiddenTestCases,
+        timeLimit,
+        memoryLimit,
+        createdBy: req.user._id,
+      });
+
+      await newProblem.save();
+      createdProblems.push(newProblem);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Batch problem creation completed.",
+      createdCount: createdProblems.length,
+      skippedCount: skippedProblems.length,
+      createdProblems,
+      skippedProblems,
+    });
+
+  } catch (error) {
+    console.error("Error in createProblemFromArray controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while creating problems in batch.",
     });
   }
 }

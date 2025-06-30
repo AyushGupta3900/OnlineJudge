@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useLoginUserMutation } from "../redux/api/authAPI.js";
@@ -9,23 +8,18 @@ const useLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [loginUser, { data, error, isLoading, isSuccess }] = useLoginUserMutation();
+  const [loginUser, { isLoading, error }] = useLoginUserMutation();
 
   const login = async (loginData) => {
     try {
       const response = await loginUser(loginData).unwrap();
       dispatch(setCredentials(response));
+      toast.success("Login successful!");
+      navigate("/");
     } catch (err) {
-      // error is available in `error` already
+      toast.error(err?.data?.message || "Login failed");
     }
   };
-
-  useEffect(() => {
-    if (isSuccess && data) {
-      toast.success("Its done");
-      navigate("/"); 
-    }
-  }, [isSuccess, data, navigate]);
 
   return { login, isLoading, error };
 };

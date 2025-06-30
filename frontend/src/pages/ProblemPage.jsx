@@ -1,33 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import CodeEditor from "../components/CodeEditor";
 import { BiSolidLeftArrow, BiSolidDownArrow } from "react-icons/bi";
+import {   useGetProblemByIdQuery } from "../redux/api/problemAPI";
 
 const ProblemPage = () => {
   const { id } = useParams();
-  const [problem, setProblem] = useState(null);
-  const [viewMode, setViewMode] = useState("side"); // 'side' or 'bottom'
+  const [viewMode, setViewMode] = useState("side");
 
-  useEffect(() => {
-    const fetchProblem = async () => {
-      try {
-        const res = await fetch("/data.json");
-        const data = await res.json();
-        const found = data.problems.find((p) => p.id === id);
-        setProblem(found);
-      } catch (err) {
-        console.error("Error fetching problem:", err);
-      }
-    };
-    fetchProblem();
-  }, [id]);
+  const { data, isLoading, isError } =   useGetProblemByIdQuery(id);
+  const problem = data?.data;
 
-  if (!problem) {
+  if (isLoading) {
     return (
       <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-        <p className="text-lg text-gray-400 animate-pulse">
-          Loading problem...
-        </p>
+        <p className="text-lg text-gray-400 animate-pulse">Loading problem...</p>
+      </div>
+    );
+  }
+
+  if (isError || !problem) {
+    return (
+      <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+        <p className="text-lg text-red-500">Failed to load problem.</p>
       </div>
     );
   }
@@ -35,11 +30,10 @@ const ProblemPage = () => {
   return (
     <div className="bg-gray-900 text-white min-h-screen px-4 py-6">
       <div className="max-w-[1600px] mx-auto">
-        {/* Toggle Button */}
         <div className="hidden lg:flex justify-end mb-4">
           <button
             onClick={() => setViewMode(viewMode === "side" ? "bottom" : "side")}
-            className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium px-4 py-2 rounded-md border border-gray-700 flex items-center gap-2 transition hover:cursor-pointer"
+            className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium px-4 py-2 rounded-md border border-gray-700 flex items-center gap-2 transition"
           >
             {viewMode === "side" ? (
               <>
@@ -55,7 +49,6 @@ const ProblemPage = () => {
           </button>
         </div>
 
-        {/* Layout based on view mode */}
         {viewMode === "side" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <LeftPanel problem={problem} />
@@ -74,8 +67,7 @@ const ProblemPage = () => {
 
 export default ProblemPage;
 
-// --- Subcomponents ---
-
+// Subcomponents
 const LeftPanel = ({ problem }) => (
   <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-3rem)] pr-2">
     <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">

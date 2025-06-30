@@ -1,27 +1,27 @@
 import React, { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import useAuthUser from "../hooks/useAuthUser.js";
-import { useLogoutUserMutation } from "../redux/api/authAPI.js";
-import { useDispatch } from "react-redux";
-import { logout as clearCredentials } from "../redux/reducers/authReducer.js";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useLogout from "../hooks/useLogout.js";
 
 const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { authUser } = useAuthUser();
-  const [logoutUser] = useLogoutUserMutation();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { logout } = useLogout();
 
-  const isAuthenticated = Boolean(authUser);
+  // ✅ Use Redux state directly to avoid stale auth state
+  const authUser = useSelector((state) => state.auth.user);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const handleLogout = async () => {
     try {
-      await logoutUser().unwrap();
-      dispatch(clearCredentials());
-      navigate("/login");
+      setIsLoggingOut(true);
+      await logout();
+      setIsOpen(false); // Close dropdown
     } catch (error) {
       console.error("Logout failed", error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -80,9 +80,10 @@ const Nav = () => {
         {isAuthenticated ? (
           <button
             onClick={handleLogout}
+            disabled={isLoggingOut}
             className="btn btn-sm btn-outline text-white border-white hover:bg-blue-600"
           >
-            Logout
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         ) : (
           <Link
@@ -156,13 +157,11 @@ const Nav = () => {
             <li className="mt-2">
               {isAuthenticated ? (
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsOpen(false);
-                  }}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   className="btn btn-sm btn-outline w-full"
                 >
-                  Logout
+                  {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
               ) : (
                 <Link

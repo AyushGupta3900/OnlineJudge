@@ -89,7 +89,7 @@ export async function logoutUser(req,res){
 export async function onboardingUser(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName,bio  } = req.body;
+    const { fullName,bio } = req.body;
 
     if (!fullName || !bio ) {
       return res.status(400).json({

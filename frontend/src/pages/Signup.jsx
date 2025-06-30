@@ -1,24 +1,25 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
+import useSignup from "../hooks/useSignup.js";
 
 const Signup = () => {
-  
   const [signupData, setSignupData] = useState({
     username: "",
     email: "",
     password: "",
   });
 
+  const { signup, isLoading } = useSignup();
+
   const handleSignup = (e) => {
     e.preventDefault();
-    // handle signup logic here (e.g., mutation)
+    signup(signupData);
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-6xl flex flex-col lg:flex-row shadow-2xl rounded-xl overflow-hidden border border-gray-700 bg-gray-800">
-        
         {/* Left: Signup Form */}
         <div className="w-full lg:w-1/2 p-6 sm:p-10 space-y-6">
           <div className="flex items-center gap-2 mb-4">
@@ -85,8 +86,9 @@ const Signup = () => {
             <button
               type="submit"
               className="btn btn-primary w-full bg-blue-600 hover:bg-blue-700 border-none"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
 
             <p className="text-sm text-center mt-4">
@@ -98,12 +100,12 @@ const Signup = () => {
           </form>
         </div>
 
-        {/* Right*/}
+        {/* Right: Illustration */}
         <div className="hidden lg:flex w-full lg:w-1/2 bg-gray-900 items-center justify-center p-10 border-l border-gray-700">
           <div className="text-center space-y-6 max-w-md">
             <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
               <img
-                src="/i.jpg" 
+                src="/i.jpg"
                 alt="Signup illustration"
                 className="w-full h-full object-cover"
               />
@@ -116,7 +118,6 @@ const Signup = () => {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
