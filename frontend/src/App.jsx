@@ -1,11 +1,16 @@
-import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 // Components
 import Nav from "./components/Nav.jsx";
 import Footer from "./components/Footer.jsx";
 import PageLoader from "./components/PageLoader.jsx";
-
 
 // Lazy Loaded Pages
 const Home = lazy(() => import("./pages/Home.jsx"));
@@ -19,10 +24,16 @@ const Problems = lazy(() => import("./pages/Problems.jsx"));
 const ProblemPage = lazy(() => import("./pages/ProblemPage.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
 
+// Hook
+import useAuthUser from "./hooks/useAuthUser";
+
 const App = () => {
-  // Dummy State
-  const isAuthenticated = true;
-  const isOnboarded = true;
+  const { authUser, isLoading } = useAuthUser();
+
+  const isAuthenticated = Boolean(authUser);
+  const isOnboarded = authUser?.isOnboarded;
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <Router>
@@ -59,8 +70,6 @@ const App = () => {
               )
             }
           />
-
-          {/* ✅ Auth-Protected Routes */}
           <Route
             path="/onboarding"
             element={
@@ -70,39 +79,59 @@ const App = () => {
           <Route
             path="/about"
             element={
-              isAuthenticated ? <About /> : <Navigate to="/login" />
+              isAuthenticated && isOnboarded ? (
+                  <About />
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
             }
           />
           <Route
             path="/contact"
             element={
-              isAuthenticated ? <Contact /> : <Navigate to="/login" />
+              isAuthenticated && isOnboarded ? (
+                  <Contact/>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
             }
           />
           <Route
             path="/problems"
             element={
-              isAuthenticated ? <Problems /> : <Navigate to="/login" />
+              isAuthenticated && isOnboarded ? (
+                  <Problems/>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
+            }
+          />
+          <Route
+            path="/problem/:id"
+            element={
+              isAuthenticated && isOnboarded ? (
+                  <ProblemPage />
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
             }
           />
           <Route
             path="/courses"
             element={
-              isAuthenticated ? <Courses /> : <Navigate to="/login" />
-            }
-          />
-          <Route
-            path="/problems/:id"
-            element={
-              isAuthenticated ? <ProblemPage /> : <Navigate to="/login" />
+              isAuthenticated && isOnboarded ? (
+                  <Courses />
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
             }
           />
 
-          {/* ✅ Not Found */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
       <Footer />
+      <Toaster />
     </Router>
   );
 };

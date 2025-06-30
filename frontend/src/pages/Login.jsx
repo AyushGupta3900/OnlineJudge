@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // fixed from "react-router"
+import { Link } from "react-router-dom";
 import { FaLaptopCode } from "react-icons/fa";
+import useLogin from "../hooks/useLogin";
 
 const Login = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const isPending = false;
-  const error = null;
+  const { login, isLoading, error } = useLogin();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // loginMutation(loginData);
+    await login(loginData);
   };
 
   return (
@@ -25,7 +25,11 @@ const Login = () => {
             </span>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error.response.data.message}</p>}
+          {error && (
+            <p className="text-red-500 text-sm">
+              {error?.data?.message || "Login failed. Please try again."}
+            </p>
+          )}
 
           <h2 className="text-2xl font-bold">Welcome Back</h2>
           <p className="text-gray-400 text-sm mb-6">
@@ -68,9 +72,9 @@ const Login = () => {
             <button
               type="submit"
               className="btn btn-primary w-full bg-blue-600 hover:bg-blue-700 border-none"
-              disabled={isPending}
+              disabled={isLoading}
             >
-              {isPending ? (
+              {isLoading ? (
                 <>
                   <span className="loading loading-spinner loading-xs"></span>
                   Signing in...
@@ -89,12 +93,12 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Right*/}
+        {/* Right */}
         <div className="hidden lg:flex w-full lg:w-1/2 bg-gray-900 items-center justify-center p-10 border-l border-gray-700">
           <div className="text-center space-y-6 max-w-md">
             <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
               <img
-                src="/i.jpg" 
+                src="/i.jpg"
                 alt="Coding illustration"
                 className="w-full h-full object-cover"
               />
@@ -107,7 +111,7 @@ const Login = () => {
             </p>
           </div>
         </div>
-        
+
       </div>
     </div>
   );

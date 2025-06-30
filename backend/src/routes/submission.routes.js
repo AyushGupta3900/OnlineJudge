@@ -5,7 +5,7 @@ import {adminOnly} from "../middlewares/adminOnly.middleware.js"
 
 const router = express.Router();
 
-app.use(protectedRoute);
+router.use(protectedRoute);
 
 router.post("/submit",submitProblem);
 router.get("/user/submissions",getSubmissionsByUser);

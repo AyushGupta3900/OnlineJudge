@@ -1,9 +1,29 @@
 import React, { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuthUser from "../hooks/useAuthUser.js";
+import { useLogoutUserMutation } from "../redux/api/authAPI.js";
+import { useDispatch } from "react-redux";
+import { logout as clearCredentials } from "../redux/reducers/authReducer.js";
 
 const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { authUser } = useAuthUser();
+  const [logoutUser] = useLogoutUserMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const isAuthenticated = Boolean(authUser);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser().unwrap();
+      dispatch(clearCredentials());
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   const gradientHover =
     "hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-500 transition duration-300 bg-transparent focus:outline-none";
@@ -23,7 +43,7 @@ const Nav = () => {
       </div>
 
       {/* Desktop Menu */}
-      <div className="hidden md:flex flex-none">
+      <div className="hidden md:flex flex-none items-center gap-4">
         <ul className="menu menu-horizontal px-1 text-lg font-medium tracking-wide bg-transparent">
           <li>
             <Link to="/problems" className={`cursor-pointer ${gradientHover}`}>
@@ -55,6 +75,23 @@ const Nav = () => {
             </details>
           </li>
         </ul>
+
+        {/* Navbar Button */}
+        {isAuthenticated ? (
+          <button
+            onClick={handleLogout}
+            className="btn btn-sm btn-outline text-white border-white hover:bg-blue-600"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="btn btn-sm btn-primary text-white normal-case"
+          >
+            Login
+          </Link>
+        )}
       </div>
 
       {/* Hamburger Icon */}
@@ -113,6 +150,29 @@ const Nav = () => {
                   </li>
                 </ul>
               </details>
+            </li>
+
+            {/* Mobile Auth Button */}
+            <li className="mt-2">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="btn btn-sm btn-outline w-full"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="btn btn-sm btn-primary w-full text-white"
+                >
+                  Login
+                </Link>
+              )}
             </li>
           </ul>
         </div>

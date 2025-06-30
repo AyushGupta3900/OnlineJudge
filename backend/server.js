@@ -1,25 +1,39 @@
-import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import authRoutes from "./routes/auth.routes.js"
-import userRoutes from "./routes/user.routes.js"
-import problemRoutes from "./routes/problem.routes.js"
-import submissionRoutes from "./routes/submission.routes.js"
-import {connectDB} from "./utils/db.js"
+import express from "express";
 
+// importing routes 
+import authRoutes from "./src/routes/auth.routes.js"
+import userRoutes from "./src/routes/user.routes.js"
+import problemRoutes from "./src/routes/problem.routes.js"
+import submissionRoutes from "./src/routes/submission.routes.js"
+
+import {connectDB} from "./src/utils/db.js"
+
+// configuring .env
 dotenv.config();
+
+// connecting to DB 
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5002; 
+const PORT = process.env.PORT || 5000; 
 
+// middlewares 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 app.use(cors(
     {
-        origin: "http://localhost:5174",
+        origin: process.env.ORIGIN_URL,
         methods: ['GET','POST','PUT','PATCH','DELETE'],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "Cache-Control",
+            "Expires",
+            "Pragma"
+        ],
         credentials: true,
     }
 ));

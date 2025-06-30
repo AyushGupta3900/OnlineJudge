@@ -17,7 +17,7 @@ console.log("Hello, World!");`,
   public static void main(String[] args) {
     // Your code here
   }
-}`
+}`,
 };
 
 const CodeEditor = () => {
@@ -30,7 +30,9 @@ const CodeEditor = () => {
   }, [language]);
 
   const handleRun = () => {
-    setOutput("🚀 Running your " + language + " code...\n✅ Output:\nHello, World!");
+    setOutput(
+      "🚀 Running your " + language + " code...\n✅ Output:\nHello, World!"
+    );
   };
 
   return (
@@ -41,7 +43,9 @@ const CodeEditor = () => {
 
       {/* Language Selector */}
       <div className="flex flex-wrap items-center gap-4">
-        <label className="text-sm font-medium text-gray-400">Choose Language:</label>
+        <label className="text-sm font-medium text-gray-400">
+          Choose Language:
+        </label>
         <select
           className="bg-gray-800 text-white px-4 py-2 rounded-md outline-none border border-gray-700"
           value={language}
@@ -67,8 +71,48 @@ const CodeEditor = () => {
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              const { selectionStart, selectionEnd } = e.target;
+              const newCode =
+                code.substring(0, selectionStart) +
+                "  " +
+                code.substring(selectionEnd);
+              setCode(newCode);
+              setTimeout(() => {
+                e.target.selectionStart = e.target.selectionEnd =
+                  selectionStart + 2;
+              }, 0);
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              const { selectionStart, selectionEnd } = e.target;
+
+              // Get current line
+              const lines = code.substring(0, selectionStart).split("\n");
+              const currentLine = lines[lines.length - 1];
+
+              // Get indentation of current line
+              const indentation = currentLine.match(/^\s*/)?.[0] || "";
+
+              // Insert new line with same indentation
+              const newCode =
+                code.substring(0, selectionStart) +
+                "\n" +
+                indentation +
+                code.substring(selectionEnd);
+
+              setCode(newCode);
+
+              // Move cursor to the correct position
+              setTimeout(() => {
+                e.target.selectionStart = e.target.selectionEnd =
+                  selectionStart + 1 + indentation.length;
+              }, 0);
+            }
+          }}
           rows="14"
-          className="w-full bg-transparent text-sm text-white p-3 font-mono resize-none focus:outline-none focus:ring-0"
+          className="codearea w-full bg-transparent text-sm text-white p-3 font-mono resize-none focus:outline-none focus:ring-0"
           spellCheck="false"
           style={{ lineHeight: "1.5", minWidth: "0" }}
         />
