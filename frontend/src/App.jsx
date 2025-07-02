@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense} from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -8,7 +8,9 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
 import ScrollToTop from "./components/ScrollToTop";
+
 import useAuthUser from "./hooks/useAuthUser";
+
 // Lazy-loaded Pages
 const Home = lazy(() => import("./pages/Home"));
 
@@ -57,11 +59,10 @@ export default function App() {
   return (
     <Router>
       <Nav />
-      <Toaster position="top-center" reverseOrder={false} />
-      <ScrollToTop />
-
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+        <Toaster position="top-center" reverseOrder={false} />
+          <ScrollToTop />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
           {/* Public Routes */}
           <Route path="/login" element={requirePublic(<Login />)} />
           <Route path="/signup" element={requirePublic(<Signup />)} />
@@ -87,10 +88,9 @@ export default function App() {
 
           {/* Catch-All */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-
-      <Footer />
+              </Routes>
+            </Suspense>
+        <Footer />
     </Router>
   );
 }

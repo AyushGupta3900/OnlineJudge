@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaTwitter, FaYoutube, FaFacebook } from "react-icons/fa";
+import { FaLinkedin, FaInstagram, FaGithub } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -33,28 +33,28 @@ const Footer = () => {
           <h3 className="text-xl font-semibold text-white mb-2">Follow Us</h3>
           <div className="flex justify-center md:justify-start gap-6 text-2xl">
             <a
-              href="https://twitter.com"
+              href="https://github.com/AyushGupta3900"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-600 transition duration-300"
+            >
+              <FaGithub/>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/ayush-gupta-a5a1ab272/"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-400 transition duration-300"
             >
-              <FaTwitter />
+              <FaLinkedin />
             </a>
             <a
-              href="https://youtube.com"
+              href="https://www.instagram.com/ayushgupta_3900/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-500 transition duration-300"
+              className="hover:text-pink-500 transition duration-300"
             >
-              <FaYoutube />
-            </a>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-blue-600 transition duration-300"
-            >
-              <FaFacebook />
+              <FaInstagram />
             </a>
           </div>
         </div>
