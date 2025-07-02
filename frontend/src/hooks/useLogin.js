@@ -23,5 +23,4 @@ const useLogin = () => {
 
   return { login, isLoading, error };
 };
-
 export default useLogin;

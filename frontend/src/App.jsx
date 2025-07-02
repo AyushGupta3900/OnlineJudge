@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -7,10 +7,10 @@ import { useSelector } from "react-redux";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
-import useAuthUser from "./hooks/useAuthUser"; 
-import ScrollToTop from "./components/ScrollToTop"
+import ScrollToTop from "./components/ScrollToTop";
+import useAuthUser from "./hooks/useAuthUser";
 
-// Lazy-loaded pages
+// Lazy-loaded Pages
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -29,12 +29,23 @@ const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function App() {
+  const { isLoading } = useAuthUser();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const isOnboarded = useSelector((state) => state.auth.user?.isOnboarded);
-  const { isLoading } = useAuthUser(); 
 
-  if (isLoading) {
-    return <PageLoader />; 
+  const requireAuth = (component) =>
+    isAuthenticated && isOnboarded
+      ? component
+      : <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />;
+
+  const requirePublic = (component) =>
+    !isAuthenticated ? component : <Navigate to="/" />;
+
+  const requireOnboarding = (component) =>
+    isAuthenticated && !isOnboarded ? component : <Navigate to="/" />;
+
+  if(isLoading){
+    return <PageLoader/>
   }
 
   return (
@@ -42,156 +53,37 @@ export default function App() {
       <Nav />
       <Toaster position="top-center" reverseOrder={false} />
       <ScrollToTop />
+
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public Routes */}
-          <Route
-            path="/login"
-            element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/signup"
-            element={!isAuthenticated ? <Signup /> : <Navigate to="/" />}
-          />
+          <Route path="/login" element={requirePublic(<Login />)} />
+          <Route path="/signup" element={requirePublic(<Signup />)} />
 
           {/* Onboarding Route */}
-          <Route
-            path="/onboarding"
-            element={
-              isAuthenticated && !isOnboarded ? (
-                <Onboarding />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
+          <Route path="/onboarding" element={requireOnboarding(<Onboarding />)} />
 
           {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <Home />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/problems"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <Problems />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/problems/:id"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <ProblemPage />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/submissions/problem/:id"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <SubmissionPage />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <ProfilePage />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/courses"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <Courses />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <Contact />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <About />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/admin/add-problem"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <CreateProblem />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/admin/edit-problem/:id"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <UpdateProblem />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              isAuthenticated && isOnboarded ? (
-                <Users />
-              ) : (
-                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
-              )
-            }
-          />
+          <Route path="/" element={requireAuth(<Home />)} />
+          <Route path="/problems" element={requireAuth(<Problems />)} />
+          <Route path="/problems/:id" element={requireAuth(<ProblemPage />)} />
+          <Route path="/submissions/problem/:id" element={requireAuth(<SubmissionPage />)} />
+          <Route path="/profile" element={requireAuth(<ProfilePage />)} />
+          <Route path="/courses" element={requireAuth(<Courses />)} />
+          <Route path="/contact" element={requireAuth(<Contact />)} />
+          <Route path="/about" element={requireAuth(<About />)} />
 
-          {/* Catch-all */}
+          {/* Admin Routes */}
+          <Route path="/admin" element={requireAuth(<AdminDashboard />)} />
+          <Route path="/admin/add-problem" element={requireAuth(<CreateProblem />)} />
+          <Route path="/admin/edit-problem/:id" element={requireAuth(<UpdateProblem />)} />
+          <Route path="/admin/users" element={requireAuth(<Users />)} />
+
+          {/* Catch-All */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+
       <Footer />
     </Router>
   );

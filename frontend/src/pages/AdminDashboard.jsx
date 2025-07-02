@@ -6,6 +6,10 @@ import {
   useDeleteProblemMutation,
 } from "../redux/api/problemAPI";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 const AdminDashboard = () => {
   const {
@@ -18,7 +22,19 @@ const AdminDashboard = () => {
   const [deleteProblem] = useDeleteProblemMutation();
 
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this problem?")) {
+    const result = await MySwal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626", // red-600
+      cancelButtonColor: "#6b7280", // gray-500
+      confirmButtonText: "Yes, delete it!",
+      background: "#1f2937", // bg-gray-900
+      color: "#f3f4f6", // text-gray-100
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteProblem(id).unwrap();
         refetch();

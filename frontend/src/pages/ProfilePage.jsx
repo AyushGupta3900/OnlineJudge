@@ -43,8 +43,8 @@ const getDifficultyStats = (solvedProblems = []) => {
 };
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
   const { authUser: user, isLoading, isError, error } = useAuthUser();
+  const navigate = useNavigate();
   const pieData = getDifficultyStats(user?.solvedProblems);
   pieData[0].value = user?.solvedCountByDifficulty?.Easy || 0;
   pieData[1].value = user?.solvedCountByDifficulty?.Medium || 0;

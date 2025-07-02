@@ -11,7 +11,10 @@ const useAuthUser = () => {
     isLoading,
     isError,
     error,
-  } = useGetAuthUserQuery();
+    refetch, 
+  } = useGetAuthUserQuery(undefined, {
+    refetchOnMountOrArgChange: true, 
+  });
 
   const authUser = data?.user || null;
 
@@ -21,7 +24,13 @@ const useAuthUser = () => {
     }
   }, [authUser, dispatch]);
 
-  return { authUser, isLoading, isError, error };
+  return {
+    authUser,
+    isLoading,
+    isError,
+    error,
+    refetch, 
+  };
 };
 
 export default useAuthUser;

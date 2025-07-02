@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useCompleteOnboardingMutation } from "../redux/api/authAPI.js";
-import { setCredentials } from "../redux/reducers/authReducer.js"; // ✅ important
+import { setCredentials } from "../redux/reducers/authReducer.js"; 
 import toast from "react-hot-toast";
 
 const useOnboarding = () => {
@@ -14,8 +14,7 @@ const useOnboarding = () => {
     try {
       const response = await onboard(onBoardingData).unwrap();
 
-      // ✅ Update Redux auth state 
-      dispatch(setCredentials(response)); // same as in useLogin
+      dispatch(setCredentials(response));
 
       toast.success("Onboarding completed!");
       navigate("/");

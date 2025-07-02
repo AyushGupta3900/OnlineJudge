@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseUrl = import.meta.env.VITE_API_URL + '/submission';
+const baseUrl = import.meta.env.VITE_API_URL + "/submission";
 
 export const submissionAPI = createApi({
   reducerPath: "submissionAPI",
@@ -8,6 +8,7 @@ export const submissionAPI = createApi({
     baseUrl,
     credentials: "include",
   }),
+  tagTypes: ["User"],
   endpoints: (builder) => ({
     submitCode: builder.mutation({
       query: ({ problemId, code, language }) => ({
@@ -15,12 +16,13 @@ export const submissionAPI = createApi({
         method: "POST",
         body: { problemId, code, language },
       }),
+      invalidatesTags: ["User"], 
     }),
     getSubmissionById: builder.query({
-      query: (submissionId) => `/${submissionId}`, 
+      query: (submissionId) => `/${submissionId}`,
     }),
     getSubmissionsByProblem: builder.query({
-      query: (problemId) => `/user/${problemId}`, 
+      query: (problemId) => `/user/${problemId}`,
     }),
   }),
 });

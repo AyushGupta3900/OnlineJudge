@@ -23,6 +23,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.2",
     "recharts": "^3.0.2",
+    "redux-persist": "^6.0.0",
     "sweetalert2": "^11.22.2",
     "sweetalert2-react-content": "^5.1.0",
     "tailwindcss": "^4.1.10"

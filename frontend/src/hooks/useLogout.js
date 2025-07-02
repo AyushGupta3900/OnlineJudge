@@ -1,9 +1,9 @@
-// src/hooks/useLogout.js
 import { useNavigate } from "react-router-dom";
 import { useLogoutUserMutation } from "../redux/api/authAPI.js";
 import { useDispatch } from "react-redux";
 import { logout as clearCredentials } from "../redux/reducers/authReducer.js";
 import toast from "react-hot-toast";
+import { persistor } from "../redux/store/store.js"; 
 
 const useLogout = () => {
   const dispatch = useDispatch();
@@ -12,14 +12,15 @@ const useLogout = () => {
 
   const logout = async () => {
     try {
-      await logoutUser().unwrap();
-      dispatch(clearCredentials());
-      toast.success("Logout successful!");
-      navigate("/login");
+      await logoutUser().unwrap(); 
     } catch (error) {
-      console.error("Logout failed:", error);
-      toast.error("Logout failed");
+      console.warn("Server logout failed, proceeding to clear local state anyway");
     }
+    dispatch(clearCredentials());
+    persistor.purge(); 
+
+    toast.success("Logout successful!");
+    navigate("/login");
   };
 
   return { logout, isLoading };

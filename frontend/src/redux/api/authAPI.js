@@ -6,14 +6,14 @@ export const authAPI = createApi({
   reducerPath: 'authAPI',
   baseQuery: fetchBaseQuery({
     baseUrl,
-    credentials: 'include', // Sends cookies for auth
+    credentials: 'include', 
   }),
   tagTypes: ["User"], 
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (credentials) => ({
         url: '/login',
-        method: 'POST',
+        method: 'POST',  
         body: credentials,
       }),
     }),
