@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetAllProblemsQuery } from "../redux/api/problemAPI.js";
-import useAuthUser from "../hooks/useAuthUser.js"; 
+import { useGetAllProblemsQuery } from "../../redux/api/problemAPI.js";
+import useAuthUser from "../../hooks/useAuthUser.js"; 
 import { motion } from "framer-motion";
 
 const Problems = () => {

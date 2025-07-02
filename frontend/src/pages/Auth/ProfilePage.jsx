@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import useAuthUser from "../hooks/useAuthUser";
+import useAuthUser from "../../hooks/useAuthUser.js";
 import {
   useDeleteUserAccountMutation,
   useUpdateUserAccountMutation,
-} from "../redux/api/authAPI";
+} from "../../redux/api/authAPI.js";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -20,8 +20,8 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
-import { logout } from "../redux/reducers/authReducer";
-import { persistor } from "../redux/store/store.js"; 
+import { logout } from "../../redux/reducers/authReducer.js";
+import { persistor } from "../../redux/store/store.js"; 
 
 const MySwal = withReactContent(Swal);
 

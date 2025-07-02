@@ -4,7 +4,7 @@ import { FaPlus, FaEdit, FaTrash, FaUsers } from "react-icons/fa";
 import {
   useGetAllProblemsQuery,
   useDeleteProblemMutation,
-} from "../redux/api/problemAPI";
+} from "../../redux/api/problemAPI";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";

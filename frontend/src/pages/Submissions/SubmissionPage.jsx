@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetSubmissionsByProblemQuery } from "../redux/api/submissionAPI.js";
+import { useGetSubmissionsByProblemQuery } from "../../redux/api/submissionAPI.js";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 

@@ -3,9 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   useGetProblemByIdQuery,
   useUpdateProblemMutation,
-} from "../redux/api/problemAPI";
+} from "../../redux/api/problemAPI";
 import toast from "react-hot-toast";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/PageLoader";
 import { FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateProblemMutation } from "../redux/api/problemAPI";
+import { useCreateProblemMutation } from "../../redux/api/problemAPI";
 import { FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
 

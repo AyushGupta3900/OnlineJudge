@@ -2,7 +2,7 @@ import React from "react";
 import {
   useGetAllUsersQuery,
   useMakeUserAdminMutation,
-} from "../redux/api/authAPI.js";
+} from "../../redux/api/authAPI.js";
 
 const Users = () => {
   const { data, isLoading, isError, refetch } = useGetAllUsersQuery();

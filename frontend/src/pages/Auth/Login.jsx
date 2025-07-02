@@ -1,21 +1,16 @@
-import{ useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUserPlus } from "react-icons/fa";
+import { FaLaptopCode } from "react-icons/fa";
 import { motion } from "framer-motion";
-import useSignup from "../hooks/useSignup.js";
+import useLogin from "../../hooks/useLogin";
 
-const Signup = () => {
-  const [signupData, setSignupData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+const Login = () => {
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const { login, isLoading, error } = useLogin();
 
-  const { signup, isLoading } = useSignup();
-
-  const handleSignup = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    signup(signupData);
+    await login(loginData);
   };
 
   return (
@@ -31,7 +26,7 @@ const Signup = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-6xl flex flex-col lg:flex-row shadow-2xl rounded-xl overflow-hidden border border-gray-700 bg-gray-800"
       >
-        {/* Left: Signup Form */}
+        {/* Left: Login Form */}
         <div className="w-full lg:w-1/2 p-6 sm:p-10 space-y-6">
           <motion.div
             initial={{ x: -30, opacity: 0 }}
@@ -39,11 +34,22 @@ const Signup = () => {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="flex items-center gap-2 mb-4"
           >
-            <FaUserPlus className="text-3xl text-blue-500" />
+            <FaLaptopCode className="text-3xl text-blue-500" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-              Join CodeX
+              CodeX
             </span>
           </motion.div>
+
+          {error && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="text-red-500 text-sm"
+            >
+              {error?.data?.message || "Login failed. Please try again."}
+            </motion.p>
+          )}
 
           <motion.h2
             initial={{ x: -20, opacity: 0 }}
@@ -51,41 +57,25 @@ const Signup = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-2xl font-bold"
           >
-            Create Your Account
+            Welcome Back
           </motion.h2>
 
           <p className="text-gray-400 text-sm mb-6">
-            Start solving DSA problems and build your coding portfolio.
+            Sign in to continue solving DSA challenges and track your progress.
           </p>
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="text-sm">Username</span>
-              </label>
-              <input
-                type="text"
-                placeholder="your_coder_name"
-                className="input input-bordered bg-gray-700 text-white w-full"
-                value={signupData.username}
-                onChange={(e) =>
-                  setSignupData({ ...signupData, username: e.target.value })
-                }
-                required
-              />
-            </div>
-
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="form-control">
               <label className="label">
                 <span className="text-sm">Email</span>
               </label>
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder="hello@example.com"
                 className="input input-bordered bg-gray-700 text-white w-full"
-                value={signupData.email}
+                value={loginData.email}
                 onChange={(e) =>
-                  setSignupData({ ...signupData, email: e.target.value })
+                  setLoginData({ ...loginData, email: e.target.value })
                 }
                 required
               />
@@ -99,9 +89,9 @@ const Signup = () => {
                 type="password"
                 placeholder="••••••••"
                 className="input input-bordered bg-gray-700 text-white w-full"
-                value={signupData.password}
+                value={loginData.password}
                 onChange={(e) =>
-                  setSignupData({ ...signupData, password: e.target.value })
+                  setLoginData({ ...loginData, password: e.target.value })
                 }
                 required
               />
@@ -113,19 +103,26 @@ const Signup = () => {
               className="btn btn-primary w-full bg-blue-600 hover:bg-blue-700 border-none"
               disabled={isLoading}
             >
-              {isLoading ? "Creating Account..." : "Create Account"}
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner loading-xs"></span>
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </motion.button>
 
             <p className="text-sm text-center mt-4">
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-400 hover:underline">
-                Sign in
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-blue-400 hover:underline">
+                Create one
               </Link>
             </p>
           </form>
         </div>
 
-        {/* Right: Illustration */}
+        {/* Right */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -136,15 +133,15 @@ const Signup = () => {
             <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
               <img
                 src="/i.jpg"
-                alt="Signup illustration"
+                alt="Coding illustration"
                 className="w-full h-full object-cover"
               />
             </div>
             <h3 className="text-xl font-semibold text-white">
-              Master DSA with real-world problems
+              Level up your coding skills
             </h3>
             <p className="text-gray-400 text-sm">
-              Join a growing community of passionate coders preparing for top companies and improving daily.
+              Solve real-world DSA problems, track your performance, and prepare for tech interviews with CodeX.
             </p>
           </div>
         </motion.div>
@@ -153,4 +150,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Login;

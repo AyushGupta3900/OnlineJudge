@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
 import { motion } from "framer-motion";
-import useOnboarding from "../hooks/useOnboarding";
+import useOnboarding from "../../hooks/useOnboarding";
 
 const Onboarding = () => {
   const [formData, setFormData] = useState({

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import CodeEditor from "../components/CodeEditor";
+import CodeEditor from "../../components/CodeEditor";
 import { BiSolidLeftArrow, BiSolidDownArrow } from "react-icons/bi";
-import { useGetProblemByIdQuery } from "../redux/api/problemAPI";
-import useAuthUser from "../hooks/useAuthUser";
+import { useGetProblemByIdQuery } from "../../redux/api/problemAPI";
+import useAuthUser from "../../hooks/useAuthUser";
 import { motion } from "framer-motion";
 
 const ProblemPage = () => {
