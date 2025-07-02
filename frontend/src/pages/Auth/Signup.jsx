@@ -135,7 +135,7 @@ const Signup = () => {
           <div className="text-center space-y-6 max-w-md">
             <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
               <img
-                src="/i.jpg"
+                src="/i.png"
                 alt="Signup illustration"
                 className="w-full h-full object-cover"
               />

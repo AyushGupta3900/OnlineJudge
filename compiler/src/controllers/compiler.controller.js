@@ -11,22 +11,18 @@ export async function judgeSubmission(req, res) {
       return res.status(400).json({ message: "submissionId is required" });
     }
 
-    // 1. Fetch submission
     const submission = await Submission.findById(submissionId);
     if (!submission) {
       return res.status(404).json({ message: "Submission not found" });
     }
 
-    // 2. Fetch problem
     const problem = await Problem.findById(submission.problem);
     if (!problem) {
       return res.status(404).json({ message: "Problem not found" });
     }
 
-    // 3. Combine sample + hidden test cases
     const testCases = [...problem.sampleTestCases, ...problem.hiddenTestCases];
 
-    // 4. Run the code against test cases
     const result = await runCodeAgainstTestCases({
       code: submission.code,
       language: submission.language,
@@ -35,17 +31,19 @@ export async function judgeSubmission(req, res) {
       memoryLimit: problem.memoryLimit || 256,
     });
 
-    // 5. Update verdict and performance stats
     submission.verdict = result.verdict;
-    submission.executionTime = result.executionTime;
-    submission.memoryUsed = result.memoryUsed;
+    submission.executionTime = result.executionTime || null;
+    submission.memoryUsed = result.memoryUsed || null;
+    submission.totalTestCases = testCases.length;
+    submission.passedTestCases = result.passedTestCases || 0;
+    submission.output = result.output || "";
+    submission.error = result.error || "";
+    submission.testCaseResults = result.testCaseResults || [];
 
     await submission.save();
 
-    // 6. Update user document
     const user = await User.findById(submission.user);
     if (user) {
-      // Push the current submission to user's submissions array
       user.submissions.push({
         problemId: submission.problem,
         status: submission.verdict,
@@ -59,6 +57,7 @@ export async function judgeSubmission(req, res) {
         !user.solvedProblems.includes(submission.problem)
       ) {
         user.solvedProblems.push(submission.problem);
+
         const difficulty = problem.difficulty;
         if (["Easy", "Medium", "Hard"].includes(difficulty)) {
           if (!user.solvedCountByDifficulty) {
@@ -74,6 +73,10 @@ export async function judgeSubmission(req, res) {
     return res.status(200).json({
       message: "Submission judged successfully",
       verdict: submission.verdict,
+      executionTime: submission.executionTime,
+      memoryUsed: submission.memoryUsed,
+      passedTestCases: submission.passedTestCases,
+      totalTestCases: submission.totalTestCases,
     });
   } catch (error) {
     console.error("Error judging submission:", error);

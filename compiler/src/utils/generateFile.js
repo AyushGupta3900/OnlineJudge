@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
@@ -6,16 +6,22 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dirCodes = path.join(__dirname, "codes");
+const codeDir = path.join(__dirname, "codes");
+await fs.mkdir(codeDir, { recursive: true });
 
-if (!fs.existsSync(dirCodes)) {
-  fs.mkdirSync(dirCodes, { recursive: true });
-}
+const extensions = {
+  cpp: "cpp",
+  python: "py",
+  java: "java",
+  javascript: "js",
+};
 
-export const generateFile = (format, content) => {
-  const jobID = uuid();
-  const filename = `${jobID}.${format}`;
-  const filePath = path.join(dirCodes, filename);
-  fs.writeFileSync(filePath, content);
-  return filePath;
+export const generateFile = async (language, code) => {
+  const ext = extensions[language];
+  if (!ext) throw new Error("Unsupported language");
+
+  const filename = `${uuid()}.${ext}`;
+  const filepath = path.join(codeDir, filename);
+  await fs.writeFile(filepath, code);
+  return filepath;
 };
