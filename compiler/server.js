@@ -1,10 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { generateFile } from "./generateFile.js";
-import { executeCpp } from "./excecuteCpp.js"; 
+import { generateFile } from "./src/utils/generateFile.js";
+import { executeCpp } from "./src/utils/excecuteCpp.js"; 
+import { connectDB } from "./src/utils/db.js";
+import compileRoutes from "./src/routes/compile.routes.js"
 
 dotenv.config();
+
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5003; 
@@ -48,7 +52,8 @@ app.post("/run", async (req, res) => {
   }
 });
 
+app.use("/api/compile",compileRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
-}); 
+});

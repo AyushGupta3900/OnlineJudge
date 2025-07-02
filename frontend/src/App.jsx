@@ -7,7 +7,8 @@ import { useSelector } from "react-redux";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
-import useAuthUser from "./hooks/useAuthUser"; // 🔁 Fetch auth user on load
+import useAuthUser from "./hooks/useAuthUser"; 
+import ScrollToTop from "./components/ScrollToTop"
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -16,6 +17,12 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Problems = lazy(() => import("./pages/Problems"));
 const ProblemPage = lazy(() => import("./pages/ProblemPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const SubmissionPage = lazy(() => import("./pages/SubmissionPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const CreateProblem = lazy(() => import("./pages/CreateProblem"));
+const UpdateProblem = lazy(() => import("./pages/UpdateProblem"));
+const Users = lazy(() => import("./pages/Users"));
 const Courses = lazy(() => import("./pages/Courses"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -34,6 +41,7 @@ export default function App() {
     <Router>
       <Nav />
       <Toaster position="top-center" reverseOrder={false} />
+      <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public Routes */}
@@ -90,6 +98,26 @@ export default function App() {
             }
           />
           <Route
+            path="/submissions/problem/:id"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <SubmissionPage />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <ProfilePage />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
             path="/courses"
             element={
               isAuthenticated && isOnboarded ? (
@@ -114,6 +142,46 @@ export default function App() {
             element={
               isAuthenticated && isOnboarded ? (
                 <About />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <AdminDashboard />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
+            path="/admin/add-problem"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <CreateProblem />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
+            path="/admin/edit-problem/:id"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <UpdateProblem />
+              ) : (
+                <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
+              )
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <Users />
               ) : (
                 <Navigate to={isAuthenticated ? "/onboarding" : "/login"} />
               )

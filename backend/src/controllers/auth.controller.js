@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Submission from "../models/Submission.js"
 import jwt from "jsonwebtoken";
 
 export async function signupUser(req, res) {
@@ -116,5 +117,104 @@ export async function onboardingUser(req, res) {
   } catch (error) {
     console.error("Onboarding error:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getAllUsers(req,res) {
+    try{
+        const users = await User.find({});
+        return res.status(200).json({
+            success: true,
+            message: "Users fetched successfully",
+            data: users,
+        })
+    }
+    catch(error){
+        console.log("Error in getAllUser controller",error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching users",
+        })
+    }
+}
+
+export async function makeAdmin(req, res){
+  try {
+    const userId = req.params.id;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({
+        success: false,
+        message: "User is already an admin",
+      });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User promoted to admin",
+      user,
+    });
+  } catch (error) {
+    console.error("Error in makeAdmin controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while making admin",
+    });
+  }
+};
+
+export async function updateUserAccount(req, res) {
+  try {
+    const userId = req.user._id;
+
+    const allowedFields = ["fullName", "bio"];
+    const updates = {};
+
+    for (let field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Account updated successfully.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating account:", error);
+    res.status(500).json({ success: false, message: "Failed to update account." });
+  }
+}
+
+export async function deleteUserAccount(req, res) {
+  try {
+    const userId = req.user._id;
+    console.log(userId)
+    await Submission.deleteMany({ user: userId });
+    
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ success: true, message: "Account deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ success: false, message: "Failed to delete account." });
   }
 }

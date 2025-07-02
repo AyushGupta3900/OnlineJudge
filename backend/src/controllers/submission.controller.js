@@ -1,63 +1,84 @@
 import Submission from "../models/Submission.js";
+import axios from "axios";
 
 export async function submitProblem(req, res) {
   try {
-    const { userId, problemId, code, language } = req.body;
-
-    if (!userId || !problemId || !code || !language) {
+    const { problemId, code, language } = req.body;
+    const userId = req.user._id;
+    if (!problemId || !code || !language) {
       return res.status(400).json({ message: "All fields are required." });
     }
-
+    // 1. Save with "Pending"
     const submission = new Submission({
       user: userId,
       problem: problemId,
       code,
       language,
-      verdict: "Pending", 
+      verdict: "Pending",
     });
 
     await submission.save();
+    // 2. Send submissionId to compiler
+    const compilerBaseURL = process.env.COMPILER_BASE_URL;
+    await axios.post(`${compilerBaseURL}/api/compile/submit`, {
+      submissionId: submission._id,
+    });
 
+    // 3. Respond to frontend
     res.status(201).json({
-      message: "Submission received and pending judgment.",
+      message: "Submission received and sent to judge system.",
       submission,
     });
   } catch (error) {
-    console.error("Error in submitProblem:", error);
+    console.error("Error in submitProblem:", error.message);
     res.status(500).json({ message: "Internal server error." });
   }
-}
+} 
 
-export async function getSubmissionsByUser(req, res) {
+export async function  getSubmissionsByUserOnProblem(req, res){
   try {
-    const { userId } = req.params;
+    const userId = req.user._id;
+    const problemId = req.params.id;
 
-    const submissions = await Submission.find({ user: userId })
+    const submissions = await Submission.find({
+      user: userId,
+      problem: problemId,
+    }).sort({ submittedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      submissions,
+    });
+  } catch (err) {
+    console.error("Error in getSubmissionsByUserOnProblem:", err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export async function getSingleSubmission(req, res) {
+  try {
+    const submissionId = req.params.id;
+    const userId = req.user._id;
+
+    const submission = await Submission.findById(submissionId)
       .populate("problem", "title")
-      .sort({ createdAt: -1 });
+      .populate("user", "username");
 
-    res.status(200).json(submissions);
-  } catch (error) {
-    console.error("Error in getSubmissionsByUser:", error);
-    res.status(500).json({ message: "Internal server error." });
+    if (!submission) {
+      return res.status(404).json({ success: false, message: "Submission not found" });
+    }
+
+    if (submission.user._id.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      submission,
+    });
+
+  } catch (err) {
+    console.error("Error in getSingleSubmission:", err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
-}
-
-export async function getSubmissionToProblem(req, res) {
-  try {
-    const { problemId } = req.params;
-    const { userId } = req.query;
-
-    const filter = { problem: problemId };
-    if (userId) filter.user = userId;
-
-    const submissions = await Submission.find(filter)
-      .populate("user", "username")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json(submissions);
-  } catch (error) {
-    console.error("Error in getSubmissionToProblem:", error);
-    res.status(500).json({ message: "Internal server error." });
-  }
-}
+};

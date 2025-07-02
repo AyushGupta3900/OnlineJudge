@@ -1,874 +1,50 @@
 {
-  "problems": [
+  "cpp": "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your code here\n    return 0;\n}",
+  "python": "# Your code here\nprint(\"Hello, World!\")",
+  "javascript": "// Your code here\nconsole.log(\"Hello, World!\");",
+  "java": "public class Main {\n  public static void main(String[] args) {\n    // Your code here\n  }\n}",
+  "testimonials": [
     {
-      "id": "1",
-      "title": "Two Sum #1",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "name": "Aarav K.",
+      "text": "CodeX helped me ace my FAANG interview! The structured problem sets and UI made daily practice fun."
     },
     {
-      "id": "2",
-      "title": "Reverse String #2",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "name": "Priya S.",
+      "text": "The peer ranking and instant feedback gave me the push I needed to stay consistent and grow faster."
     },
     {
-      "id": "3",
-      "title": "Valid Parentheses #3",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "name": "Rahul M.",
+      "text": "From solving easy problems to cracking system design, CodeX is my daily go-to resource."
     },
     {
-      "id": "4",
-      "title": "Merge Sorted Arrays #4",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "name": "Neha T.",
+      "text": "Love how intuitive the UI is and the problem tagging helps me focus on my weak areas."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Is CodeX free to use?",
+      "answer": "Yes, CodeX is completely free for practicing coding problems and tracking your progress. Premium features may be added in the future for structured learning and mentorship."
     },
     {
-      "id": "5",
-      "title": "Median of Two Sorted Arrays #5",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
+      "question": "How is the difficulty level of problems determined?",
+      "answer": "Difficulty levels are manually tagged based on the problem's logic complexity and expected time to solve, ranging from Easy to Hard."
     },
     {
-      "id": "6",
-      "title": "Two Sum #6",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "question": "Can I track my progress?",
+      "answer": "Absolutely! Your solved problems, submission history, and rating are saved to your profile so you can monitor your improvement over time."
     },
     {
-      "id": "7",
-      "title": "Reverse String #7",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "question": "What if I find a bug or mistake in a problem?",
+      "answer": "You can report bugs through our feedback form or Discord server. We actively review reports and fix issues promptly."
     },
     {
-      "id": "8",
-      "title": "Valid Parentheses #8",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
+      "question": "Do you support multiple programming languages?",
+      "answer": "Currently, we support C++, Python, JavaScript, and Java. More languages may be added based on user demand."
     },
     {
-      "id": "9",
-      "title": "Merge Sorted Arrays #9",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "10",
-      "title": "Median of Two Sorted Arrays #10",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
-    },
-    {
-      "id": "11",
-      "title": "Two Sum #11",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "12",
-      "title": "Reverse String #12",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "13",
-      "title": "Valid Parentheses #13",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "14",
-      "title": "Merge Sorted Arrays #14",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "15",
-      "title": "Median of Two Sorted Arrays #15",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
-    },
-    {
-      "id": "16",
-      "title": "Two Sum #16",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "17",
-      "title": "Reverse String #17",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "18",
-      "title": "Valid Parentheses #18",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "19",
-      "title": "Merge Sorted Arrays #19",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "20",
-      "title": "Median of Two Sorted Arrays #20",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
-    },
-    {
-      "id": "21",
-      "title": "Two Sum #21",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "22",
-      "title": "Reverse String #22",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "23",
-      "title": "Valid Parentheses #23",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "24",
-      "title": "Merge Sorted Arrays #24",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "25",
-      "title": "Median of Two Sorted Arrays #25",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
-    },
-    {
-      "id": "26",
-      "title": "Two Sum #26",
-      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      "difficulty": "Easy",
-      "tags": [
-        "Array",
-        "HashMap"
-      ],
-      "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9",
-      "inputFormat": "nums = [2,7,11,15], target = 9",
-      "outputFormat": "Output: [0,1]",
-      "sampleTestCases": [
-        {
-          "input": "nums = [2,7,11,15], target = 9",
-          "output": "[0,1]",
-          "explanation": "nums[0] + nums[1] == 9"
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums = [3,2,4], target = 6",
-          "output": "[1,2]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "27",
-      "title": "Reverse String #27",
-      "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
-      "difficulty": "Easy",
-      "tags": [
-        "String",
-        "Two Pointers"
-      ],
-      "constraints": "1 <= s.length <= 10^5\ns[i] is a printable ASCII character.",
-      "inputFormat": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
-      "outputFormat": "Output: [\"o\",\"l\",\"l\",\"e\",\"h\"]",
-      "sampleTestCases": [
-        {
-          "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]",
-          "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
-          "explanation": "Reverse the array in place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
-          "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "28",
-      "title": "Valid Parentheses #28",
-      "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
-      "difficulty": "Easy",
-      "tags": [
-        "Stack",
-        "String"
-      ],
-      "constraints": "1 <= s.length <= 10^4\ns consists of parentheses only.",
-      "inputFormat": "s = \"()[]{}\"",
-      "outputFormat": "Output: true",
-      "sampleTestCases": [
-        {
-          "input": "\"()[]{}\"",
-          "output": "true",
-          "explanation": "All brackets are closed in correct order."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "\"(]\"",
-          "output": "false"
-        }
-      ],
-      "timeLimit": 1,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "29",
-      "title": "Merge Sorted Arrays #29",
-      "description": "Merge two sorted arrays nums1 and nums2 into a single sorted array.",
-      "difficulty": "Medium",
-      "tags": [
-        "Two Pointers",
-        "Array"
-      ],
-      "constraints": "0 <= m, n <= 200\nnums1.length == m + n\nnums2.length == n",
-      "inputFormat": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-      "outputFormat": "Output: [1,2,2,3,5,6]",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
-          "output": "[1,2,2,3,5,6]",
-          "explanation": "Merged two arrays in-place."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
-          "output": "[1]"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 256,
-      "createdBy": "user123"
-    },
-    {
-      "id": "30",
-      "title": "Median of Two Sorted Arrays #30",
-      "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
-      "difficulty": "Hard",
-      "tags": [
-        "Binary Search",
-        "Divide & Conquer"
-      ],
-      "constraints": "nums1.length == m\nnums2.length == n\n0 <= m, n <= 1000",
-      "inputFormat": "nums1 = [1,3], nums2 = [2]",
-      "outputFormat": "Output: 2.0",
-      "sampleTestCases": [
-        {
-          "input": "nums1 = [1,3], nums2 = [2]",
-          "output": "2.0",
-          "explanation": "Combined array is [1,2,3]; median is 2."
-        }
-      ],
-      "hiddenTestCases": [
-        {
-          "input": "nums1 = [1,2], nums2 = [3,4]",
-          "output": "2.5"
-        }
-      ],
-      "timeLimit": 2,
-      "memoryLimit": 512,
-      "createdBy": "user123"
+      "question": "Is there a leaderboard or ranking system?",
+      "answer": "Yes! You can compare your progress with peers via the global leaderboard and performance stats."
     }
   ],
   "courses": [
@@ -952,5 +128,730 @@
       "difficulty": "Intermediate",
       "link": "/courses/cloud-computing"
     }
+  ],
+  "problems": [
+    {
+      "title": "Minimum Window Substring",
+      "description": "Given two strings s and t, return the minimum window in s which will contain all the characters in t.",
+      "difficulty": "Hard",
+      "tags": ["String", "Sliding Window", "HashMap"],
+      "constraints": [
+        "1 <= s.length, t.length <= 10^5",
+        "s and t consist of English letters."
+      ],
+      "inputFormat": ["Line 1: String s", "Line 2: String t"],
+      "outputFormat": [
+        "Print the smallest window in s containing all characters of t, or empty string if no such window exists."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "ADOBECODEBANC\nABC",
+          "output": "BANC",
+          "explanation": "BANC is the smallest window containing A, B, and C."
+        },
+        {
+          "input": "a\naa",
+          "output": "",
+          "explanation": "a doesn't contain enough 'a's to form 'aa'"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "ab\nb",
+          "output": "b"
+        },
+        {
+          "input": "aaflslflsldkabcaa\nabc",
+          "output": "abc"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Sum of Two Numbers",
+      "description": "Given two integers a and b, your task is to find their sum.",
+      "difficulty": "Easy",
+      "tags": ["Math", "Beginner", "Input/Output"],
+      "constraints": ["-10^9 <= a, b <= 10^9"],
+      "inputFormat": [
+        "The first and only line contains two space-separated integers a and b."
+      ],
+      "outputFormat": ["Print a single integer — the sum of a and b."],
+      "sampleTestCases": [
+        {
+          "input": "3 5",
+          "output": "8",
+          "explanation": "3 + 5 = 8"
+        },
+        {
+          "input": "-4 9",
+          "output": "5",
+          "explanation": "-4 + 9 = 5"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "0 0",
+          "output": "0"
+        },
+        {
+          "input": "1000000000 -1000000000",
+          "output": "0"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Maximum Product Subarray",
+      "description": "Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product.",
+      "difficulty": "Medium",
+      "tags": ["Array", "Dynamic Programming"],
+      "constraints": ["1 <= nums.length <= 2 * 10^4", "-10 <= nums[i] <= 10"],
+      "inputFormat": [
+        "First line: n — the length of the array.",
+        "Second line: n space-separated integers — the elements of the array."
+      ],
+      "outputFormat": [
+        "Print a single integer — the maximum product of any subarray."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "4\n2 3 -2 4",
+          "output": "6",
+          "explanation": "Subarray [2,3] has max product 6."
+        },
+        {
+          "input": "3\n-2 0 -1",
+          "output": "0",
+          "explanation": "Single element 0 has highest product."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "5\n-1 -2 -3 -4 -5",
+          "output": "120"
+        },
+        {
+          "input": "6\n1 0 -1 2 3 -5",
+          "output": "30"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Palindrome Check",
+      "description": "Given a string, determine if it is a palindrome. Ignore non-alphanumeric characters and case.",
+      "difficulty": "Easy",
+      "tags": ["String", "Two Pointers"],
+      "constraints": [
+        "1 <= s.length <= 10^5",
+        "s contains printable ASCII characters."
+      ],
+      "inputFormat": ["A single line containing the string."],
+      "outputFormat": [
+        "Print 'true' if it is a palindrome, else print 'false'."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "A man, a plan, a canal: Panama",
+          "output": "true",
+          "explanation": "It reads the same backward ignoring spaces and punctuation."
+        },
+        {
+          "input": "race a car",
+          "output": "false",
+          "explanation": "It's not a palindrome."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "Was it a car or a cat I saw?",
+          "output": "true"
+        },
+        {
+          "input": "No lemon, no melon",
+          "output": "true"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 128
+    },
+    {
+      "title": "Merge Intervals",
+      "description": "Given a collection of intervals, merge all overlapping intervals.",
+      "difficulty": "Medium",
+      "tags": ["Sorting", "Greedy"],
+      "constraints": [
+        "1 <= intervals.length <= 10^4",
+        "intervals[i].length == 2",
+        "0 <= start <= end <= 10^4"
+      ],
+      "inputFormat": [
+        "First line: integer n, number of intervals",
+        "Next n lines: each line contains two integers start and end"
+      ],
+      "outputFormat": [
+        "Print merged intervals as space-separated pairs in new lines."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "3\n1 3\n2 6\n8 10",
+          "output": "1 6\n8 10",
+          "explanation": "Intervals [1,3] and [2,6] are merged."
+        },
+        {
+          "input": "2\n1 4\n4 5",
+          "output": "1 5",
+          "explanation": "Overlapping at endpoint."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "4\n1 5\n10 15\n5 10\n16 20",
+          "output": "1 15\n16 20"
+        },
+        {
+          "input": "1\n0 0",
+          "output": "0 0"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Fibonacci Number",
+      "description": "Write a program to find the N-th Fibonacci number using recursion with memoization.",
+      "difficulty": "Easy",
+      "tags": ["Recursion", "DP"],
+      "constraints": ["0 <= N <= 30"],
+      "inputFormat": ["An integer N"],
+      "outputFormat": ["The N-th Fibonacci number"],
+      "sampleTestCases": [
+        {
+          "input": "3",
+          "output": "2",
+          "explanation": "Fib(3) = 2"
+        },
+        {
+          "input": "6",
+          "output": "8",
+          "explanation": "Fib(6) = 8"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "10",
+          "output": "55"
+        },
+        {
+          "input": "0",
+          "output": "0"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 64
+    },
+    {
+      "title": "Word Ladder",
+      "description": "Given two words and a dictionary, find the length of the shortest transformation sequence from beginWord to endWord such that only one letter can be changed at a time and each transformed word must exist in the dictionary.",
+      "difficulty": "Hard",
+      "tags": ["Graph", "BFS", "Word Transformation"],
+      "constraints": [
+        "1 <= beginWord.length == endWord.length <= 10",
+        "0 <= wordList.length <= 5000"
+      ],
+      "inputFormat": [
+        "Line 1: beginWord endWord",
+        "Line 2: integer n (size of wordList)",
+        "Next n lines: one word per line"
+      ],
+      "outputFormat": [
+        "Print the length of the shortest transformation sequence, or 0 if not possible"
+      ],
+      "sampleTestCases": [
+        {
+          "input": "hit cog\n6\nhot\ndot\ndog\nlot\nlog\ncog",
+          "output": "5",
+          "explanation": "hit → hot → dot → dog → cog"
+        },
+        {
+          "input": "hit cog\n5\nhot\ndot\ndog\nlot\nlog",
+          "output": "0",
+          "explanation": "cog not in wordList"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "a b\n0",
+          "output": "0"
+        },
+        {
+          "input": "hit cog\n3\nhot\ncog\ndot",
+          "output": "0"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Longest Substring Without Repeating Characters",
+      "description": "Given a string s, find the length of the longest substring without repeating characters.",
+      "difficulty": "Medium",
+      "tags": ["String", "Sliding Window", "HashMap"],
+      "constraints": [
+        "0 <= s.length <= 10^5",
+        "s consists of English letters, digits, symbols and spaces."
+      ],
+      "inputFormat": ["The first and only line contains a string s."],
+      "outputFormat": [
+        "Print a single integer — the length of the longest substring without repeating characters."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "abcabcbb",
+          "output": "3",
+          "explanation": "The answer is 'abc', with the length of 3."
+        },
+        {
+          "input": "bbbbb",
+          "output": "1",
+          "explanation": "The answer is 'b', with the length of 1."
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "pwwkew",
+          "output": "3"
+        },
+        {
+          "input": "dvdf",
+          "output": "3"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 256
+    },
+    {
+      "title": "Two Sum",
+      "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+      "difficulty": "Easy",
+      "tags": ["Array", "HashMap"],
+      "constraints": [
+        "2 <= nums.length <= 10^4",
+        "-10^9 <= nums[i] <= 10^9",
+        "-10^9 <= target <= 10^9"
+      ],
+      "inputFormat": [
+        "First line: integer n",
+        "Second line: n space-separated integers",
+        "Third line: target integer"
+      ],
+      "outputFormat": [
+        "Print two integers — the indices of the numbers that add up to target"
+      ],
+      "sampleTestCases": [
+        {
+          "input": "4\n2 7 11 15\n9",
+          "output": "0 1",
+          "explanation": "nums[0] + nums[1] == 9"
+        },
+        {
+          "input": "3\n3 2 4\n6",
+          "output": "1 2",
+          "explanation": "nums[1] + nums[2] == 6"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "2\n3 3\n6",
+          "output": "0 1"
+        },
+        {
+          "input": "5\n1 2 3 4 5\n8",
+          "output": "2 4"
+        }
+      ],
+      "timeLimit": 1,
+      "memoryLimit": 128
+    },
+    {
+      "title": "Regular Expression Matching",
+      "description": "Implement regular expression matching with support for '.' and '*'.",
+      "difficulty": "Hard",
+      "tags": ["DP", "String", "Regex"],
+      "constraints": ["1 <= s.length <= 20", "1 <= p.length <= 30"],
+      "inputFormat": ["Line 1: string s", "Line 2: pattern p"],
+      "outputFormat": [
+        "Print 'true' if the pattern matches the entire string, else 'false'."
+      ],
+      "sampleTestCases": [
+        {
+          "input": "aa\na",
+          "output": "false",
+          "explanation": "a does not match entire string aa"
+        },
+        {
+          "input": "aa\na*",
+          "output": "true",
+          "explanation": "a* matches zero or more a's"
+        }
+      ],
+      "hiddenTestCases": [
+        {
+          "input": "mississippi\nmis*is*p*.",
+          "output": "false"
+        },
+        {
+          "input": "ab\n.*",
+          "output": "true"
+        }
+      ],
+      "timeLimit": 2,
+      "memoryLimit": 256
+    },{
+    "title": "Climbing Stairs",
+    "description": "You are climbing a staircase. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+    "difficulty": "Easy",
+    "tags": ["DP", "Recursion"],
+    "constraints": [
+      "1 <= n <= 45"
+    ],
+    "inputFormat": [
+      "Single integer n — the number of stairs."
+    ],
+    "outputFormat": [
+      "Print the number of distinct ways to reach the top."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "2",
+        "output": "2",
+        "explanation": "1 step + 1 step or 2 steps."
+      },
+      {
+        "input": "3",
+        "output": "3",
+        "explanation": "1+1+1, 1+2, 2+1"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "5",
+        "output": "8"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 64
+  },
+  {
+    "title": "Valid Parentheses",
+    "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+    "difficulty": "Easy",
+    "tags": ["Stack", "String"],
+    "constraints": [
+      "1 <= s.length <= 10^4"
+    ],
+    "inputFormat": [
+      "A single line containing string s."
+    ],
+    "outputFormat": [
+      "Print 'true' if the string is valid, else 'false'."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "()[]{}",
+        "output": "true",
+        "explanation": "All brackets are closed properly."
+      },
+      {
+        "input": "(]",
+        "output": "false",
+        "explanation": "Improper closing."
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "([)]",
+        "output": "false"
+      },
+      {
+        "input": "{[]}",
+        "output": "true"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "Majority Element",
+    "description": "Given an array of size n, find the majority element. The majority element is the element that appears more than ⌊n/2⌋ times.",
+    "difficulty": "Easy",
+    "tags": ["Array", "Divide and Conquer", "HashMap"],
+    "constraints": [
+      "1 <= nums.length <= 5 * 10^4",
+      "-10^9 <= nums[i] <= 10^9"
+    ],
+    "inputFormat": [
+      "First line: n",
+      "Second line: n space-separated integers"
+    ],
+    "outputFormat": [
+      "Print the majority element"
+    ],
+    "sampleTestCases": [
+      {
+        "input": "3\n3 2 3",
+        "output": "3"
+      },
+      {
+        "input": "5\n2 2 1 1 1",
+        "output": "1"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "7\n1 1 1 2 2 1 1",
+        "output": "1"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "Find Peak Element",
+    "description": "A peak element is an element that is greater than its neighbors. Find a peak element and return its index.",
+    "difficulty": "Medium",
+    "tags": ["Binary Search", "Array"],
+    "constraints": [
+      "1 <= nums.length <= 10^5",
+      "-2^31 <= nums[i] <= 2^31 - 1"
+    ],
+    "inputFormat": [
+      "First line: n",
+      "Second line: n space-separated integers"
+    ],
+    "outputFormat": [
+      "Print a valid peak element index."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "4\n1 2 3 1",
+        "output": "2"
+      },
+      {
+        "input": "2\n1 2",
+        "output": "1"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "3\n3 2 1",
+        "output": "0"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "First Unique Character in a String",
+    "description": "Given a string, find the first non-repeating character and return its index. If it doesn't exist, return -1.",
+    "difficulty": "Easy",
+    "tags": ["HashMap", "String", "Queue"],
+    "constraints": [
+      "1 <= s.length <= 10^5"
+    ],
+    "inputFormat": [
+      "A single string s."
+    ],
+    "outputFormat": [
+      "Print the index of the first unique character."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "leetcode",
+        "output": "0"
+      },
+      {
+        "input": "loveleetcode",
+        "output": "2"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "aabb",
+        "output": "-1"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "Rotate Array",
+    "description": "Given an array, rotate the array to the right by k steps, where k is non-negative.",
+    "difficulty": "Medium",
+    "tags": ["Array", "Two Pointers"],
+    "constraints": [
+      "1 <= nums.length <= 10^5",
+      "-10^9 <= nums[i] <= 10^9",
+      "0 <= k <= 10^5"
+    ],
+    "inputFormat": [
+      "First line: two integers n and k",
+      "Second line: n space-separated integers"
+    ],
+    "outputFormat": [
+      "Print the rotated array as space-separated integers"
+    ],
+    "sampleTestCases": [
+      {
+        "input": "7 3\n1 2 3 4 5 6 7",
+        "output": "5 6 7 1 2 3 4"
+      },
+      {
+        "input": "6 2\n-1 -100 3 99 0 2",
+        "output": "0 2 -1 -100 3 99"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "5 5\n1 2 3 4 5",
+        "output": "1 2 3 4 5"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 256
+  },
+  {
+    "title": "Binary Tree Inorder Traversal",
+    "description": "Given the root of a binary tree, return the inorder traversal of its nodes' values.",
+    "difficulty": "Easy",
+    "tags": ["Tree", "Stack", "Recursion"],
+    "constraints": [
+      "0 <= number of nodes <= 100"
+    ],
+    "inputFormat": [
+      "Preorder serialized string of the binary tree with 'null' as missing nodes."
+    ],
+    "outputFormat": [
+      "Print space-separated inorder traversal."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "1 null 2 3",
+        "output": "1 3 2"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "2 1 3",
+        "output": "1 2 3"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "Valid Anagram",
+    "description": "Given two strings s and t, return true if t is an anagram of s, and false otherwise.",
+    "difficulty": "Easy",
+    "tags": ["HashMap", "Sorting"],
+    "constraints": [
+      "1 <= s.length, t.length <= 5 * 10^4"
+    ],
+    "inputFormat": [
+      "Two lines: first line string s, second line string t."
+    ],
+    "outputFormat": [
+      "Print 'true' or 'false'"
+    ],
+    "sampleTestCases": [
+      {
+        "input": "anagram\nnagaram",
+        "output": "true"
+      },
+      {
+        "input": "rat\ncar",
+        "output": "false"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "a\nab",
+        "output": "false"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 64
+  },
+  {
+    "title": "Implement strStr()",
+    "description": "Return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.",
+    "difficulty": "Easy",
+    "tags": ["String", "KMP"],
+    "constraints": [
+      "1 <= haystack.length, needle.length <= 10^4"
+    ],
+    "inputFormat": [
+      "Two lines: first haystack string, second needle string"
+    ],
+    "outputFormat": [
+      "Print an integer"
+    ],
+    "sampleTestCases": [
+      {
+        "input": "hello\nll",
+        "output": "2"
+      },
+      {
+        "input": "aaaaa\nbba",
+        "output": "-1"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "abc\nc",
+        "output": "2"
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 128
+  },
+  {
+    "title": "Reverse Linked List",
+    "description": "Reverse a singly linked list.",
+    "difficulty": "Easy",
+    "tags": ["Linked List"],
+    "constraints": [
+      "0 <= number of nodes <= 5000"
+    ],
+    "inputFormat": [
+      "First line: integer n",
+      "Second line: n space-separated integers"
+    ],
+    "outputFormat": [
+      "Print the reversed linked list values."
+    ],
+    "sampleTestCases": [
+      {
+        "input": "5\n1 2 3 4 5",
+        "output": "5 4 3 2 1"
+      },
+      {
+        "input": "1\n10",
+        "output": "10"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "input": "0",
+        "output": ""
+      }
+    ],
+    "timeLimit": 1,
+    "memoryLimit": 64
+  }
   ]
 }

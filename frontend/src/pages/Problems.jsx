@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useGetAllProblemsQuery } from "../redux/api/problemAPI.js";
+import useAuthUser from "../hooks/useAuthUser.js"; 
+import { motion } from "framer-motion";
 
 const Problems = () => {
   const { data, isLoading, isError } = useGetAllProblemsQuery();
@@ -8,7 +10,10 @@ const Problems = () => {
   const [search, setSearch] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState("table");
+  const [viewMode, setViewMode] = useState("card");
+
+  const { authUser } = useAuthUser();
+  const solvedProblemIds = authUser?.solvedProblems?.map((id) => id.toString()) || [];
 
   const problemsPerPage = 12;
 
@@ -33,23 +38,38 @@ const Problems = () => {
     indexOfLastProblem
   );
   const totalPages = Math.ceil(filteredProblems.length / problemsPerPage);
-  
+
+  const markedProblems = currentProblems.map((problem) => ({
+    ...problem,
+    status: solvedProblemIds.includes(problem._id) ? "solved" : "unsolved",
+  }));
+
   return (
     <div className="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen px-4 py-10">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8"
+      >
         <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text drop-shadow-md">
-          🧩 DSA Problems
+          🧙‍♂️ DSA Problems
         </h1>
 
         <button
           onClick={() => setViewMode(viewMode === "card" ? "table" : "card")}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-blue-500 text-white px-6 py-2 rounded-xl shadow-lg font-medium w-full md:w-auto"
+          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-blue-500 text-white px-6 py-2 rounded-xl shadow-lg font-medium w-full md:w-auto cursor-pointer"
         >
           Switch to {viewMode === "card" ? "Table" : "Card"} View
         </button>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8"
+      >
         <input
           type="text"
           placeholder="🔍 Search problems..."
@@ -67,14 +87,14 @@ const Problems = () => {
             setSelectedDifficulty(e.target.value);
             setCurrentPage(1);
           }}
-          className="bg-gray-800 text-white px-5 py-3 rounded-lg border border-gray-700 shadow-md"
+          className="bg-gray-800 text-white px-5 py-3 rounded-lg border border-gray-700 shadow-md cursor-pointer"
         >
           <option value="">All Difficulties</option>
           <option value="Easy">Easy</option>
           <option value="Medium">Medium</option>
           <option value="Hard">Hard</option>
         </select>
-      </div>
+      </motion.div>
 
       {isLoading && (
         <div className="text-center text-blue-400 font-medium py-10">
@@ -91,10 +111,23 @@ const Problems = () => {
       {!isLoading && !isError && (
         <>
           {viewMode === "card" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentProblems.map((problem) => (
-                <div
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { staggerChildren: 0.05 },
+                },
+              }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {markedProblems.map((problem) => (
+                <motion.div
                   key={problem._id}
+                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                   className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 h-full flex flex-col justify-between min-h-[220px]"
                 >
                   <div>
@@ -146,9 +179,9 @@ const Problems = () => {
                       Solve →
                     </Link>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <div className="overflow-x-auto mt-4 bg-gray-800 rounded-xl shadow-xl">
               <table className="min-w-full text-sm text-left">
@@ -162,7 +195,7 @@ const Problems = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentProblems.map((problem) => (
+                  {markedProblems.map((problem) => (
                     <tr
                       key={problem._id}
                       className="border-b border-gray-700 hover:bg-gray-700 transition"
@@ -220,7 +253,7 @@ const Problems = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentPage(index + 1)}
-                  className={`px-4 py-2 rounded-full font-medium text-sm transition border shadow-md hover:scale-105 duration-200 ${
+                  className={`px-4 py-2 rounded-full font-medium text-sm transition border shadow-md hover:scale-105 duration-200 cursor-pointer ${
                     currentPage === index + 1
                       ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
                       : "bg-gray-800 text-gray-300 hover:bg-gray-700"

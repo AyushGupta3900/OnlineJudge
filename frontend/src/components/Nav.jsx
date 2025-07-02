@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -9,15 +9,15 @@ const Nav = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { logout } = useLogout();
 
-  // ✅ Use Redux state directly to avoid stale auth state
   const authUser = useSelector((state) => state.auth.user);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isAdmin = authUser?.role === "admin";
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
       await logout();
-      setIsOpen(false); // Close dropdown
+      setIsOpen(false);
     } catch (error) {
       console.error("Logout failed", error);
     } finally {
@@ -25,141 +25,118 @@ const Nav = () => {
     }
   };
 
-  const gradientHover =
-    "hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-500 transition duration-300 bg-transparent focus:outline-none";
+  const gradientLink =
+    "hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-500 transition duration-300";
 
   return (
-    <nav className="navbar sticky top-0 z-50 bg-base-100 shadow-sm px-4">
-      <div className="flex-1">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/90 border-b border-gray-800 shadow-md px-4 py-3">
+      <div className="flex justify-between items-center max-w-7xl mx-auto">
+        {/* Logo */}
         <Link
           to="/"
-          className={`btn btn-ghost text-2xl font-extrabold tracking-tight uppercase cursor-pointer text-white ${gradientHover}`}
+          className={`text-2xl font-extrabold tracking-tight uppercase text-white ${gradientLink} flex items-center gap-2`}
         >
-          <span className="inline-flex items-center gap-2">
-            <FaLaptopCode className="text-3xl text-blue-500" />
-            CodeX
-          </span>
+          <FaLaptopCode className="text-3xl text-blue-500" />
+          CodeX
         </Link>
-      </div>
 
-      {/* Desktop Menu */}
-      <div className="hidden md:flex flex-none items-center gap-4">
-        <ul className="menu menu-horizontal px-1 text-lg font-medium tracking-wide bg-transparent">
-          <li>
-            <Link to="/problems" className={`cursor-pointer ${gradientHover}`}>
-              Problems
-            </Link>
-          </li>
-          <li>
-            <details>
-              <summary className={`cursor-pointer ${gradientHover}`}>
-                Explore Courses
-              </summary>
-              <ul className="bg-base-100 rounded-t-none p-2 text-base font-normal">
-                <li>
-                  <Link to="/courses/" className={gradientHover}>
-                    Data Structures
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/courses/" className={gradientHover}>
-                    Algorithms
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/courses/" className={gradientHover}>
-                    System Design
-                  </Link>
-                </li>
-              </ul>
-            </details>
-          </li>
-        </ul>
-
-        {/* Navbar Button */}
-        {isAuthenticated ? (
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="btn btn-sm btn-outline text-white border-white hover:bg-blue-600"
-          >
-            {isLoggingOut ? "Logging out..." : "Logout"}
-          </button>
-        ) : (
-          <Link
-            to="/login"
-            className="btn btn-sm btn-primary text-white normal-case"
-          >
-            Login
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-6">
+          <Link to="/problems" className={`text-white text-base font-medium ${gradientLink}`}>
+            Problems
           </Link>
-        )}
-      </div>
+          <Link to="/courses" className={`text-white text-base font-medium ${gradientLink}`}>
+            Courses
+          </Link>
+          {isAuthenticated && (
+            <Link to="/profile" className={`text-white text-base font-medium ${gradientLink}`}>
+              Profile
+            </Link>
+          )}
+          {isAdmin && (
+            <Link to="/admin" className={`text-white text-base font-medium ${gradientLink}`}>
+              Admin Dashboard
+            </Link>
+          )}
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="px-4 py-1.5 border border-white text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
+            >
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition"
+            >
+              Login
+            </Link>
+          )}
+        </div>
 
-      {/* Hamburger Icon */}
-      <div className="md:hidden">
-        <button
-          className="btn btn-ghost text-xl"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          ☰
-        </button>
+        {/* Mobile Menu Icon */}
+        <div className="md:hidden">
+          <button
+            className="text-white text-2xl"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            ☰
+          </button>
+        </div>
       </div>
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="absolute top-16 right-4 bg-base-100 shadow-md rounded-md w-52 z-50 md:hidden">
-          <ul className="menu p-2 text-base font-medium bg-transparent">
+        <div className="md:hidden absolute top-16 right-4 bg-gray-800 border border-gray-700 rounded-xl shadow-xl w-56 py-4 z-50 transition-all duration-300">
+          <ul className="flex flex-col gap-3 px-4 text-white font-medium">
             <li>
               <Link
                 to="/problems"
                 onClick={() => setIsOpen(false)}
-                className={gradientHover}
+                className={`${gradientLink}`}
               >
                 Problems
               </Link>
             </li>
             <li>
-              <details>
-                <summary className={gradientHover}>Explore Courses</summary>
-                <ul className="p-2 text-sm">
-                  <li>
-                    <Link
-                      to="/courses/"
-                      onClick={() => setIsOpen(false)}
-                      className={gradientHover}
-                    >
-                      Data Structures
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/courses/"
-                      onClick={() => setIsOpen(false)}
-                      className={gradientHover}
-                    >
-                      Algorithms
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/courses/"
-                      onClick={() => setIsOpen(false)}
-                      className={gradientHover}
-                    >
-                      System Design
-                    </Link>
-                  </li>
-                </ul>
-              </details>
+              <Link
+                to="/courses"
+                onClick={() => setIsOpen(false)}
+                className={`${gradientLink}`}
+              >
+                Courses
+              </Link>
             </li>
-
-            {/* Mobile Auth Button */}
-            <li className="mt-2">
+            {isAuthenticated && (
+              <li>
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className={`${gradientLink}`}
+                >
+                  Profile
+                </Link>
+              </li>
+            )}
+            {isAdmin && (
+              <li>
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className={`${gradientLink}`}
+                >
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
+            <li className="pt-2">
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="btn btn-sm btn-outline w-full"
+                  className="w-full py-2 border border-white rounded-md text-white hover:bg-blue-600 transition"
                 >
                   {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
@@ -167,7 +144,7 @@ const Nav = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="btn btn-sm btn-primary w-full text-white"
+                  className="w-full block text-center py-2 bg-blue-600 rounded-md text-white hover:bg-blue-500 transition"
                 >
                   Login
                 </Link>

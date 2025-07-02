@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const ExploreCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -26,9 +27,19 @@ const ExploreCourses = () => {
   const totalPages = Math.ceil(courses.length / coursesPerPage);
 
   return (
-    <div className="bg-gray-950 text-white min-h-screen px-6 py-16">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="bg-gray-950 text-white min-h-screen px-6 py-16"
+    >
       {/* Hero Section */}
-      <div className="text-center mb-16 space-y-4">
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16 space-y-4"
+      >
         <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
           📚 Explore Courses
         </h1>
@@ -36,38 +47,57 @@ const ExploreCourses = () => {
           Structured learning paths designed to help you master DSA and system
           design — one step at a time.
         </p>
-      </div>
+      </motion.div>
 
       {/* Courses Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        {currentCourses.map((course) => (
-          <Link
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: { staggerChildren: 0.1 },
+          },
+        }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
+      >
+        {currentCourses.map((course, i) => (
+          <motion.div
             key={course.id}
-            to={course.link}
-            className="bg-gradient-to-tr from-gray-800 to-gray-900 border border-gray-700 p-6 rounded-2xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.1 }}
           >
-            <div className="text-5xl mb-4 text-blue-500 group-hover:rotate-3 transition-transform duration-300">
-              {course.icon}
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              {course.title}
-            </h3>
-            <p className="text-gray-300 mb-4 line-clamp-3">
-              {course.description}
-            </p>
-            <span className="inline-block px-3 py-1 text-sm bg-blue-600/80 backdrop-blur-md rounded-full text-white shadow-md">
-              {course.difficulty}
-            </span>
-
-            {/* Glow border effect */}
-            <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-blue-500 transition-all duration-300"></div>
-          </Link>
+            <Link
+              to={course.link}
+              className="bg-gradient-to-tr from-gray-800 to-gray-900 border border-gray-700 p-6 rounded-2xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group relative block"
+            >
+              <div className="text-5xl mb-4 text-blue-500 group-hover:rotate-3 transition-transform duration-300">
+                {course.icon}
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {course.title}
+              </h3>
+              <p className="text-gray-300 mb-4 line-clamp-3">
+                {course.description}
+              </p>
+              <span className="inline-block px-3 py-1 text-sm bg-blue-600/80 backdrop-blur-md rounded-full text-white shadow-md">
+                {course.difficulty}
+              </span>
+              <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-blue-500 transition-all duration-300"></div>
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-12 flex justify-center gap-2 flex-wrap">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-12 flex justify-center gap-2 flex-wrap"
+        >
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index}
@@ -81,9 +111,9 @@ const ExploreCourses = () => {
               {index + 1}
             </button>
           ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

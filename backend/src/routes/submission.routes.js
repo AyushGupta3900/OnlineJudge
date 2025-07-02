@@ -1,14 +1,17 @@
 import express from "express";
-import {submitProblem, getSubmissionsByUser, getSubmissionToProblem} from "../controllers/submission.controller.js";
+import {
+  submitProblem,
+  getSubmissionsByUserOnProblem,
+  getSingleSubmission, 
+} from "../controllers/submission.controller.js";
 import { protectedRoute } from "../middlewares/auth.middleware.js";
-import {adminOnly} from "../middlewares/adminOnly.middleware.js"
 
 const router = express.Router();
 
 router.use(protectedRoute);
 
-router.post("/submit",submitProblem);
-router.get("/user/submissions",getSubmissionsByUser);
-router.get("/problem/submissions",adminOnly,getSubmissionToProblem);
+router.post("/submit", submitProblem);
+router.get("/user/:id", getSubmissionsByUserOnProblem);
+router.get("/:id", getSingleSubmission);
 
-export default router; 
+export default router;

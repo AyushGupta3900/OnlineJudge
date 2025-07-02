@@ -1,10 +1,8 @@
-// utils/generateFile.js
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
 
-// Handle __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

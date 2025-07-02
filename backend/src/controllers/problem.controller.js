@@ -1,21 +1,22 @@
 import Problem from "../models/Problem.js";
+import Submission from "../models/Submission.js";
+import User from "../models/User.js"
 
-export async function  getAllProblems(req, res) {
-    try {
-        const problems = await Problem.find({});
-        return res.status(200).json({
-            success: true,
-            message: "Problems fetched successfully",
-            data: problems,
-        });
-    }
-    catch (error) {
-        console.log("Error in getAllProblems controller", error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error while fetching problems",
-        });
-    }
+export async function getAllProblems(req, res) {
+  try {
+    const problems = await Problem.find({});
+    return res.status(200).json({
+      success: true,
+      message: "Problems fetched successfully",
+      data: problems,
+    });
+  } catch (error) {
+    console.log("Error in getAllProblems controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching problems",
+    });
+  }
 }
 
 export async function getProblem(req, res) {
@@ -59,15 +60,15 @@ export async function createProblem(req, res) {
       description,
       difficulty,
       tags,
-      constraints,
-      inputFormat,
-      outputFormat,
+      constraints = [],
+      inputFormat = [],
+      outputFormat = [],
       sampleTestCases,
       hiddenTestCases,
       timeLimit,
-      memoryLimit
+      memoryLimit,
     } = req.body;
-
+    console.log("Running")
     if (!title || !description || !sampleTestCases || sampleTestCases.length === 0) {
       return res.status(400).json({
         success: false,
@@ -117,7 +118,7 @@ export async function createProblem(req, res) {
 
 export async function editProblem(req, res) {
   try {
-    const { problemId } = req.params; 
+    const problemId = req.params.id;
     const updates = req.body;
 
     const problem = await Problem.findById(problemId);
@@ -156,6 +157,73 @@ export async function editProblem(req, res) {
   }
 }
 
+export async function deleteProblem(req, res) {
+  try {
+    const problemId = req.params.id;
+
+    if (!problemId) {
+      return res.status(400).json({
+        success: false,
+        message: "Problem ID is required",
+      });
+    }
+
+    const problem = await Problem.findById(problemId);
+    if (!problem) {
+      return res.status(404).json({
+        success: false,
+        message: "Problem not found",
+      });
+    }
+
+    if (problem.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to delete this problem",
+      });
+    }
+
+    // 1. Delete all submissions related to this problem
+    await Submission.deleteMany({ problem: problemId });
+
+    // 2. Remove related submissions from all users
+    await User.updateMany(
+      {},
+      {
+        $pull: {
+          submissions: { problemId: problemId },
+        },
+      }
+    );
+
+    // 3. Remove the problem from users' solvedProblems
+    const users = await User.find({ solvedProblems: problemId });
+
+    for (const user of users) {
+      const difficulty = problem.difficulty;
+      user.solvedProblems.pull(problemId);
+      if (difficulty && user.solvedCountByDifficulty[difficulty] > 0) {
+        user.solvedCountByDifficulty[difficulty] -= 1;
+      }
+      await user.save();
+    }
+
+    // 4. Delete the problem itself
+    await problem.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Problem, related submissions, and user references deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error in deleteProblem controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting problem",
+    });
+  }
+}
+
 export async function createProblemFromArray(req, res) {
   try {
     const problemsArray = req.body;
@@ -176,16 +244,15 @@ export async function createProblemFromArray(req, res) {
         description,
         difficulty,
         tags,
-        constraints,
-        inputFormat,
-        outputFormat,
+        constraints = [],
+        inputFormat = [],
+        outputFormat = [],
         sampleTestCases,
         hiddenTestCases,
         timeLimit,
-        memoryLimit
+        memoryLimit,
       } = problem;
 
-      // Basic validation
       if (!title || !description || !sampleTestCases || sampleTestCases.length === 0) {
         skippedProblems.push({
           title,
@@ -194,7 +261,6 @@ export async function createProblemFromArray(req, res) {
         continue;
       }
 
-      // Check for existing problem with the same title
       const existing = await Problem.findOne({ title });
       if (existing) {
         skippedProblems.push({

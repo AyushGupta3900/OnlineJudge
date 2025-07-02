@@ -1,3 +1,4 @@
+// importing packages
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -5,7 +6,6 @@ import express from "express";
 
 // importing routes 
 import authRoutes from "./src/routes/auth.routes.js"
-import userRoutes from "./src/routes/user.routes.js"
 import problemRoutes from "./src/routes/problem.routes.js"
 import submissionRoutes from "./src/routes/submission.routes.js"
 
@@ -40,11 +40,10 @@ app.use(cors(
 app.use(cookieParser());
 
 app.get("/",(req,res)=>{
-    res.send("<h1>Home Page</h1>")
+    res.send("This server is working");
 })
 
 app.use("/api/v1/auth",authRoutes);
-app.use("/api/v1/user",userRoutes);
 app.use("/api/v1/problem",problemRoutes);
 app.use("/api/v1/submission",submissionRoutes);
 

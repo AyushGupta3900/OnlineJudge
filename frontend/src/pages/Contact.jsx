@@ -1,5 +1,3 @@
-import React from "react";
-
 const Contact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white px-6 py-16 flex items-center justify-center">

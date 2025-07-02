@@ -17,18 +17,10 @@ const problemSchema = new mongoose.Schema(
       default: "Easy",
     },
     tags: [String],
-    constraints: {
-      type: [String], 
-      default: [],
-    },
-    inputFormat: {
-      type: [String], 
-      default: [],
-    },
-    outputFormat: {
-      type: [String],
-      default: [],
-    },
+    constraints: String,
+    inputFormat: String,
+    outputFormat: String,
+
     sampleTestCases: [
       {
         input: String,
@@ -36,12 +28,14 @@ const problemSchema = new mongoose.Schema(
         explanation: String,
       },
     ],
+
     hiddenTestCases: [
       {
         input: String,
         output: String,
       },
     ],
+
     timeLimit: {
       type: Number,
       default: 1, 
