@@ -9,24 +9,30 @@ import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
 import ScrollToTop from "./components/ScrollToTop";
 import useAuthUser from "./hooks/useAuthUser";
-
 // Lazy-loaded Pages
 const Home = lazy(() => import("./pages/Home"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const Onboarding = lazy(() => import("./pages/Onboarding"));
-const Problems = lazy(() => import("./pages/Problems"));
-const ProblemPage = lazy(() => import("./pages/ProblemPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const SubmissionPage = lazy(() => import("./pages/SubmissionPage"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const CreateProblem = lazy(() => import("./pages/CreateProblem"));
-const UpdateProblem = lazy(() => import("./pages/UpdateProblem"));
-const Users = lazy(() => import("./pages/Users"));
-const Courses = lazy(() => import("./pages/Courses"));
-const About = lazy(() => import("./pages/About"));
-const Contact = lazy(() => import("./pages/Contact"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+
+const Login = lazy(() => import("./pages/Auth/Login"));
+const Signup = lazy(() => import("./pages/Auth/Signup"));
+const Onboarding = lazy(() => import("./pages/Auth/Onboarding"));
+const ProfilePage = lazy(() => import("./pages/Auth/ProfilePage"));
+
+const Problems = lazy(() => import("./pages/Problems/Problems"));
+const ProblemPage = lazy(() => import("./pages/Problems/ProblemPage"));
+const CreateProblem = lazy(() => import("./pages/Problems/CreateProblem"));
+const UpdateProblem = lazy(() => import("./pages/Problems/UpdateProblem"));
+
+const SubmissionPage = lazy(() => import("./pages/Submissions/SubmissionPage"));
+
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const Users = lazy(() => import("./pages/Admin/Users"));
+
+const Courses = lazy(() => import("./pages/Courses/Courses"));
+
+const About = lazy(() => import("./pages/Static/About"));
+const Contact = lazy(() => import("./pages/Static/Contact"));
+const NotFound = lazy(() => import("./pages/Static/NotFound"));
+
 
 export default function App() {
   const { isLoading } = useAuthUser();
