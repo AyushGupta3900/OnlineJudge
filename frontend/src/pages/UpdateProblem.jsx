@@ -7,6 +7,26 @@ import {
 import toast from "react-hot-toast";
 import PageLoader from "../components/PageLoader";
 import { FiX } from "react-icons/fi";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { staggerChildren: 0.1, when: "beforeChildren" },
+  },
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const buttonVariants = {
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
+};
 
 const UpdateProblem = () => {
   const { id } = useParams();
@@ -31,26 +51,25 @@ const UpdateProblem = () => {
 
   useEffect(() => {
     if (data?.data) {
-      const problem = data.data;
+      const p = data.data;
       setFormData({
-        title: problem.title,
-        description: problem.description,
-        difficulty: problem.difficulty,
-        tags: problem.tags.join(", "),
-        constraints: problem.constraints || [""],
-        inputFormat: problem.inputFormat || [""],
-        outputFormat: problem.outputFormat || [""],
-        timeLimit: problem.timeLimit,
-        memoryLimit: problem.memoryLimit,
-        sampleTestCases: problem.sampleTestCases,
-        hiddenTestCases: problem.hiddenTestCases,
+        title: p.title,
+        description: p.description,
+        difficulty: p.difficulty,
+        tags: p.tags.join(", "),
+        constraints: p.constraints || [""],
+        inputFormat: p.inputFormat || [""],
+        outputFormat: p.outputFormat || [""],
+        timeLimit: p.timeLimit,
+        memoryLimit: p.memoryLimit,
+        sampleTestCases: p.sampleTestCases,
+        hiddenTestCases: p.hiddenTestCases,
       });
     }
   }, [data]);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
   const handleTestCaseChange = (type, index, field, value) => {
     const updated = [...formData[type]];
@@ -63,49 +82,56 @@ const UpdateProblem = () => {
       type === "sampleTestCases"
         ? { input: "", output: "", explanation: "" }
         : { input: "", output: "" };
-    setFormData((prev) => ({
-      ...prev,
-      [type]: [...prev[type], newCase],
-    }));
+    setFormData((prev) => ({ ...prev, [type]: [...prev[type], newCase] }));
   };
 
-  const removeTestCase = (type, index) => {
+  const removeTestCase = (type, idx) =>
     setFormData((prev) => ({
       ...prev,
-      [type]: prev[type].filter((_, i) => i !== index),
+      [type]: prev[type].filter((_, i) => i !== idx),
     }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedProblem = {
+    const payload = {
       ...formData,
-      tags: formData.tags.split(",").map((tag) => tag.trim()),
-      constraints: formData.constraints.filter((v) => v.trim() !== ""),
-      inputFormat: formData.inputFormat.filter((v) => v.trim() !== ""),
-      outputFormat: formData.outputFormat.filter((v) => v.trim() !== ""),
+      tags: formData.tags.split(",").map((t) => t.trim()),
+      constraints: formData.constraints.filter((v) => v.trim()),
+      inputFormat: formData.inputFormat.filter((v) => v.trim()),
+      outputFormat: formData.outputFormat.filter((v) => v.trim()),
     };
 
     try {
-      await updateProblem({ id, ...updatedProblem }).unwrap();
+      await updateProblem({ id, ...payload }).unwrap();
+      toast.success("Problem updated!");
       navigate("/admin");
-    } catch (error) {
-      if (error.status === 403) {
-        toast.error("You are unauthorized to update this problem");
-      }
-      console.error("Update failed:", error);
+    } catch (err) {
+      if (err.status === 403) toast.error("Unauthorized to update this problem.");
+      console.error(err);
     }
   };
 
   if (isFetching) return <PageLoader />;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-10">
-      <div className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 shadow">
+    <motion.div
+      className="min-h-screen bg-gray-950 text-white px-4 py-10"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div
+        className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 shadow"
+        variants={fieldVariants}
+      >
         <h2 className="text-2xl font-bold mb-6 text-center">✏️ Update Problem</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
-          <div>
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          variants={containerVariants}
+        >
+          {/* Title */}
+          <motion.div variants={fieldVariants}>
             <label className="block mb-1">Title</label>
             <input
               type="text"
@@ -114,8 +140,10 @@ const UpdateProblem = () => {
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
             />
-          </div>
-          <div>
+          </motion.div>
+
+          {/* Description */}
+          <motion.div variants={fieldVariants}>
             <label className="block mb-1">Description</label>
             <textarea
               name="description"
@@ -124,81 +152,93 @@ const UpdateProblem = () => {
               onChange={handleChange}
               className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md resize-y"
             />
-          </div>
+          </motion.div>
 
-          <div>
-            <label className="block mb-1">Difficulty</label>
-            <select
-              name="difficulty"
-              value={formData.difficulty}
-              onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
-            >
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </select>
-          </div>
+          {/* Difficulty & Tags */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            variants={fieldVariants}
+          >
+            <div>
+              <label className="block mb-1">Difficulty</label>
+              <select
+                name="difficulty"
+                value={formData.difficulty}
+                onChange={handleChange}
+                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
+              >
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1">Tags (comma-separated)</label>
+              <input
+                type="text"
+                name="tags"
+                value={formData.tags}
+                onChange={handleChange}
+                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
+              />
+            </div>
+          </motion.div>
 
-          <div>
-            <label className="block mb-1">Tags (comma-separated)</label>
-            <input
-              type="text"
-              name="tags"
-              value={formData.tags}
-              onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
-            />
-          </div>
-
-          {/* Dynamic Fields */}
+          {/* Dynamic Arrays */}
           {["constraints", "inputFormat", "outputFormat"].map((field) => (
-            <div key={field}>
+            <motion.div key={field} variants={fieldVariants}>
               <label className="block mb-1 capitalize">{field}</label>
-              {formData[field].map((value, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
+              {formData[field].map((val, i) => (
+                <div key={i} className="flex gap-2 mb-2">
                   <input
                     type="text"
-                    value={value}
+                    value={val}
                     onChange={(e) => {
-                      const updated = [...formData[field]];
-                      updated[idx] = e.target.value;
-                      setFormData((prev) => ({ ...prev, [field]: updated }));
+                      const arr = [...formData[field]];
+                      arr[i] = e.target.value;
+                      setFormData((p) => ({ ...p, [field]: arr }));
                     }}
                     className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
                   />
                   {formData[field].length > 1 && (
-                    <button
+                    <motion.button
                       type="button"
                       onClick={() => {
-                        const updated = formData[field].filter((_, i) => i !== idx);
-                        setFormData((prev) => ({ ...prev, [field]: updated }));
+                        const arr = formData[field].filter((_, idx2) => idx2 !== i);
+                        setFormData((p) => ({ ...p, [field]: arr }));
                       }}
                       className="text-red-500 hover:text-red-400 cursor-pointer"
-                      title={`Remove ${field}`}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
                     >
                       <FiX size={20} />
-                    </button>
+                    </motion.button>
                   )}
                 </div>
               ))}
-              <button
+              <motion.button
                 type="button"
                 onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    [field]: [...prev[field], ""],
+                  setFormData((p) => ({
+                    ...p,
+                    [field]: [...p[field], ""],
                   }))
                 }
                 className="mt-1 px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-sm cursor-pointer"
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
               >
                 + Add {field}
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           ))}
 
           {/* Time & Memory */}
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div
+            className="grid grid-cols-2 gap-4"
+            variants={fieldVariants}
+          >
             <div>
               <label className="block mb-1">Time Limit (sec)</label>
               <input
@@ -219,97 +259,110 @@ const UpdateProblem = () => {
                 className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Sample Test Cases */}
-          <div>
+          <motion.div variants={fieldVariants}>
             <label className="block mb-2">Sample Test Cases</label>
-            {formData.sampleTestCases.map((tc, index) => (
-              <div
-                key={index}
+            {formData.sampleTestCases.map((tc, idx) => (
+              <motion.div
+                key={idx}
                 className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
+                variants={fieldVariants}
               >
-                <button
+                <motion.button
                   type="button"
-                  onClick={() => removeTestCase("sampleTestCases", index)}
+                  onClick={() => removeTestCase("sampleTestCases", idx)}
                   className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  title="Remove Sample Test Case"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <FiX size={18} />
-                </button>
-                {["input", "output", "explanation"].map((field) => (
+                </motion.button>
+                {["input", "output", "explanation"].map((f) => (
                   <textarea
-                    key={field}
-                    placeholder={field}
-                    value={tc[field]}
+                    key={f}
+                    placeholder={f}
+                    value={tc[f]}
                     onChange={(e) =>
-                      handleTestCaseChange("sampleTestCases", index, field, e.target.value)
+                      handleTestCaseChange("sampleTestCases", idx, f, e.target.value)
                     }
-                    rows={field === "explanation" ? 2 : 3}
+                    rows={f === "explanation" ? 2 : 3}
                     className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
                   />
                 ))}
-              </div>
+              </motion.div>
             ))}
-            <button
+            <motion.button
               type="button"
               onClick={() => addTestCase("sampleTestCases")}
               className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               + Add Sample Test Case
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Hidden Test Cases */}
-          <div>
+          <motion.div variants={fieldVariants}>
             <label className="block mb-2">Hidden Test Cases</label>
-            {formData.hiddenTestCases.map((tc, index) => (
-              <div
-                key={index}
+            {formData.hiddenTestCases.map((tc, idx) => (
+              <motion.div
+                key={idx}
                 className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
+                variants={fieldVariants}
               >
-                <button
+                <motion.button
                   type="button"
-                  onClick={() => removeTestCase("hiddenTestCases", index)}
+                  onClick={() => removeTestCase("hiddenTestCases", idx)}
                   className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  title="Remove Hidden Test Case"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <FiX size={18} />
-                </button>
-                {["input", "output"].map((field) => (
+                </motion.button>
+                {["input", "output"].map((f) => (
                   <textarea
-                    key={field}
-                    placeholder={field}
-                    value={tc[field]}
+                    key={f}
+                    placeholder={f}
+                    value={tc[f]}
                     onChange={(e) =>
-                      handleTestCaseChange("hiddenTestCases", index, field, e.target.value)
+                      handleTestCaseChange("hiddenTestCases", idx, f, e.target.value)
                     }
                     rows={3}
                     className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
                   />
                 ))}
-              </div>
+              </motion.div>
             ))}
-            <button
+            <motion.button
               type="button"
               onClick={() => addTestCase("hiddenTestCases")}
               className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               + Add Hidden Test Case
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Submit */}
-          <button
+          <motion.button
             type="submit"
             disabled={isLoading}
             className="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md font-semibold cursor-pointer"
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
           >
             {isLoading ? "Updating..." : "Update Problem"}
-          </button>
-        </form>
-      </div>
-    </div>
+          </motion.button>
+        </motion.form>
+      </motion.div>
+    </motion.div>
   );
 };
 

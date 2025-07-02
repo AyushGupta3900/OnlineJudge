@@ -19,6 +19,9 @@ import {
   Legend,
 } from "recharts";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/reducers/authReducer";
+import { persistor } from "../redux/store/store.js"; 
 
 const MySwal = withReactContent(Swal);
 
@@ -45,6 +48,8 @@ const getDifficultyStats = (solvedProblems = []) => {
 const ProfilePage = () => {
   const { authUser: user, isLoading, isError, error } = useAuthUser();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const pieData = getDifficultyStats(user?.solvedProblems);
   pieData[0].value = user?.solvedCountByDifficulty?.Easy || 0;
   pieData[1].value = user?.solvedCountByDifficulty?.Medium || 0;
@@ -69,8 +74,9 @@ const ProfilePage = () => {
     if (result.isConfirmed) {
       try {
         await deleteUserAccount().unwrap();
+        dispatch(logout());
         toast.success("Account deleted successfully.");
-        navigate("/");
+        navigate("/login");
       } catch (err) {
         toast.error("Failed to delete account.");
         console.error(err);

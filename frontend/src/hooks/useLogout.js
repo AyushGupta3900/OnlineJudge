@@ -17,7 +17,7 @@ const useLogout = () => {
       console.warn("Server logout failed, proceeding to clear local state anyway");
     }
     dispatch(clearCredentials());
-    persistor.purge(); 
+    await persistor.purge(); 
 
     toast.success("Logout successful!");
     navigate("/login");

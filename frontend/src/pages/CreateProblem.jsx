@@ -2,6 +2,26 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateProblemMutation } from "../redux/api/problemAPI";
 import { FiX } from "react-icons/fi";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { staggerChildren: 0.1, when: "beforeChildren" }
+  },
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const buttonVariants = {
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
+};
 
 const CreateProblem = () => {
   const [title, setTitle] = useState("");
@@ -51,7 +71,7 @@ const CreateProblem = () => {
   };
 
   const renderDynamicField = (label, values, setValues) => (
-    <div>
+    <motion.div variants={fieldVariants} className="mb-6">
       <label className="block text-sm font-semibold mb-2">{label}</label>
       {values.map((item, idx) => (
         <div key={idx} className="flex items-center gap-2 mb-2">
@@ -66,34 +86,50 @@ const CreateProblem = () => {
             className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
           />
           {values.length > 1 && (
-            <button
+            <motion.button
               type="button"
               onClick={() => setValues(values.filter((_, i) => i !== idx))}
               className="text-red-500 hover:text-red-400 transition cursor-pointer"
-              title="Remove"
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
             >
               <FiX size={20} />
-            </button>
+            </motion.button>
           )}
         </div>
       ))}
-      <button
+      <motion.button
         type="button"
         onClick={() => setValues([...values, ""])}
         className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+        variants={buttonVariants}
+        whileHover="hover"
+        whileTap="tap"
       >
         + Add {label}
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-10">
-      <div className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 shadow">
+    <motion.div
+      className="min-h-screen bg-gray-950 text-white px-4 py-10"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div
+        className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 shadow"
+        variants={fieldVariants}
+      >
         <h2 className="text-2xl font-bold mb-6 text-center">📝 Create New Problem</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title, Description, Difficulty, Tags */}
-          <div>
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          variants={containerVariants}
+        >
+          {/* Title */}
+          <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-1">Title</label>
             <input
               type="text"
@@ -102,9 +138,10 @@ const CreateProblem = () => {
               onChange={(e) => setTitle(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
             />
-          </div>
+          </motion.div>
 
-          <div>
+          {/* Description */}
+          <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-1">Description</label>
             <textarea
               required
@@ -113,38 +150,46 @@ const CreateProblem = () => {
               rows={4}
               className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md resize-y"
             />
-          </div>
+          </motion.div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Difficulty</label>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
-            >
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
+          {/* Difficulty & Tags */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            variants={fieldVariants}
+          >
+            <div>
+              <label className="block text-sm font-semibold mb-1">Difficulty</label>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">Tags (comma-separated)</label>
+              <input
+                type="text"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
+              />
+            </div>
+          </motion.div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Tags (comma-separated)</label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
-            />
-          </div>
-
-          {/* Constraints, Input Format, Output Format */}
+          {/* Dynamic Fields */}
           {renderDynamicField("Constraints", constraints, setConstraints)}
           {renderDynamicField("Input Format", inputFormat, setInputFormat)}
           {renderDynamicField("Output Format", outputFormat, setOutputFormat)}
 
-          {/* Time & Memory Limit */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Time & Memory Limits */}
+          <motion.div
+            className="grid grid-cols-2 gap-4"
+            variants={fieldVariants}
+          >
             <div>
               <label className="block text-sm font-semibold mb-1">Time Limit (s)</label>
               <input
@@ -163,23 +208,28 @@ const CreateProblem = () => {
                 className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Sample Test Cases */}
-          <div>
+          <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-2">Sample Test Cases</label>
             {sampleTestCases.map((tc, index) => (
-              <div key={index} className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800">
-                <button
+              <motion.div
+                key={index}
+                className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
+                variants={fieldVariants}
+              >
+                <motion.button
                   type="button"
                   onClick={() =>
                     setSampleTestCases(sampleTestCases.filter((_, i) => i !== index))
                   }
                   className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  title="Remove Sample Test Case"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <FiX size={18} />
-                </button>
+                </motion.button>
                 <textarea
                   placeholder="Input"
                   value={tc.input}
@@ -215,9 +265,9 @@ const CreateProblem = () => {
                   rows={2}
                   className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y"
                 />
-              </div>
+              </motion.div>
             ))}
-            <button
+            <motion.button
               type="button"
               onClick={() =>
                 setSampleTestCases([
@@ -226,26 +276,34 @@ const CreateProblem = () => {
                 ])
               }
               className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               + Add Sample Test Case
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Hidden Test Cases */}
-          <div>
+          <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-2">Hidden Test Cases</label>
             {hiddenTestCases.map((tc, index) => (
-              <div key={index} className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800">
-                <button
+              <motion.div
+                key={index}
+                className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
+                variants={fieldVariants}
+              >
+                <motion.button
                   type="button"
                   onClick={() =>
                     setHiddenTestCases(hiddenTestCases.filter((_, i) => i !== index))
                   }
                   className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  title="Remove Hidden Test Case"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <FiX size={18} />
-                </button>
+                </motion.button>
                 <textarea
                   placeholder="Input"
                   value={tc.input}
@@ -270,30 +328,36 @@ const CreateProblem = () => {
                   rows={3}
                   className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y"
                 />
-              </div>
+              </motion.div>
             ))}
-            <button
+            <motion.button
               type="button"
               onClick={() =>
                 setHiddenTestCases([...hiddenTestCases, { input: "", output: "" }])
               }
               className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               + Add Hidden Test Case
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Submit */}
-          <button
+          <motion.button
             type="submit"
             disabled={isLoading}
             className="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md font-semibold cursor-pointer"
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
           >
             {isLoading ? "Creating..." : "Create Problem"}
-          </button>
-        </form>
-      </div>
-    </div>
+          </motion.button>
+        </motion.form>
+      </motion.div>
+    </motion.div>
   );
 };
 
