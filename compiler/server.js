@@ -39,23 +39,20 @@ app.post("/run", async (req, res) => {
   }
 
   try {
-    // Generate file with appropriate extension
     const filePath = await generateFile(language, code);
-
-    // Choose executor based on language
-    let output;
+    let result;
     switch (language) {
       case "cpp":
-        output = await executeCpp(filePath, input);
+        result = await executeCpp(filePath, input);
         break;
       case "python":
-        output = await executePython(filePath, input);
+        result = await executePython(filePath, input);
         break;
       case "java":
-        output = await executeJava(filePath, input);
+        result = await executeJava(filePath, input);
         break;
       case "javascript":
-        output = await executeJs(filePath, input);
+        result = await executeJs(filePath, input);
         break;
       default:
         return res.status(400).json({
@@ -66,13 +63,16 @@ app.post("/run", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      output,
+      output: result.output,
+      timeMs: result.timeMs,
     });
 
   } catch (error) {
     return res.status(500).json({
       success: false,
       error: error?.stderr || error?.error || "Something went wrong",
+      type: error?.type || "unknown",
+      timeMs: error?.timeMs || null,
     });
   }
 });
@@ -80,5 +80,5 @@ app.post("/run", async (req, res) => {
 app.use("/api/compile", compileRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`✅ Server is running at http://localhost:${PORT}`);
 });

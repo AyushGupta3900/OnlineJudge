@@ -11,9 +11,19 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-export const executeJava = (filepath, input = "") => {
+const GNU_TIME = "/opt/homebrew/bin/gtime"; // adjust if needed
+
+export const executeJava = (classname, input = "") => {
   return new Promise((resolve, reject) => {
-    const child = spawn("java", [filepath], { cwd: outputPath });
+    const startTime = process.hrtime();
+
+    const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
+
+    const child = spawn(
+      GNU_TIME,
+      ["-f", "%M", "-o", memFile, "java", classname],
+      { cwd: outputPath }
+    );
 
     let stdout = "";
     let stderr = "";
@@ -38,10 +48,31 @@ export const executeJava = (filepath, input = "") => {
 
     child.on("close", (code) => {
       clearTimeout(timeout);
-      if (code !== 0) {
-        return reject({ type: "runtime", code, stderr });
-      }
-      return resolve(stdout);
+
+      const [sec, nanosec] = process.hrtime(startTime);
+      const elapsedMs = sec * 1000 + nanosec / 1e6;
+
+      fs.readFile(memFile, "utf8", (err, memData) => {
+        fs.unlink(memFile, () => {}); // cleanup
+
+        const memoryKb = err ? null : parseInt(memData.trim(), 10);
+
+        if (code !== 0) {
+          return reject({
+            type: "runtime",
+            code,
+            stderr,
+            timeMs: elapsedMs,
+            memoryKb,
+          });
+        }
+
+        return resolve({
+          output: stdout,
+          timeMs: elapsedMs,
+          memoryKb,
+        });
+      });
     });
 
     child.on("error", (err) => {

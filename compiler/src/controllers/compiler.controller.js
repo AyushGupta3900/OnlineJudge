@@ -30,7 +30,6 @@ export async function judgeSubmission(req, res) {
       timeLimit: problem.timeLimit || 1,
       memoryLimit: problem.memoryLimit || 256,
     });
-
     submission.verdict = result.verdict;
     submission.executionTime = result.executionTime || null;
     submission.memoryUsed = result.memoryUsed || null;
@@ -39,7 +38,7 @@ export async function judgeSubmission(req, res) {
     submission.output = result.output || "";
     submission.error = result.error || "";
     submission.testCaseResults = result.testCaseResults || [];
-
+    console.log(submission)
     await submission.save();
 
     const user = await User.findById(submission.user);

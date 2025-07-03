@@ -59,10 +59,11 @@ const userSchema = new mongoose.Schema(
           enum: [
             "Accepted",
             "Wrong Answer",
-            "TLE",
-            "MLE",
+            "Time Limit Exceeded",
+            "Memory Limit Exceeded",
             "Runtime Error",
             "Compilation Error",
+            "Pending"
           ],
         },
         language: String,

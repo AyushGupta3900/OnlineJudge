@@ -25,11 +25,19 @@ const executorMap = {
   java: executeJava,
   javascript: executeJs,
 };
-
-export async function runCodeAgainstTestCases({ code, testCases, language }) {
+export async function runCodeAgainstTestCases({
+  code,
+  testCases,
+  language,
+  timeLimit = 1,
+  memoryLimit = 256,
+}) {
   const ext = extensionMap[language];
   const jobId = uuid();
   const codeFile = path.join(codeDir, `${jobId}.${ext}`);
+
+  const timeLimitMs = timeLimit * 1000;
+  const memoryLimitKb = memoryLimit * 1024;
 
   try {
     await fs.mkdir(codeDir, { recursive: true });
@@ -38,52 +46,133 @@ export async function runCodeAgainstTestCases({ code, testCases, language }) {
     const execute = executorMap[language];
     if (!execute) throw new Error(`Unsupported language: ${language}`);
 
+    let totalTimeMs = 0;
+    let totalMemoryKb = 0;
+    let passedTestCases = 0;
+    const testCaseResults = [];
+    let wrongAnswer = false;
+
     for (let i = 0; i < testCases.length; i++) {
       const test = testCases[i];
-      let output;
 
       try {
-        output = await execute(codeFile, test.input);
-      } catch (err) {
-        if (err.type === "compile") {
-          return {
-            verdict: "Compilation Error",
-            error: err.stderr || err.error,
-            testCase: i + 1,
-          };
+        const result = await execute(codeFile, test.input);
+
+        totalTimeMs += Number(result.timeMs || 0);
+        if (result.memoryKb != null) {
+          totalMemoryKb += Number(result.memoryKb);
         }
+
+        const expected = test.output.trim();
+        const actual = result.output.trim();
+        const passed = expected === actual;
+
+        if (passed) passedTestCases++;
+        else wrongAnswer = true;
+
+        testCaseResults.push({
+          testCase: i + 1,
+          input: test.input,
+          expectedOutput: expected,
+          actualOutput: actual,
+          executionTimeMs: result.timeMs?.toFixed(2) || "0.00",
+          memoryKb: result.memoryKb ?? null,
+          status: passed ? "Passed" : "Failed",
+        });
+
+      } catch (err) {
+        testCaseResults.push({
+          testCase: i + 1,
+          input: test.input,
+          expectedOutput: test.output.trim(),
+          actualOutput: "",
+          executionTimeMs: "0.00",
+          memoryKb: null,
+          status: "Error",
+          error: err.stderr || err.error,
+        });
+
+        const baseErrorResult = {
+          executionTime: totalTimeMs.toFixed(2),
+          memoryUsed: totalMemoryKb || null,
+          passedTestCases,
+          output: "",
+          error: err.stderr || err.error,
+          testCaseResults,
+        };
+
+        if (err.type === "compile") {
+          return { verdict: "Compilation Error", ...baseErrorResult };
+        }
+
         if (err.type === "timeout") {
           return {
             verdict: "Time Limit Exceeded",
-            testCase: i + 1,
+            ...baseErrorResult,
+            error: "Time Limit Exceeded",
           };
         }
-        return {
-          verdict: "Runtime Error",
-          error: err.stderr || err.error,
-          testCase: i + 1,
-        };
-      }
 
-      if (output.trim() !== test.output.trim()) {
-        return {
-          verdict: "Wrong Answer",
-          testCase: i + 1,
-          expected: test.output.trim(),
-          received: output.trim(),
-        };
+        return { verdict: "Runtime Error", ...baseErrorResult };
       }
+    }
+
+    // 🔷 Check limits after running all test cases
+    if (totalTimeMs > timeLimitMs) {
+      return {
+        verdict: "Time Limit Exceeded",
+        executionTime: totalTimeMs.toFixed(2),
+        memoryUsed: totalMemoryKb || null,
+        passedTestCases,
+        output: "",
+        error: "Time Limit Exceeded",
+        testCaseResults,
+      };
+    }
+
+    if (totalMemoryKb > memoryLimitKb) {
+      return {
+        verdict: "Memory Limit Exceeded",
+        executionTime: totalTimeMs.toFixed(2),
+        memoryUsed: totalMemoryKb || null,
+        passedTestCases,
+        output: "",
+        error: "Memory Limit Exceeded",
+        testCaseResults,
+      };
+    }
+
+    if (wrongAnswer) {
+      return {
+        verdict: "Wrong Answer",
+        executionTime: totalTimeMs.toFixed(2),
+        memoryUsed: totalMemoryKb || null,
+        passedTestCases,
+        output: "",
+        error: "",
+        testCaseResults,
+      };
     }
 
     return {
       verdict: "Accepted",
-      totalTestCases: testCases.length,
+      executionTime: totalTimeMs.toFixed(2),
+      memoryUsed: totalMemoryKb || null,
+      passedTestCases,
+      output: testCaseResults.map(tc => tc.actualOutput).join("\n"),
+      error: "",
+      testCaseResults,
     };
 
   } catch (err) {
     return {
       verdict: "Internal Error",
+      executionTime: 0,
+      memoryUsed: null,
+      passedTestCases: 0,
+      output: "",
       error: err.message || "Something went wrong while running test cases.",
+      testCaseResults: [],
     };
   } finally {
     try {

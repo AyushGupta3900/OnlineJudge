@@ -48,21 +48,22 @@ const submissionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    output: {
-      type: String,
-    },
     error: {
       type: String,
     },
     testCaseResults: [
       {
+        testCase: Number,
         input: String,
         expectedOutput: String,
         actualOutput: String,
+        executionTimeMs: Number,
+        memoryKb: Number,
         status: {
           type: String,
-          enum: ["Passed", "Failed"],
+          enum: ["Passed", "Failed","Error"],
         },
+        error: String,
       },
     ],
   },

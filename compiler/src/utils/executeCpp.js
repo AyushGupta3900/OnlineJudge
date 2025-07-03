@@ -11,32 +11,44 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
+const GNU_TIME = "/opt/homebrew/bin/gtime"; // adjust if needed
+
 export const executeCpp = (filepath, input = "") => {
   const jobId = path.basename(filepath).split(".")[0];
-  const outPath = path.join(outputPath, jobId);
+  const binaryPath = path.join(outputPath, jobId);
+  const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
 
   return new Promise((resolve, reject) => {
-    // Compile the C++ file
-    const compileCommand = `g++ -std=c++17 "${filepath}" -o "${outPath}"`;
+    const compileCommand = `g++ -std=c++17 "${filepath}" -o "${binaryPath}"`;
 
     exec(compileCommand, (compileErr, _, compileStderr) => {
       if (compileErr) {
-        return reject({ type: "compile", error: compileErr.message, stderr: compileStderr });
+        return reject({
+          type: "compile",
+          error: compileErr.message,
+          stderr: compileStderr,
+        });
       }
 
-      // Spawn the process to run the program
-      const child = spawn(outPath, [], { cwd: outputPath });
+      const startTime = process.hrtime();
+
+      const child = spawn(
+        GNU_TIME,
+        ["-f", "%M", "-o", memFile, binaryPath],
+        { cwd: outputPath }
+      );
 
       let stdout = "";
       let stderr = "";
 
-      // Timeout safeguard (e.g. 5 seconds)
       const timeout = setTimeout(() => {
         child.kill("SIGKILL");
-        return reject({ type: "timeout", error: "Execution timed out." });
+        return reject({
+          type: "timeout",
+          error: "Execution timed out.",
+        });
       }, 5000);
 
-      // Capture output
       child.stdout.on("data", (data) => {
         stdout += data.toString();
       });
@@ -45,19 +57,46 @@ export const executeCpp = (filepath, input = "") => {
         stderr += data.toString();
       });
 
-      // Feed stdin if any
       if (input) {
         child.stdin.write(input);
       }
       child.stdin.end();
 
-      // Resolve when done
       child.on("close", (code) => {
         clearTimeout(timeout);
-        if (code !== 0) {
-          return reject({ type: "runtime", code, stderr });
-        }
-        return resolve(stdout);
+
+        const [sec, nanosec] = process.hrtime(startTime);
+        const elapsedMs = sec * 1000 + nanosec / 1e6;
+
+        fs.readFile(memFile, "utf8", (err, memData) => {
+          fs.unlink(memFile, () => {}); // cleanup
+
+          const memoryKb = err ? null : parseInt(memData.trim(), 10);
+
+          if (code !== 0) {
+            return reject({
+              type: "runtime",
+              code,
+              stderr,
+              timeMs: elapsedMs,
+              memoryKb,
+            });
+          }
+
+          return resolve({
+            output: stdout,
+            timeMs: elapsedMs,
+            memoryKb,
+          });
+        });
+      });
+
+      child.on("error", (err) => {
+        clearTimeout(timeout);
+        return reject({
+          type: "spawn",
+          error: err.message,
+        });
       });
     });
   });

@@ -26,7 +26,6 @@ const CodeEditor = ({ problemId: propId }) => {
   const [runCode, { isLoading: running }] = useRunCodeMutation();
   const [fetchSubmission] = useLazyGetSubmissionByIdQuery();
 
-  // Fetch boilerplate
   useEffect(() => {
     (async () => {
       try {
@@ -39,7 +38,6 @@ const CodeEditor = ({ problemId: propId }) => {
     })();
   }, [language]);
 
-  // Polling logic
   useEffect(() => {
     if (!submissionId || !isPolling) return;
 
@@ -55,8 +53,10 @@ const CodeEditor = ({ problemId: propId }) => {
         }
 
         setVerdict(currentVerdict);
+
         if (currentVerdict !== "Pending") {
-          setOutput(`✅ Verdict: ${currentVerdict}`);
+          const formattedOutput = formatSubmissionOutput(res.submission);
+          setOutput(formattedOutput);
           clearInterval(interval);
           setIsPolling(false);
         }
@@ -101,7 +101,8 @@ const CodeEditor = ({ problemId: propId }) => {
   };
 
   const getVerdictColor = () => {
-    if (verdict === "success" || verdict?.toLowerCase() === "accepted") return "text-green-400";
+    if (verdict === "success" || verdict?.toLowerCase() === "accepted")
+      return "text-green-400";
     if (verdict?.toLowerCase() === "pending") return "text-yellow-400";
     return "text-red-400";
   };
@@ -195,7 +196,9 @@ const CodeEditor = ({ problemId: propId }) => {
         }`}
       >
         <div className="flex justify-between items-center mb-3">
-          <h3 className={`text-xl font-semibold flex items-center gap-2 ${getVerdictColor()}`}>
+          <h3
+            className={`text-xl font-semibold flex items-center gap-2 ${getVerdictColor()}`}
+          >
             📤 Output
           </h3>
           {verdict && (
@@ -222,3 +225,35 @@ const CodeEditor = ({ problemId: propId }) => {
 };
 
 export default CodeEditor;
+
+// 🔷 Helper to format output nicely
+function formatSubmissionOutput(submission) {
+  const verdict = submission.verdict;
+  if (!verdict) return "⚠️ No verdict available.";
+
+  if (verdict === "Accepted") {
+    return `✅ Accepted\n⏱️ Execution Time: ${submission.executionTime} ms\n💾 Memory Used: ${submission.memoryUsed} KB`;
+  }
+
+  if (
+    ["Wrong Answer", "Time Limit Exceeded", "Memory Limit Exceeded"].includes(
+      verdict
+    )
+  ) {
+    const failedCases = submission.testCaseResults
+      .filter((tc) => tc.status !== "Passed")
+      .map(
+        (tc) =>
+          `❌ Test Case #${tc.testCase}\nInput: ${tc.input}\nExpected: ${tc.expectedOutput}\nActual: ${tc.actualOutput}\nError: ${tc.error || "N/A"}`
+      )
+      .join("\n\n");
+
+    return `🚨 ${verdict}\n\n${failedCases || "No details available."}`;
+  }
+
+  if (["Compilation Error", "Runtime Error"].includes(verdict)) {
+    return `💥 ${verdict}\n${submission.error || "No error details available."}`;
+  }
+
+  return `ℹ️ Verdict: ${verdict}`;
+}

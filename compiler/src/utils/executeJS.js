@@ -13,6 +13,8 @@ if (!fs.existsSync(outputPath)) {
 
 export const executeJs = (filepath, input = "") => {
   return new Promise((resolve, reject) => {
+    const startTime = process.hrtime();
+
     const child = spawn("node", [filepath], { cwd: outputPath });
 
     let stdout = "";
@@ -38,10 +40,15 @@ export const executeJs = (filepath, input = "") => {
 
     child.on("close", (code) => {
       clearTimeout(timeout);
+
+      const [sec, nanosec] = process.hrtime(startTime);
+      const elapsedMs = sec * 1000 + nanosec / 1e6;
+
       if (code !== 0) {
-        return reject({ type: "runtime", code, stderr });
+        return reject({ type: "runtime", code, stderr, timeMs: elapsedMs });
       }
-      return resolve(stdout);
+
+      return resolve({ output: stdout, timeMs: elapsedMs });
     });
 
     child.on("error", (err) => {

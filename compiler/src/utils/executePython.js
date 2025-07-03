@@ -11,14 +11,23 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
+const GNU_TIME = "/opt/homebrew/bin/gtime";
+
 export const executePython = (filepath, input = "") => {
   return new Promise((resolve, reject) => {
-    const child = spawn("python3", [filepath], { cwd: outputPath });
+    const startTime = process.hrtime();
+
+    const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
+
+    const child = spawn(
+      GNU_TIME,
+      ["-f", "%M", "-o", memFile, "python3", filepath],
+      { cwd: outputPath }
+    );
 
     let stdout = "";
     let stderr = "";
 
-    // Timeout safeguard (e.g., 5 seconds)
     const timeout = setTimeout(() => {
       child.kill("SIGKILL");
       return reject({ type: "timeout", error: "Execution timed out." });
@@ -39,10 +48,31 @@ export const executePython = (filepath, input = "") => {
 
     child.on("close", (code) => {
       clearTimeout(timeout);
-      if (code !== 0) {
-        return reject({ type: "runtime", code, stderr });
-      }
-      return resolve(stdout);
+
+      const [sec, nanosec] = process.hrtime(startTime);
+      const elapsedMs = sec * 1000 + nanosec / 1e6;
+
+      fs.readFile(memFile, "utf8", (err, memData) => {
+        fs.unlink(memFile, () => {}); // cleanup
+
+        const memoryKb = err ? null : parseInt(memData.trim(), 10);
+        console.log(memoryKb)
+        if (code !== 0) {
+          return reject({
+            type: "runtime",
+            code,
+            stderr,
+            timeMs: elapsedMs,
+            memoryKb,
+          });
+        }
+
+        return resolve({
+          output: stdout,
+          timeMs: elapsedMs,
+          memoryKb,
+        });
+      });
     });
 
     child.on("error", (err) => {
