@@ -48,6 +48,9 @@ const Nav = () => {
           <Link to="/courses" className={`text-white text-base font-medium ${gradientLink}`}>
             Courses
           </Link>
+          <Link to="/leaderboard" className={`text-white text-base font-medium ${gradientLink}`}>
+            Leaderboard
+          </Link>
           {isAuthenticated && (
             <Link to="/profile" className={`text-white text-base font-medium ${gradientLink}`}>
               Profile
@@ -107,6 +110,15 @@ const Nav = () => {
                 className={`${gradientLink}`}
               >
                 Courses
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/leaderboard"
+                onClick={() => setIsOpen(false)}
+                className={`${gradientLink}`}
+              >
+                Leaderboard
               </Link>
             </li>
             {isAuthenticated && (

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  useGetProblemByIdQuery,
-  useUpdateProblemMutation,
-} from "../../redux/api/problemAPI";
+import { useGetProblemByIdQuery, useUpdateProblemMutation } from "../../redux/api/problemAPI";
 import toast from "react-hot-toast";
 import PageLoader from "../../components/PageLoader";
 import { FiX } from "react-icons/fi";
@@ -11,11 +8,7 @@ import { motion } from "framer-motion";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { staggerChildren: 0.1, when: "beforeChildren" },
-  },
+  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1, when: "beforeChildren" } },
 };
 
 const fieldVariants = {
@@ -28,6 +21,109 @@ const buttonVariants = {
   tap: { scale: 0.95 },
 };
 
+const DynamicArrayField = ({ label, values, setValues }) => (
+  <motion.div variants={fieldVariants}>
+    <label className="block mb-1 capitalize">{label}</label>
+    {values.map((val, i) => (
+      <div key={i} className="flex gap-2 mb-2">
+        <input
+          type="text"
+          value={val}
+          onChange={(e) => {
+            const updated = [...values];
+            updated[i] = e.target.value;
+            setValues(updated);
+          }}
+          className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
+        />
+        {values.length > 1 && (
+          <motion.button
+            type="button"
+            onClick={() => setValues(values.filter((_, idx) => idx !== i))}
+            className="text-red-500 hover:text-red-400 cursor-pointer"
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FiX size={20} />
+          </motion.button>
+        )}
+      </div>
+    ))}
+    <motion.button
+      type="button"
+      onClick={() => setValues([...values, ""])}
+      className="mt-1 px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-sm cursor-pointer"
+      variants={buttonVariants}
+      whileHover="hover"
+      whileTap="tap"
+    >
+      + Add {label}
+    </motion.button>
+  </motion.div>
+);
+
+const TestCaseSection = ({ title, testCases, setTestCases, hasExplanation }) => {
+  const handleChange = (index, field, value) => {
+    const updated = [...testCases];
+    updated[index][field] = value;
+    setTestCases(updated);
+  };
+
+  const addCase = () => {
+    setTestCases([
+      ...testCases,
+      hasExplanation ? { input: "", output: "", explanation: "" } : { input: "", output: "" },
+    ]);
+  };
+
+  const removeCase = (index) => {
+    setTestCases(testCases.filter((_, idx) => idx !== index));
+  };
+
+  return (
+    <motion.div variants={fieldVariants}>
+      <label className="block mb-2">{title}</label>
+      {testCases.map((tc, idx) => (
+        <motion.div
+          key={idx}
+          className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
+          variants={fieldVariants}
+        >
+          <motion.button
+            type="button"
+            onClick={() => removeCase(idx)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FiX size={18} />
+          </motion.button>
+          {Object.keys(tc).map((key) => (
+            <textarea
+              key={key}
+              placeholder={key}
+              value={tc[key]}
+              onChange={(e) => handleChange(idx, key, e.target.value)}
+              rows={key === "explanation" ? 2 : 3}
+              className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
+            />
+          ))}
+        </motion.div>
+      ))}
+      <motion.button
+        type="button"
+        onClick={addCase}
+        className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
+        variants={buttonVariants}
+        whileHover="hover"
+        whileTap="tap"
+      >
+        + Add {title}
+      </motion.button>
+    </motion.div>
+  );
+};
+
 const UpdateProblem = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -36,15 +132,9 @@ const UpdateProblem = () => {
   const [updateProblem, { isLoading }] = useUpdateProblemMutation();
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    difficulty: "Easy",
-    tags: "",
-    constraints: [""],
-    inputFormat: [""],
-    outputFormat: [""],
-    timeLimit: 1,
-    memoryLimit: 256,
+    title: "", description: "", difficulty: "Easy", tags: "",
+    constraints: [""], inputFormat: [""], outputFormat: [""],
+    timeLimit: 1, memoryLimit: 256,
     sampleTestCases: [{ input: "", output: "", explanation: "" }],
     hiddenTestCases: [{ input: "", output: "" }],
   });
@@ -70,26 +160,6 @@ const UpdateProblem = () => {
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-  const handleTestCaseChange = (type, index, field, value) => {
-    const updated = [...formData[type]];
-    updated[index][field] = value;
-    setFormData((prev) => ({ ...prev, [type]: updated }));
-  };
-
-  const addTestCase = (type) => {
-    const newCase =
-      type === "sampleTestCases"
-        ? { input: "", output: "", explanation: "" }
-        : { input: "", output: "" };
-    setFormData((prev) => ({ ...prev, [type]: [...prev[type], newCase] }));
-  };
-
-  const removeTestCase = (type, idx) =>
-    setFormData((prev) => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== idx),
-    }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -125,6 +195,7 @@ const UpdateProblem = () => {
         variants={fieldVariants}
       >
         <h2 className="text-2xl font-bold mb-6 text-center">✏️ Update Problem</h2>
+
         <motion.form
           onSubmit={handleSubmit}
           className="space-y-6"
@@ -184,61 +255,25 @@ const UpdateProblem = () => {
             </div>
           </motion.div>
 
-          {/* Dynamic Arrays */}
-          {["constraints", "inputFormat", "outputFormat"].map((field) => (
-            <motion.div key={field} variants={fieldVariants}>
-              <label className="block mb-1 capitalize">{field}</label>
-              {formData[field].map((val, i) => (
-                <div key={i} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={val}
-                    onChange={(e) => {
-                      const arr = [...formData[field]];
-                      arr[i] = e.target.value;
-                      setFormData((p) => ({ ...p, [field]: arr }));
-                    }}
-                    className="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 rounded-md"
-                  />
-                  {formData[field].length > 1 && (
-                    <motion.button
-                      type="button"
-                      onClick={() => {
-                        const arr = formData[field].filter((_, idx2) => idx2 !== i);
-                        setFormData((p) => ({ ...p, [field]: arr }));
-                      }}
-                      className="text-red-500 hover:text-red-400 cursor-pointer"
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <FiX size={20} />
-                    </motion.button>
-                  )}
-                </div>
-              ))}
-              <motion.button
-                type="button"
-                onClick={() =>
-                  setFormData((p) => ({
-                    ...p,
-                    [field]: [...p[field], ""],
-                  }))
-                }
-                className="mt-1 px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-sm cursor-pointer"
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                + Add {field}
-              </motion.button>
-            </motion.div>
-          ))}
+          {/* Dynamic Array Fields */}
+          <DynamicArrayField
+            label="Constraints"
+            values={formData.constraints}
+            setValues={(v) => setFormData((p) => ({ ...p, constraints: v }))}
+          />
+          <DynamicArrayField
+            label="Input Format"
+            values={formData.inputFormat}
+            setValues={(v) => setFormData((p) => ({ ...p, inputFormat: v }))}
+          />
+          <DynamicArrayField
+            label="Output Format"
+            values={formData.outputFormat}
+            setValues={(v) => setFormData((p) => ({ ...p, outputFormat: v }))}
+          />
 
           {/* Time & Memory */}
-          <motion.div
-            className="grid grid-cols-2 gap-4"
-            variants={fieldVariants}
-          >
+          <motion.div className="grid grid-cols-2 gap-4" variants={fieldVariants}>
             <div>
               <label className="block mb-1">Time Limit (sec)</label>
               <input
@@ -261,95 +296,20 @@ const UpdateProblem = () => {
             </div>
           </motion.div>
 
-          {/* Sample Test Cases */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2">Sample Test Cases</label>
-            {formData.sampleTestCases.map((tc, idx) => (
-              <motion.div
-                key={idx}
-                className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
-                variants={fieldVariants}
-              >
-                <motion.button
-                  type="button"
-                  onClick={() => removeTestCase("sampleTestCases", idx)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <FiX size={18} />
-                </motion.button>
-                {["input", "output", "explanation"].map((f) => (
-                  <textarea
-                    key={f}
-                    placeholder={f}
-                    value={tc[f]}
-                    onChange={(e) =>
-                      handleTestCaseChange("sampleTestCases", idx, f, e.target.value)
-                    }
-                    rows={f === "explanation" ? 2 : 3}
-                    className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
-                  />
-                ))}
-              </motion.div>
-            ))}
-            <motion.button
-              type="button"
-              onClick={() => addTestCase("sampleTestCases")}
-              className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-            >
-              + Add Sample Test Case
-            </motion.button>
-          </motion.div>
+          {/* Test Cases */}
+          <TestCaseSection
+            title="Sample Test Cases"
+            testCases={formData.sampleTestCases}
+            setTestCases={(v) => setFormData((p) => ({ ...p, sampleTestCases: v }))}
+            hasExplanation
+          />
+          <TestCaseSection
+            title="Hidden Test Cases"
+            testCases={formData.hiddenTestCases}
+            setTestCases={(v) => setFormData((p) => ({ ...p, hiddenTestCases: v }))}
+            hasExplanation={false}
+          />
 
-          {/* Hidden Test Cases */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2">Hidden Test Cases</label>
-            {formData.hiddenTestCases.map((tc, idx) => (
-              <motion.div
-                key={idx}
-                className="relative border border-gray-700 rounded-md p-4 mb-4 bg-gray-800"
-                variants={fieldVariants}
-              >
-                <motion.button
-                  type="button"
-                  onClick={() => removeTestCase("hiddenTestCases", idx)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <FiX size={18} />
-                </motion.button>
-                {["input", "output"].map((f) => (
-                  <textarea
-                    key={f}
-                    placeholder={f}
-                    value={tc[f]}
-                    onChange={(e) =>
-                      handleTestCaseChange("hiddenTestCases", idx, f, e.target.value)
-                    }
-                    rows={3}
-                    className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
-                  />
-                ))}
-              </motion.div>
-            ))}
-            <motion.button
-              type="button"
-              onClick={() => addTestCase("hiddenTestCases")}
-              className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-            >
-              + Add Hidden Test Case
-            </motion.button>
-          </motion.div>
-
-          {/* Submit */}
           <motion.button
             type="submit"
             disabled={isLoading}

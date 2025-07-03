@@ -6,7 +6,7 @@ import {
   useSubmitCodeMutation,
   useLazyGetSubmissionByIdQuery,
 } from "../redux/api/submissionAPI";
-import { useRunCodeMutation } from "../redux/api/compilerAPI.js";
+import { useRunCodeMutation } from "../redux/api/compilerAPI";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
 
@@ -27,47 +27,12 @@ const CodeEditor = ({ problemId: propId }) => {
   const [fetchSubmission] = useLazyGetSubmissionByIdQuery();
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/data.json");
-        const data = await res.json();
-        setCode(data[language] || "");
-      } catch {
-        setCode("");
-      }
-    })();
+    loadBoilerplate(language, setCode);
   }, [language]);
 
   useEffect(() => {
     if (!submissionId || !isPolling) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetchSubmission(submissionId).unwrap();
-        console.log("Polling response:", res);
-
-        const currentVerdict = res.submission?.verdict;
-        if (!currentVerdict) {
-          setOutput("⚠️ Verdict not available yet.");
-          return;
-        }
-
-        setVerdict(currentVerdict);
-
-        if (currentVerdict !== "Pending") {
-          const formattedOutput = formatSubmissionOutput(res.submission);
-          setOutput(formattedOutput);
-          clearInterval(interval);
-          setIsPolling(false);
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-        setOutput("❌ Failed to fetch verdict.");
-        clearInterval(interval);
-        setIsPolling(false);
-      }
-    }, 2000);
-
+    const interval = pollSubmission(submissionId, fetchSubmission, setVerdict, setOutput, setIsPolling);
     return () => clearInterval(interval);
   }, [submissionId, isPolling]);
 
@@ -100,133 +65,195 @@ const CodeEditor = ({ problemId: propId }) => {
     }
   };
 
-  const getVerdictColor = () => {
-    if (verdict === "success" || verdict?.toLowerCase() === "accepted")
-      return "text-green-400";
-    if (verdict?.toLowerCase() === "pending") return "text-yellow-400";
-    return "text-red-400";
-  };
-
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6 space-y-5">
-      {/* Language Selector */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-400">Language:</span>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-md"
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>
-              {lang.toUpperCase()}
-            </option>
-          ))}
-        </select>
-      </div>
+      <LanguageSelector language={language} setLanguage={setLanguage} />
 
-      {/* Monaco Editor */}
-      <Editor
-        height="420px"
-        language={language}
-        theme="vs-dark"
-        value={code}
-        onChange={(val) => setCode(val)}
-        options={{
-          fontSize: 15,
-          minimap: { enabled: false },
-          scrollbar: {
-            verticalScrollbarSize: 10,
-            horizontalScrollbarSize: 8,
-            vertical: "visible",
-            horizontal: "visible",
-          },
-          padding: { top: 12 },
-        }}
+      <MonacoEditor code={code} setCode={setCode} language={language} />
+
+      <CustomInput input={input} setInput={setInput} />
+
+      <ActionButtons
+        handleRun={handleRun}
+        handleSubmit={handleSubmit}
+        running={running}
+        submitting={submitting}
       />
 
-      {/* Custom Input */}
-      <textarea
-        rows="3"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        className="w-full bg-gray-800 p-2 rounded-md border border-gray-700 text-sm font-mono"
-        placeholder="Enter custom input..."
-      />
-
-      {/* Run & Submit Buttons */}
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={handleRun}
-          disabled={running}
-          className={`flex items-center gap-2 px-6 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${
-            running
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-500"
-          }`}
-        >
-          <FaPlay size={16} />
-          {running ? "Running..." : "Run"}
-        </button>
-
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className={`flex items-center gap-2 px-6 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${
-            submitting
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-500"
-          }`}
-        >
-          <FaUpload size={16} />
-          {submitting ? "Submitting..." : "Submit"}
-        </button>
-      </div>
-
-      {/* Output Box */}
-      <div
-        className={`relative rounded-xl shadow-lg border-2 p-5 overflow-auto transition-all duration-300 ${
-          verdict === "success" || verdict?.toLowerCase() === "accepted"
-            ? "border-green-500/50 bg-gradient-to-br from-green-900/20 via-gray-800 to-gray-900"
-            : verdict?.toLowerCase() === "pending"
-            ? "border-yellow-500/50 bg-gradient-to-br from-yellow-900/20 via-gray-800 to-gray-900"
-            : verdict
-            ? "border-red-500/50 bg-gradient-to-br from-red-900/20 via-gray-800 to-gray-900"
-            : "border-gray-700 bg-gray-800"
-        }`}
-      >
-        <div className="flex justify-between items-center mb-3">
-          <h3
-            className={`text-xl font-semibold flex items-center gap-2 ${getVerdictColor()}`}
-          >
-            📤 Output
-          </h3>
-          {verdict && (
-            <span
-              className={`text-xs font-medium px-3 py-1 rounded-full animate-pulse ${
-                verdict === "success" || verdict?.toLowerCase() === "accepted"
-                  ? "bg-green-700 text-green-200"
-                  : verdict?.toLowerCase() === "pending"
-                  ? "bg-yellow-600 text-yellow-100"
-                  : "bg-red-700 text-red-200"
-              }`}
-            >
-              {verdict.toUpperCase()}
-            </span>
-          )}
-        </div>
-
-        <pre className="whitespace-pre-wrap text-sm font-mono text-gray-200 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-          {output || "Your output will appear here..."}
-        </pre>
-      </div>
+      <OutputBox output={output} verdict={verdict} />
     </div>
   );
 };
 
 export default CodeEditor;
 
-// 🔷 Helper to format output nicely
+const LanguageSelector = ({ language, setLanguage }) => (
+  <div className="flex items-center gap-3">
+    <span className="text-sm text-gray-400">Language:</span>
+    <select
+      value={language}
+      onChange={(e) => setLanguage(e.target.value)}
+      className="bg-gray-800 border border-gray-700 px-4 py-2 rounded-md"
+    >
+      {LANGUAGES.map((lang) => (
+        <option key={lang} value={lang}>
+          {lang.toUpperCase()}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const MonacoEditor = ({ code, setCode, language }) => (
+  <Editor
+    height="420px"
+    language={language}
+    theme="vs-dark"
+    value={code}
+    onChange={(val) => setCode(val)}
+    options={{
+      fontSize: 15,
+      minimap: { enabled: false },
+      scrollbar: {
+        verticalScrollbarSize: 10,
+        horizontalScrollbarSize: 8,
+        vertical: "visible",
+        horizontal: "visible",
+      },
+      padding: { top: 12 },
+    }}
+  />
+);
+
+const CustomInput = ({ input, setInput }) => (
+  <textarea
+    rows="3"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    className="w-full bg-gray-800 p-2 rounded-md border border-gray-700 text-sm font-mono"
+    placeholder="Enter custom input..."
+  />
+);
+
+const ActionButtons = ({ handleRun, handleSubmit, running, submitting }) => (
+  <div className="flex justify-end gap-4">
+    <ActionButton
+      onClick={handleRun}
+      loading={running}
+      label="Run"
+      icon={<FaPlay size={16} />}
+      color="green"
+    />
+    <ActionButton
+      onClick={handleSubmit}
+      loading={submitting}
+      label="Submit"
+      icon={<FaUpload size={16} />}
+      color="blue"
+    />
+  </div>
+);
+
+const ActionButton = ({ onClick, loading, label, icon, color }) => (
+  <button
+    onClick={onClick}
+    disabled={loading}
+    className={`flex items-center gap-2 px-6 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${
+      loading
+        ? "bg-gray-500 cursor-not-allowed"
+        : `bg-${color}-600 hover:bg-${color}-500`
+    }`}
+  >
+    {icon}
+    {loading ? `${label}...` : label}
+  </button>
+);
+
+const OutputBox = ({ output, verdict }) => {
+  const getVerdictColor = () => {
+    if (verdict === "success" || verdict?.toLowerCase() === "accepted") return "text-green-400";
+    if (verdict?.toLowerCase() === "pending") return "text-yellow-400";
+    return "text-red-400";
+  };
+
+  const verdictClass =
+    verdict === "success" || verdict?.toLowerCase() === "accepted"
+      ? "border-green-500/50 bg-gradient-to-br from-green-900/20 via-gray-800 to-gray-900"
+      : verdict?.toLowerCase() === "pending"
+      ? "border-yellow-500/50 bg-gradient-to-br from-yellow-900/20 via-gray-800 to-gray-900"
+      : verdict
+      ? "border-red-500/50 bg-gradient-to-br from-red-900/20 via-gray-800 to-gray-900"
+      : "border-gray-700 bg-gray-800";
+
+  return (
+    <div
+      className={`relative rounded-xl shadow-lg border-2 p-5 overflow-auto transition-all duration-300 ${verdictClass}`}
+    >
+      <div className="flex justify-between items-center mb-3">
+        <h3 className={`text-xl font-semibold flex items-center gap-2 ${getVerdictColor()}`}>
+          📤 Output
+        </h3>
+        {verdict && (
+          <span
+            className={`text-xs font-medium px-3 py-1 rounded-full animate-pulse ${
+              verdict === "success" || verdict?.toLowerCase() === "accepted"
+                ? "bg-green-700 text-green-200"
+                : verdict?.toLowerCase() === "pending"
+                ? "bg-yellow-600 text-yellow-100"
+                : "bg-red-700 text-red-200"
+            }`}
+          >
+            {verdict.toUpperCase()}
+          </span>
+        )}
+      </div>
+
+      <pre className="whitespace-pre-wrap text-sm font-mono text-gray-200 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+        {output || "Your output will appear here..."}
+      </pre>
+    </div>
+  );
+};
+
+// 🔷 Utilities
+
+function loadBoilerplate(language, setCode) {
+  fetch("/data.json")
+    .then((res) => res.json())
+    .then((data) => setCode(data[language] || ""))
+    .catch(() => setCode(""));
+}
+
+function pollSubmission(submissionId, fetchSubmission, setVerdict, setOutput, setIsPolling) {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetchSubmission(submissionId).unwrap();
+      const currentVerdict = res.submission?.verdict;
+
+      if (!currentVerdict) {
+        setOutput("⚠️ Verdict not available yet.");
+        return;
+      }
+
+      setVerdict(currentVerdict);
+
+      if (currentVerdict !== "Pending") {
+        const formattedOutput = formatSubmissionOutput(res.submission);
+        setOutput(formattedOutput);
+        clearInterval(interval);
+        setIsPolling(false);
+      }
+    } catch (error) {
+      console.error("Polling error:", error);
+      setOutput("❌ Failed to fetch verdict.");
+      clearInterval(interval);
+      setIsPolling(false);
+    }
+  }, 2000);
+
+  return interval;
+}
+
 function formatSubmissionOutput(submission) {
   const verdict = submission.verdict;
   if (!verdict) return "⚠️ No verdict available.";
@@ -236,9 +263,7 @@ function formatSubmissionOutput(submission) {
   }
 
   if (
-    ["Wrong Answer", "Time Limit Exceeded", "Memory Limit Exceeded"].includes(
-      verdict
-    )
+    ["Wrong Answer", "Time Limit Exceeded", "Memory Limit Exceeded"].includes(verdict)
   ) {
     const failedCases = submission.testCaseResults
       .filter((tc) => tc.status !== "Passed")

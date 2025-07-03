@@ -1,0 +1,98 @@
+{
+  "faqs": [
+    {
+      "question": "Is CodeX free to use?",
+      "answer": "Yes, CodeX is completely free for practicing coding problems and tracking your progress. Premium features may be added in the future for structured learning and mentorship."
+    },
+    {
+      "question": "How is the difficulty level of problems determined?",
+      "answer": "Difficulty levels are manually tagged based on the problem's logic complexity and expected time to solve, ranging from Easy to Hard."
+    },
+    {
+      "question": "Can I track my progress?",
+      "answer": "Absolutely! Your solved problems, submission history, and rating are saved to your profile so you can monitor your improvement over time."
+    },
+    {
+      "question": "What if I find a bug or mistake in a problem?",
+      "answer": "You can report bugs through our feedback form or Discord server. We actively review reports and fix issues promptly."
+    },
+    {
+      "question": "Do you support multiple programming languages?",
+      "answer": "Currently, we support C++, Python, JavaScript, and Java. More languages may be added based on user demand."
+    },
+    {
+      "question": "Is there a leaderboard or ranking system?",
+      "answer": "Yes! You can compare your progress with peers via the global leaderboard and performance stats."
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "Aarav K.",
+      "text": "CodeX helped me ace my FAANG interview! The structured problem sets and UI made daily practice fun."
+    },
+    {
+      "name": "Priya S.",
+      "text": "The peer ranking and instant feedback gave me the push I needed to stay consistent and grow faster."
+    },
+    {
+      "name": "Rahul M.",
+      "text": "From solving easy problems to cracking system design, CodeX is my daily go-to resource."
+    },
+    {
+      "name": "Neha T.",
+      "text": "Love how intuitive the UI is and the problem tagging helps me focus on my weak areas."
+    }
+  ],
+  "features": [
+    {
+      "icon": "🧠",
+      "title": "Handpicked DSA Problems",
+      "description": "Curated challenges across all major DSA topics to sharpen your edge.",
+      "bgColor": "bg-gradient-to-br from-cyan-600 to-blue-700"
+    },
+    {
+      "icon": "🏆",
+      "title": "Structured Courses",
+      "description": "Guided learning paths with increasing difficulty to master concepts step by step.",
+      "bgColor": "bg-gradient-to-br from-purple-600 to-pink-700"
+    },
+    {
+      "icon": "📜",
+      "title": "Insightful Analytics",
+      "description": "Analyze your progress, revisit attempts, and grow with clear metrics.",
+      "bgColor": "bg-gradient-to-br from-pink-600 to-red-700"
+    }
+  ],
+  "benefits": [
+    {
+      "icon": "🧩",
+      "title": "Real Interview Questions",
+      "color": "from-purple-500 to-indigo-600"
+    },
+    {
+      "icon": "⚡",
+      "title": "Fast & Intuitive UI",
+      "color": "from-pink-500 to-orange-500"
+    },
+    {
+      "icon": "📈",
+      "title": "Performance Tracking",
+      "color": "from-blue-500 to-cyan-500"
+    },
+    {
+      "icon": "👥",
+      "title": "Peer Leaderboards",
+      "color": "from-green-500 to-emerald-500"
+    },
+    {
+      "icon": "✅",
+      "title": "Instant Code Feedback",
+      "color": "from-yellow-500 to-orange-400"
+    },
+    {
+      "icon": "💬",
+      "title": "Supportive Community",
+      "color": "from-teal-500 to-cyan-500"
+    }
+  ]
+}

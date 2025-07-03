@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Problem",
+        default: [],
       },
     ],
     solvedCountByDifficulty: {
@@ -63,7 +64,7 @@ const userSchema = new mongoose.Schema(
             "Memory Limit Exceeded",
             "Runtime Error",
             "Compilation Error",
-            "Pending"
+            "Pending",
           ],
         },
         language: String,
@@ -79,10 +80,30 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-// 🔐 Hash password before saving
+userSchema.virtual("computedRating").get(function () {
+  const solvedCount = Array.isArray(this.solvedProblems) ? this.solvedProblems.length : 0;
+
+  const totalSubmissions = Array.isArray(this.submissions) ? this.submissions.length : 0;
+  const acceptedSubmissions = Array.isArray(this.submissions)
+    ? this.submissions.filter((s) => s.status === "Accepted").length
+    : 0;
+
+  const accuracy =
+    totalSubmissions > 0 ? (acceptedSubmissions / totalSubmissions) * 100 : 0;
+
+  const bonus =
+    accuracy > 0
+      ? Math.round((Math.log2(accuracy) / Math.log2(100)) * 100)
+      : 0;
+
+  return 1500 + solvedCount * 10 + bonus;
+});
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -95,7 +116,6 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// 🔐 Compare entered password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

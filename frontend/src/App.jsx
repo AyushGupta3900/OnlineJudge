@@ -25,6 +25,7 @@ const CreateProblem = lazy(() => import("./pages/Problems/CreateProblem"));
 const UpdateProblem = lazy(() => import("./pages/Problems/UpdateProblem"));
 
 const SubmissionPage = lazy(() => import("./pages/Submissions/SubmissionPage"));
+const AllSubmissionsPage = lazy(() => import("./pages/Submissions/AllSubmissionsPage"));
 
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const Users = lazy(() => import("./pages/Admin/Users"));
@@ -34,6 +35,8 @@ const Courses = lazy(() => import("./pages/Courses/Courses"));
 const About = lazy(() => import("./pages/Static/About"));
 const Contact = lazy(() => import("./pages/Static/Contact"));
 const NotFound = lazy(() => import("./pages/Static/NotFound"));
+
+const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 
 
 export default function App() {
@@ -75,10 +78,13 @@ export default function App() {
           <Route path="/problems" element={requireAuth(<Problems />)} />
           <Route path="/problems/:id" element={requireAuth(<ProblemPage />)} />
           <Route path="/submissions/problem/:id" element={requireAuth(<SubmissionPage />)} />
+          <Route path="/submissions" element={requireAuth(<AllSubmissionsPage />)} />
           <Route path="/profile" element={requireAuth(<ProfilePage />)} />
           <Route path="/courses" element={requireAuth(<Courses />)} />
           <Route path="/contact" element={requireAuth(<Contact />)} />
+          <Route path="/leaderboard" element={requireAuth(<Leaderboard />)} />
           <Route path="/about" element={requireAuth(<About />)} />
+
 
           {/* Admin Routes */}
           <Route path="/admin" element={requireAuth(<AdminDashboard />)} />
