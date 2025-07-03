@@ -11,7 +11,7 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-const GNU_TIME = "/opt/homebrew/bin/gtime"; // adjust if needed
+const GNU_TIME = "/usr/bin/time";
 
 export const executeJava = (classname, input = "") => {
   return new Promise((resolve, reject) => {

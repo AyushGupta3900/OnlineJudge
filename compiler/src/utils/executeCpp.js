@@ -11,7 +11,7 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-const GNU_TIME = "/opt/homebrew/bin/gtime"; // adjust if needed
+const GNU_TIME = "/usr/bin/time";
 
 export const executeCpp = (filepath, input = "") => {
   const jobId = path.basename(filepath).split(".")[0];
