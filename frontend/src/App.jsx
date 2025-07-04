@@ -29,6 +29,7 @@ const AllSubmissionsPage = lazy(() => import("./pages/Submissions/AllSubmissions
 
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const Users = lazy(() => import("./pages/Admin/Users"));
+const ContactMessages = lazy(() => import("./pages/Admin/ContactMessages"));
 
 const Courses = lazy(() => import("./pages/Courses/Courses"));
 
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/admin" element={requireAuth(<AdminDashboard />)} />
           <Route path="/admin/add-problem" element={requireAuth(<CreateProblem />)} />
           <Route path="/admin/edit-problem/:id" element={requireAuth(<UpdateProblem />)} />
+          <Route path="/admin/contact-messages" element={requireAuth(<ContactMessages />)} />
           <Route path="/admin/users" element={requireAuth(<Users />)} />
 
           {/* Catch-All */}

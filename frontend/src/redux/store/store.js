@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+
 import authReducer from "../reducers/authReducer.js";
 
 import { authAPI } from "../api/authAPI.js";
 import { problemAPI } from "../api/problemAPI.js";
 import { compilerAPI } from "../api/compilerAPI.js";
 import { submissionAPI } from "../api/submissionAPI.js";
+import { contactAPI } from "../api/contactAPI.js";  
 
 const persistConfig = {
   key: "auth",
@@ -22,15 +24,17 @@ export const store = configureStore({
     [problemAPI.reducerPath]: problemAPI.reducer,
     [compilerAPI.reducerPath]: compilerAPI.reducer,
     [submissionAPI.reducerPath]: submissionAPI.reducer,
+    [contactAPI.reducerPath]: contactAPI.reducer,  
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
     })
       .concat(authAPI.middleware)
       .concat(problemAPI.middleware)
       .concat(compilerAPI.middleware)
-      .concat(submissionAPI.middleware),
+      .concat(submissionAPI.middleware)
+      .concat(contactAPI.middleware), 
 });
 
 export const persistor = persistStore(store);

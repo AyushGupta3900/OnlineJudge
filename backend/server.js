@@ -8,6 +8,7 @@ import express from "express";
 import authRoutes from "./src/routes/auth.routes.js"
 import problemRoutes from "./src/routes/problem.routes.js"
 import submissionRoutes from "./src/routes/submission.routes.js"
+import contactRoutes from "./src/routes/contact.routes.js";
 
 import {connectDB} from "./src/utils/db.js"
 
@@ -46,6 +47,8 @@ app.get("/",(req,res)=>{
 app.use("/api/v1/auth",authRoutes);
 app.use("/api/v1/problem",problemRoutes);
 app.use("/api/v1/submission",submissionRoutes);
+app.use("/api/v1/contact", contactRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);

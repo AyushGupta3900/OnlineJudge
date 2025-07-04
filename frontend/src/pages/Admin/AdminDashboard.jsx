@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaUsers, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaUsers, FaEdit, FaTrash, FaEnvelope } from "react-icons/fa";
 import {
   useGetAllProblemsQuery,
   useDeleteProblemMutation,
@@ -69,10 +69,7 @@ const AdminDashboard = () => {
           <p className="text-red-500">Failed to load problems.</p>
         ) : (
           <>
-            <ProblemsTable
-              problems={currentProblems}
-              onDelete={handleDelete}
-            />
+            <ProblemsTable problems={currentProblems} onDelete={handleDelete} />
 
             {totalPages > 1 && (
               <AdminPagination
@@ -91,13 +88,21 @@ const AdminDashboard = () => {
 // 📌 Header Component
 const DashboardHeader = () => (
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Admin Dashboard</h1>
-    <div className="flex gap-4">
+    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+      Admin Dashboard
+    </h1>
+    <div className="flex flex-wrap gap-4">
       <Link
         to="/admin/users"
         className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-md transition cursor-pointer"
       >
         <FaUsers /> View Users
+      </Link>
+      <Link
+        to="/admin/contact-messages"
+        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 rounded-md transition cursor-pointer"
+      >
+        <FaEnvelope /> View Contact Messages
       </Link>
       <Link
         to="/admin/add-problem"
