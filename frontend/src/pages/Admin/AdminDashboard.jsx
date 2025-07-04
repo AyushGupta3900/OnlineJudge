@@ -91,7 +91,7 @@ const AdminDashboard = () => {
 // 📌 Header Component
 const DashboardHeader = () => (
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Admin Dashboard</h1>
     <div className="flex gap-4">
       <Link
         to="/admin/users"

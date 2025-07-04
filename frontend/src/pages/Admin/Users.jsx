@@ -4,6 +4,7 @@ import {
   useMakeUserAdminMutation,
 } from "../../redux/api/authAPI.js";
 import AdminPagination from "../../components/AdminPagination.jsx";
+import PageHeader from "../../components/PageHeader.jsx";
 
 const Users = () => {
   const { data, isLoading, isError, refetch } = useGetAllUsersQuery();
@@ -34,10 +35,12 @@ const Users = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
+  const heading = "All Users";
+
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <UsersHeader />
+        <PageHeader heading={heading} />
 
         {isLoading ? (
           <SkeletonLoader />
@@ -64,11 +67,6 @@ const Users = () => {
     </div>
   );
 };
-
-// 📌 Header Component
-const UsersHeader = () => (
-  <h1 className="text-3xl font-bold">All Users</h1>
-);
 
 // 📌 Table Component
 const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (

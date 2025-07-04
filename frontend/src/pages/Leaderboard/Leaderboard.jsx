@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useGetAllUsersQuery } from "../../redux/api/authAPI.js";
 import { FaMedal } from "react-icons/fa";
 import AdminPagination from "../../components/AdminPagination.jsx";
-
+import PageHeader from "../../components/PageHeader.jsx"
 const medalColors = ["text-yellow-400", "text-gray-300", "text-orange-400"];
 
 const TopThree = ({ users }) => (
@@ -94,12 +94,12 @@ const Leaderboard = () => {
   const indexOfFirst = (currentPage - 1) * usersPerPage;
   const currentUsers = others.slice(indexOfFirst, indexOfFirst + usersPerPage);
 
+  const heading = "Leaderboard";
+
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center text-yellow-400">
-          🚀 Leaderboard
-        </h1>
+      <PageHeader heading={heading} />
 
         {isLoading ? (
           <div className="space-y-4 animate-pulse">

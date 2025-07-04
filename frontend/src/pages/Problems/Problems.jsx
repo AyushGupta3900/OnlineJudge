@@ -104,7 +104,7 @@ const Header = ({ viewMode, setViewMode }) => (
     className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8"
   >
     <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text drop-shadow-md">
-      🧙‍♂️ DSA Problems
+      💼 DSA Problems
     </h1>
 
     <button

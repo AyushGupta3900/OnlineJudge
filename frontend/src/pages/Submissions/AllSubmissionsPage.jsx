@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaClock, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaClock, FaChevronDown, FaChevronUp, FaClipboardList } from "react-icons/fa";
 import useAuthUser from "../../hooks/useAuthUser";
 import { useGetProblemByIdQuery } from "../../redux/api/problemAPI";
 import AdminPagination from "../../components/AdminPagination"
+import PageHeader from "../../components/PageHeader";
 
 const verdictColors = {
   Accepted: "text-green-500",
@@ -144,12 +145,13 @@ const AllSubmissionsPage = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
+  const heading = "All Submissions";
+
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-6 text-center text-blue-400">
-          📄 Your Submissions
-        </h1>
+        
+      <PageHeader heading={heading}/>
 
         {submissions.length === 0 ? (
           <p className="text-center text-gray-400">No submissions yet.</p>

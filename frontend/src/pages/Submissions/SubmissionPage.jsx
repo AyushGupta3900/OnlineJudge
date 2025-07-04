@@ -3,18 +3,8 @@ import { useParams } from "react-router-dom";
 import { useGetSubmissionsByProblemQuery } from "../../redux/api/submissionAPI.js";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
-import { FaClipboardList } from "react-icons/fa";
 import AdminPagination from "../../components/AdminPagination.jsx";
-
-// Header Component
-const Header = () => (
-  <div className="flex items-center gap-3 mb-8">
-    <FaClipboardList className="text-4xl text-blue-500" />
-    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-      Submissions Dashboard
-    </h1>
-  </div>
-);
+import PageHeader from "../../components/PageHeader.jsx";
 
 // TestCase Table
 const TestCaseTable = ({ testCaseResults }) => (
@@ -151,6 +141,8 @@ const SubmissionPage = () => {
     setExpanded((prev) => (prev === id ? null : id));
   };
 
+  const heading = "Submissions Dashboard";
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -159,7 +151,7 @@ const SubmissionPage = () => {
       className="min-h-screen bg-gray-950 text-white px-6 py-8"
     >
       <div className="max-w-6xl mx-auto">
-        <Header />
+        <PageHeader heading={heading} />
 
         {isLoading ? (
           <p className="text-blue-300 animate-pulse">Loading submissions...</p>
