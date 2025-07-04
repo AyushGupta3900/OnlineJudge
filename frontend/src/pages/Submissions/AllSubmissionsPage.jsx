@@ -90,7 +90,7 @@ const SubmissionsTable = ({
               <td className="px-6 py-4 text-sm">
                 <button
                   onClick={() => toggleRow(indexOfFirst + idx)}
-                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
                 >
                   {expandedRows[indexOfFirst + idx] ? (
                     <>

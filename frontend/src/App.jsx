@@ -8,6 +8,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
 import ScrollToTop from "./components/ScrollToTop";
+import ComingSoon from "./components/ComingSoon"
 
 import useAuthUser from "./hooks/useAuthUser";
 
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/submissions" element={requireAuth(<AllSubmissionsPage />)} />
           <Route path="/profile" element={requireAuth(<ProfilePage />)} />
           <Route path="/courses" element={requireAuth(<Courses />)} />
+          <Route path="/courses/:id" element={requireAuth(<ComingSoon />)} />
           <Route path="/contact" element={requireAuth(<Contact />)} />
           <Route path="/leaderboard" element={requireAuth(<Leaderboard />)} />
           <Route path="/about" element={requireAuth(<About />)} />
