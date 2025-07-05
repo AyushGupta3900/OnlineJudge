@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
-import Nav from "./components/Nav";
-import Footer from "./components/Footer";
+const Nav = lazy(() => import("./components/Nav"));
+const Footer = lazy(() => import("./components/Footer"));
+
 import PageLoader from "./components/PageLoader";
 import ScrollToTop from "./components/ScrollToTop";
 import ComingSoon from "./components/ComingSoon";
