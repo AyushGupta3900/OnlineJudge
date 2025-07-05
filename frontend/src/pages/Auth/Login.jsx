@@ -126,6 +126,13 @@ const LoginForm = ({ loginData, setLoginData, handleLogin, isLoading, error }) =
           Create one
         </Link>
       </p>
+
+      <p className="text-sm text-center">
+        Want to try without an account?{" "}
+        <Link to="/problems" className="text-purple-400 hover:underline">
+          Take a demo
+        </Link>
+      </p>
     </form>
   </div>
 );

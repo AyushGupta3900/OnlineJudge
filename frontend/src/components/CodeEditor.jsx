@@ -164,12 +164,12 @@ const CustomInput = ({ input, setInput }) => (
 );
 
 const ActionButtons = ({ handleRun, handleSubmit, handleReset, running, submitting }) => (
-  <div className="flex justify-end gap-4">
+  <div className="flex flex-wrap justify-end gap-4">
     <ActionButton
       onClick={handleReset}
       loading={false}
       label="Reset"
-      icon={<FaUndo/>}
+      icon={<FaUndo />}
       color="gray"
     />
     <ActionButton
@@ -188,6 +188,7 @@ const ActionButtons = ({ handleRun, handleSubmit, handleReset, running, submitti
     />
   </div>
 );
+
 
 const ActionButton = ({ onClick, loading, label, icon, color }) => (
   <button
