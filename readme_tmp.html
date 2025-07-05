@@ -442,17 +442,18 @@ It allows users to solve coding problems, run and submit code, track progress, v
 </ul>
 <hr>
 <h2 id="%F0%9F%93%A6-project-structure">📦 Project Structure</h2>
-<p>CodeX/<br>
-├── backend/ # CRUD server<br>
-│ └── package.json<br>
-│ └── .env<br>
-├── compiler/ # Docker-based code runner<br>
-│ └── package.json<br>
-│ └── .env<br>
-├── frontend/ # React frontend<br>
-│ └── package.json<br>
-│ └── .env<br>
-└── README.md</p>
+<pre class="hljs"><code><div>CodeX/
+├── backend/ # CRUD server
+│ └── package.json
+│ └── .env
+├── compiler/ # Docker-based code runner
+│ └── package.json
+│ └── .env
+├── frontend/ # React frontend
+│ └── package.json
+│ └── .env
+└── README.md
+</div></code></pre>
 <p>Each service runs independently and communicates via REST APIs.</p>
 <hr>
 <h2 id="%F0%9F%A7%AA-installation--setup">🧪 Installation &amp; Setup</h2>
@@ -483,28 +484,35 @@ MONGO_URI=mongodb+srv://&lt;username&gt;:&lt;password&gt;@&lt;cluster&gt;.mongod
 <pre class="hljs"><code><div>VITE_API_URL=http://localhost:5005/api/v1
 VITE_COMPILER_URL=http://localhost:5008/
 </div></code></pre>
-<p>🧑‍💻 Run the Project<br>
-1️⃣ Clone the repository</p>
-<p>git clone https://github.com/AyushGupta3900/SummerProject.git<br>
-cd SummerProject<br>
-2️⃣ Setup Backend (CRUD)</p>
-<p>cd backend<br>
-cp .env.example .env   # and fill in your credentials<br>
-npm install<br>
-npm run dev<br>
-3️⃣ Setup Frontend</p>
-<p>cd ../frontend<br>
-cp .env.example .env   # and fill in your URLs<br>
-npm install<br>
-npm run dev<br>
-4️⃣ Setup Compiler (Docker-based)</p>
-<p>cd ../compiler<br>
-cp .env.example .env   # and fill in your credentials<br>
-docker stop $(docker ps -q) || true<br>
-docker rm $(docker ps -aq) || true<br>
-docker image prune -a -f<br>
-docker build --no-cache -t compiler-server .<br>
-docker run -p 5008:5008 compiler-server</p>
+<h3 id="clone-the-repository">Clone the repository</h3>
+<ul>
+<li>git clone https://github.com/AyushGupta3900/SummerProject.git</li>
+<li>cd SummerProject</li>
+</ul>
+<h3 id="setup-backend-crud">Setup Backend (CRUD)</h3>
+<ul>
+<li>cd backend</li>
+<li>cp .env.example .env   # and fill in your credentials</li>
+<li>npm install</li>
+<li>npm run dev</li>
+</ul>
+<h3 id="setup-frontend">Setup Frontend</h3>
+<ul>
+<li>cd ../frontend</li>
+<li>cp .env.example .env   # and fill in your URLs</li>
+<li>npm install</li>
+<li>npm run dev</li>
+</ul>
+<h3 id="setup-compiler-docker-based">Setup Compiler (Docker-based)</h3>
+<ul>
+<li>cd ../compiler</li>
+<li>cp .env.example .env   # and fill in your credentials</li>
+<li>docker stop $(docker ps -q) || true</li>
+<li>docker rm $(docker ps -aq) || true</li>
+<li>docker image prune -a -f</li>
+<li>docker build --no-cache -t compiler-server .</li>
+<li>docker run -p 5008:5008 compiler-server</li>
+</ul>
 
 </body>
 

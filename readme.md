@@ -56,6 +56,7 @@ It allows users to solve coding problems, run and submit code, track progress, v
 
 ## 📦 Project Structure
 
+```
 CodeX/
 ├── backend/ # CRUD server
 │ └── package.json
@@ -67,7 +68,7 @@ CodeX/
 │ └── package.json
 │ └── .env
 └── README.md
-
+```
 
 Each service runs independently and communicates via REST APIs.
 
@@ -111,29 +112,31 @@ VITE_API_URL=http://localhost:5005/api/v1
 VITE_COMPILER_URL=http://localhost:5008/
 ```
 
-🧑‍💻 Run the Project
-1️⃣ Clone the repository
+### Clone the repository
 
-git clone https://github.com/AyushGupta3900/SummerProject.git
-cd SummerProject
-2️⃣ Setup Backend (CRUD)
+- git clone https://github.com/AyushGupta3900/SummerProject.git
+- cd SummerProject
 
-cd backend
-cp .env.example .env   # and fill in your credentials
-npm install
-npm run dev
-3️⃣ Setup Frontend
+### Setup Backend (CRUD)
 
-cd ../frontend
-cp .env.example .env   # and fill in your URLs
-npm install
-npm run dev
-4️⃣ Setup Compiler (Docker-based)
+- cd backend
+- cp .env.example .env   # and fill in your credentials
+- npm install
+- npm run dev
 
-cd ../compiler
-cp .env.example .env   # and fill in your credentials
-docker stop $(docker ps -q) || true
-docker rm $(docker ps -aq) || true
-docker image prune -a -f
-docker build --no-cache -t compiler-server .
-docker run -p 5008:5008 compiler-server
+### Setup Frontend
+
+- cd ../frontend
+- cp .env.example .env   # and fill in your URLs
+- npm install
+- npm run dev
+  
+### Setup Compiler (Docker-based)
+
+- cd ../compiler
+- cp .env.example .env   # and fill in your credentials
+- docker stop $(docker ps -q) || true
+- docker rm $(docker ps -aq) || true
+- docker image prune -a -f
+- docker build --no-cache -t compiler-server .
+- docker run -p 5008:5008 compiler-server
