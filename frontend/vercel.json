@@ -1,15 +1,3 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://onlinejudge-8lvi.onrender.com/api/v1/$1"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html",
-      "permanent": false
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
