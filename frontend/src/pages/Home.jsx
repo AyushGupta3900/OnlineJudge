@@ -2,23 +2,34 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
+const PageLoader = () => (
+  <div className="flex flex-col gap-4 justify-center items-center min-h-screen bg-black text-white">
+    <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+    <p className="text-cyan-400 text-lg">Loading Home Page…</p>
+  </div>
+);
+
 const Home = () => {
   const [faqs, setFaqs] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [features, setFeatures] = useState([]);
   const [benefits, setBenefits] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/home.json")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setFaqs(data.faqs || []);
         setTestimonials(data.testimonials || []);
         setFeatures(data.features || []);
         setBenefits(data.benefits || []);
       })
-      .catch(err => console.error("Failed to load home.json", err));
+      .catch((err) => console.error("Failed to load home.json", err))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <PageLoader />;
 
   return (
     <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen px-6 py-10">
@@ -26,12 +37,11 @@ const Home = () => {
 
       {/* Features */}
       <section className="mt-28 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 px-4">
-        {features.map(f => (
+        {features.map((f) => (
           <FeatureCard key={f.title} {...f} />
         ))}
       </section>
 
-      {/* Courses */}
       <CoursesSection />
 
       {/* Benefits */}
@@ -41,22 +51,22 @@ const Home = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-4 md:px-8">
-          {benefits.map(b => (
+          {benefits.map((b) => (
             <Benefit key={b.title} {...b} />
           ))}
         </div>
       </section>
 
-      {/* Testimonials */}
       <TestimonialsSection testimonials={testimonials} />
 
-      {/* FAQ */}
       <FAQSection faqs={faqs} />
     </div>
   );
 };
 
 export default Home;
+
+// 💡 Your sections below remain the same ⬇️
 
 const HeroSection = () => (
   <motion.section
@@ -193,7 +203,9 @@ const FeatureCard = ({ icon, title, description, bgColor }) => (
     transition={{ duration: 0.4 }}
     className="bg-gray-800 p-6 rounded-2xl shadow-xl hover:scale-[1.03] text-center"
   >
-    <div className={`flex justify-center items-center w-16 h-16 mx-auto mb-4 rounded-full text-white text-2xl shadow-md ${bgColor}`}>
+    <div
+      className={`flex justify-center items-center w-16 h-16 mx-auto mb-4 rounded-full text-white text-2xl shadow-md ${bgColor}`}
+    >
       {icon}
     </div>
     <h3 className="text-xl font-semibold mb-2">{title}</h3>
@@ -209,7 +221,9 @@ const Benefit = ({ icon, title, color }) => (
     transition={{ duration: 0.4 }}
     className="w-full sm:w-[90%] bg-gray-900/70 border border-gray-700 rounded-xl p-6 shadow-lg hover:scale-[1.04]"
   >
-    <div className={`text-3xl mb-4 inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${color} text-white shadow-md`}>
+    <div
+      className={`text-3xl mb-4 inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${color} text-white shadow-md`}
+    >
       {icon}
     </div>
     <h3 className="text-base font-medium text-white">{title}</h3>
