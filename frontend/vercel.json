@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://onlinejudge-8lvi.onrender.com/api/v1/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -29,8 +33,5 @@
     }
   ],
   "cleanUrls": true,
-  "trailingSlash": false,
-  "error": {
-    "404": "/index.html"
-  }
+  "trailingSlash": false
 }
