@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import Submission from "../models/Submission.js"
+import Submission from "../models/Submission.js";
 import jwt from "jsonwebtoken";
 
 export async function signupUser(req, res) {
@@ -39,10 +39,10 @@ export async function signupUser(req, res) {
       }
     );
     res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true, 
-      sameSite: "strict", 
-      secure: process.env.NODE_ENV === "production",
     });
     res.status(201).json({ success: true, user: newUser });
   } catch (error) {
@@ -59,20 +59,22 @@ export async function loginUser(req, res) {
     }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid email or password" });
+    if (!user)
+      return res.status(401).json({ message: "Invalid email or password" });
 
     const isPasswordCorrect = await user.matchPassword(password);
-    if (!isPasswordCorrect) return res.status(401).json({ message: "Invalid email or password" });
+    if (!isPasswordCorrect)
+      return res.status(401).json({ message: "Invalid email or password" });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
     });
 
     res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true, 
-      sameSite: "strict", 
-      secure: process.env.NODE_ENV === "production",
     });
 
     res.status(200).json({ success: true, user });
@@ -82,23 +84,24 @@ export async function loginUser(req, res) {
   }
 }
 
-export async function logoutUser(req,res){
-  res.clearCookie("jwt");
+export async function logoutUser(req, res) {
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  });
   res.status(200).json({ success: true, message: "Logout successful" });
 }
 
 export async function onboardingUser(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName,bio } = req.body;
+    const { fullName, bio } = req.body;
 
-    if (!fullName || !bio ) {
+    if (!fullName || !bio) {
       return res.status(400).json({
         message: "All fields are required",
-        missingFields: [
-          !fullName && "fullName",
-          !bio && "bio",
-        ].filter(Boolean),
+        missingFields: [!fullName && "fullName", !bio && "bio"].filter(Boolean),
       });
     }
 
@@ -112,7 +115,8 @@ export async function onboardingUser(req, res) {
       { new: true }
     );
 
-    if (!updatedUser) return res.status(404).json({ message: "User not found" });
+    if (!updatedUser)
+      return res.status(404).json({ message: "User not found" });
     res.status(200).json({ success: true, user: updatedUser });
   } catch (error) {
     console.error("Onboarding error:", error);
@@ -120,28 +124,27 @@ export async function onboardingUser(req, res) {
   }
 }
 
-export async function getAllUsers(req,res) {
-    try{
-        const users = await User.find({});
-        return res.status(200).json({
-            success: true,
-            message: "Users fetched successfully",
-            data: users,
-        })
-    }
-    catch(error){
-        console.log("Error in getAllUser controller",error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error while fetching users",
-        })
-    }
+export async function getAllUsers(req, res) {
+  try {
+    const users = await User.find({});
+    return res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.log("Error in getAllUser controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching users",
+    });
+  }
 }
 
-export async function makeAdmin(req, res){
+export async function makeAdmin(req, res) {
   try {
     const userId = req.params.id;
-    
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -172,7 +175,7 @@ export async function makeAdmin(req, res){
       message: "Server error while making admin",
     });
   }
-};
+}
 
 export async function updateUserAccount(req, res) {
   try {
@@ -200,21 +203,27 @@ export async function updateUserAccount(req, res) {
     });
   } catch (error) {
     console.error("Error updating account:", error);
-    res.status(500).json({ success: false, message: "Failed to update account." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update account." });
   }
 }
 
 export async function deleteUserAccount(req, res) {
   try {
     const userId = req.user._id;
-    console.log(userId)
+    console.log(userId);
     await Submission.deleteMany({ user: userId });
-    
+
     await User.findByIdAndDelete(userId);
 
-    res.status(200).json({ success: true, message: "Account deleted successfully." });
+    res
+      .status(200)
+      .json({ success: true, message: "Account deleted successfully." });
   } catch (error) {
     console.error("Error deleting account:", error);
-    res.status(500).json({ success: false, message: "Failed to delete account." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete account." });
   }
 }
