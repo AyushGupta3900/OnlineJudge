@@ -77,8 +77,8 @@ export default function App() {
 
           {/* Protected Routes */}
           <Route path="/" element={requireAuth(<Home />)} />
-          <Route path="/problems" element={requireAuth(<Problems />)} />
-          <Route path="/problems/:id" element={requireAuth(<ProblemPage />)} />
+          <Route path="/problems" element={<Problems />} />
+          <Route path="/problems/:id" element={<ProblemPage />} />
           <Route path="/submissions/problem/:id" element={requireAuth(<SubmissionPage />)} />
           <Route path="/submissions" element={requireAuth(<AllSubmissionsPage />)} />
           <Route path="/profile" element={requireAuth(<ProfilePage />)} />

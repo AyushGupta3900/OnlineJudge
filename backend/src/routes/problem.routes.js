@@ -6,13 +6,11 @@ import { createProblemFromArray } from "../controllers/problem.controller.js";
 
 const router = express.Router();
 
-router.use(protectedRoute);
-
 router.get("/all",getAllProblems);
-router.post("/admin/new",adminOnly,createProblem);
-router.patch("/admin/:id",adminOnly,editProblem);
-router.delete("/admin/:id",adminOnly,deleteProblem);
-router.post("/batch-create", adminOnly, createProblemFromArray);
+router.post("/admin/new",protectedRoute,adminOnly,createProblem);
+router.patch("/admin/:id",protectedRoute,adminOnly,editProblem);
+router.delete("/admin/:id",protectedRoute,adminOnly,deleteProblem);
+router.post("/batch-create",protectedRoute,adminOnly, createProblemFromArray);
 router.get("/:id",getProblem);
 
 export default router;

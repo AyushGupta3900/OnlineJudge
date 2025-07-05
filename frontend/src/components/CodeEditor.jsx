@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { FaPlay, FaUpload } from "react-icons/fa";
+import { FaPlay, FaUndo, FaUpload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import Editor from "@monaco-editor/react";
+import toast from "react-hot-toast";
+
 import {
   useSubmitCodeMutation,
   useLazyGetSubmissionByIdQuery,
 } from "../redux/api/submissionAPI";
 import { useRunCodeMutation } from "../redux/api/compilerAPI";
+
+import useCode from "../hooks/useCode";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
 
@@ -14,8 +18,6 @@ const CodeEditor = ({ problemId: propId }) => {
   const { id: routeId } = useParams();
   const problemId = propId || routeId;
 
-  const [language, setLanguage] = useState("cpp");
-  const [code, setCode] = useState("");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [verdict, setVerdict] = useState(null);
@@ -26,13 +28,22 @@ const CodeEditor = ({ problemId: propId }) => {
   const [runCode, { isLoading: running }] = useRunCodeMutation();
   const [fetchSubmission] = useLazyGetSubmissionByIdQuery();
 
+  const { code, language, updateCode, updateLanguage } = useCode();
+
   useEffect(() => {
-    loadBoilerplate(language, setCode);
-  }, [language]);
+    // Load initial boilerplate if empty
+    if (!code) loadBoilerplate(language, updateCode);
+  }, []);
 
   useEffect(() => {
     if (!submissionId || !isPolling) return;
-    const interval = pollSubmission(submissionId, fetchSubmission, setVerdict, setOutput, setIsPolling);
+    const interval = pollSubmission(
+      submissionId,
+      fetchSubmission,
+      setVerdict,
+      setOutput,
+      setIsPolling
+    );
     return () => clearInterval(interval);
   }, [submissionId, isPolling]);
 
@@ -65,17 +76,34 @@ const CodeEditor = ({ problemId: propId }) => {
     }
   };
 
+  const handleReset = () => {
+    loadBoilerplate(language, updateCode);
+    setOutput("");
+    setVerdict(null);
+    toast.success("Code Reset");
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6 space-y-5">
-      <LanguageSelector language={language} setLanguage={setLanguage} />
+      <LanguageSelector
+        language={language}
+        setLanguage={(lang) => {
+          updateLanguage(lang);
+          loadBoilerplate(lang, updateCode);
+          setOutput("");
+          setVerdict(null);
+          toast.success("Code Reset");
+        }}
+      />
 
-      <MonacoEditor code={code} setCode={setCode} language={language} />
+      <MonacoEditor code={code} setCode={updateCode} language={language} />
 
       <CustomInput input={input} setInput={setInput} />
 
       <ActionButtons
         handleRun={handleRun}
         handleSubmit={handleSubmit}
+        handleReset={handleReset}
         running={running}
         submitting={submitting}
       />
@@ -135,8 +163,15 @@ const CustomInput = ({ input, setInput }) => (
   />
 );
 
-const ActionButtons = ({ handleRun, handleSubmit, running, submitting }) => (
+const ActionButtons = ({ handleRun, handleSubmit, handleReset, running, submitting }) => (
   <div className="flex justify-end gap-4">
+    <ActionButton
+      onClick={handleReset}
+      loading={false}
+      label="Reset"
+      icon={<FaUndo/>}
+      color="gray"
+    />
     <ActionButton
       onClick={handleRun}
       loading={running}
@@ -224,7 +259,13 @@ function loadBoilerplate(language, setCode) {
     .catch(() => setCode(""));
 }
 
-function pollSubmission(submissionId, fetchSubmission, setVerdict, setOutput, setIsPolling) {
+function pollSubmission(
+  submissionId,
+  fetchSubmission,
+  setVerdict,
+  setOutput,
+  setIsPolling
+) {
   const interval = setInterval(async () => {
     try {
       const res = await fetchSubmission(submissionId).unwrap();
