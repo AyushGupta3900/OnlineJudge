@@ -29,7 +29,11 @@ const Branding = () => (
   </motion.div>
 );
 
-const Illustration = () => (
+const Skeleton = ({ className }) => (
+  <div className={`animate-pulse bg-gray-700 rounded-md ${className}`} />
+);
+
+const Illustration = ({ isLoading }) => (
   <motion.div
     initial={{ opacity: 0, x: 40 }}
     animate={{ opacity: 1, x: 0 }}
@@ -37,19 +41,31 @@ const Illustration = () => (
     className="hidden lg:flex w-full lg:w-1/2 bg-gray-900 items-center justify-center p-10 border-l border-gray-700"
   >
     <div className="text-center space-y-6 max-w-md">
-      <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
-        <img
-          src="/i.png"
-          alt="Coding illustration"
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <h3 className="text-xl font-semibold text-white">
-        Level up your coding skills
-      </h3>
-      <p className="text-gray-400 text-sm">
-        Solve real-world DSA problems, track your performance, and prepare for tech interviews with CodeX.
-      </p>
+      {isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="w-60 h-60 mx-auto" />
+          <Skeleton className="h-5 w-40 mx-auto" />
+          <Skeleton className="h-3 w-64 mx-auto" />
+          <Skeleton className="h-3 w-56 mx-auto" />
+        </div>
+      ) : (
+        <>
+          <div className="relative aspect-square max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg">
+            <img
+              src="/i.png"
+              alt="Coding illustration"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h3 className="text-xl font-semibold text-white">
+            Level up your coding skills
+          </h3>
+          <p className="text-gray-400 text-sm">
+            Solve real-world DSA problems, track your performance, and prepare
+            for tech interviews with CodeX.
+          </p>
+        </>
+      )}
     </div>
   </motion.div>
 );
@@ -159,7 +175,7 @@ const Login = () => {
           isLoading={isLoading}
           error={error}
         />
-        <Illustration />
+        <Illustration isLoading={isLoading} />
       </motion.div>
     </motion.div>
   );
