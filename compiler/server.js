@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   res.send("<h1>Home Page</h1>");
 });
 
-app.post("/run", async (req, res) => {
+app.post("/api/run", async (req, res) => {
   const { language = "cpp", code, input = "" } = req.body;
 
   if (!code) {
