@@ -1,27 +1,28 @@
 import { useSelector, useDispatch } from "react-redux";
 import { setCode, setLanguage, resetCode } from "../redux/reducers/codeReducer.js";
 
-const useCode = () => {
+const useCode = (problemId) => {
   const dispatch = useDispatch();
 
-  const code = useSelector((state) => state.code.code);
-  const language = useSelector((state) => state.code.language);
+  const problemState = useSelector(
+    (state) => state.code.problems[problemId] || { code: "", language: "cpp" }
+  );
 
   const updateCode = (newCode) => {
-    dispatch(setCode(newCode));
+    dispatch(setCode({ problemId, code: newCode }));
   };
 
   const updateLanguage = (newLang) => {
-    dispatch(setLanguage(newLang));
+    dispatch(setLanguage({ problemId, language: newLang }));
   };
 
   const reset = () => {
-    dispatch(resetCode());
+    dispatch(resetCode({ problemId }));
   };
 
   return {
-    code,
-    language,
+    code: problemState.code,
+    language: problemState.language,
     updateCode,
     updateLanguage,
     reset,

@@ -1,8 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  code: "",         
-  language: "cpp", 
+  problems: {}, 
 };
 
 const codeSlice = createSlice({
@@ -10,17 +9,29 @@ const codeSlice = createSlice({
   initialState,
   reducers: {
     setCode: (state, action) => {
-      state.code = action.payload;
+      const { problemId, code } = action.payload;
+      if (!state.problems[problemId]) {
+        state.problems[problemId] = { code: "", language: "cpp" };
+      }
+      state.problems[problemId].code = code;
     },
     setLanguage: (state, action) => {
-      state.language = action.payload;
+      const { problemId, language } = action.payload;
+      if (!state.problems[problemId]) {
+        state.problems[problemId] = { code: "", language: "cpp" };
+      }
+      state.problems[problemId].language = language;
     },
-    resetCode: (state) => {
-      state.code = "";
-      state.language = "cpp";
+    resetCode: (state, action) => {
+      const { problemId } = action.payload;
+      state.problems[problemId] = { code: "", language: "cpp" };
+    },
+    resetAll: (state) => {
+      state.problems = {};
     },
   },
 });
 
-export const { setCode, setLanguage, resetCode } = codeSlice.actions;
+export const { setCode, setLanguage, resetCode, resetAll } = codeSlice.actions;
+
 export default codeSlice.reducer;

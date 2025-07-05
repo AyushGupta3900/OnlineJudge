@@ -28,12 +28,11 @@ const CodeEditor = ({ problemId: propId }) => {
   const [runCode, { isLoading: running }] = useRunCodeMutation();
   const [fetchSubmission] = useLazyGetSubmissionByIdQuery();
 
-  const { code, language, updateCode, updateLanguage } = useCode();
+  const { code, language, updateCode, updateLanguage, reset } = useCode(problemId);
 
   useEffect(() => {
-    // Load initial boilerplate if empty
     if (!code) loadBoilerplate(language, updateCode);
-  }, []);
+  }, [problemId]);
 
   useEffect(() => {
     if (!submissionId || !isPolling) return;
@@ -80,6 +79,7 @@ const CodeEditor = ({ problemId: propId }) => {
     loadBoilerplate(language, updateCode);
     setOutput("");
     setVerdict(null);
+    reset();
     toast.success("Code Reset");
   };
 
@@ -188,7 +188,6 @@ const ActionButtons = ({ handleRun, handleSubmit, handleReset, running, submitti
     />
   </div>
 );
-
 
 const ActionButton = ({ onClick, loading, label, icon, color }) => (
   <button

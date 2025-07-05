@@ -193,7 +193,7 @@ const ProfilePage = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center text-blue-400 font-medium">
         <p>Loading profile...</p>
       </div>
     );
