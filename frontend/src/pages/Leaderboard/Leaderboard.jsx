@@ -2,31 +2,36 @@ import React, { useState } from "react";
 import { useGetAllUsersQuery } from "../../redux/api/authAPI.js";
 import { FaMedal } from "react-icons/fa";
 import AdminPagination from "../../components/AdminPagination.jsx";
-import PageHeader from "../../components/PageHeader.jsx"
+import PageHeader from "../../components/PageHeader.jsx";
+
 const medalColors = ["text-yellow-400", "text-gray-300", "text-orange-400"];
 
-const TopThree = ({ users }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-    {users.map((user, index) => (
-      <div
-        key={user._id}
-        className="bg-gray-900 rounded-xl shadow-lg p-4 flex flex-col items-center justify-center gap-2"
-      >
-        <FaMedal className={`text-4xl ${medalColors[index]}`} />
-        <h2 className="text-xl font-bold">
-          {user.fullName || user.username}
-        </h2>
-        <p className="text-sm text-gray-400">{user.email}</p>
-        <p className="text-lg font-semibold text-blue-400">
-          Rating: {user.computedRating ?? "N/A"}
-        </p>
-        <p className="text-sm text-green-400">
-          Solved: {user.solvedProblems?.length || 0}
-        </p>
-      </div>
-    ))}
-  </div>
-);
+const TopThree = ({ users }) => {
+  if (!users.length) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      {users.map((user, index) => (
+        <div
+          key={user._id}
+          className="bg-gray-900 rounded-xl shadow-lg p-4 flex flex-col items-center justify-center gap-2"
+        >
+          <FaMedal className={`text-4xl ${medalColors[index]}`} />
+          <h2 className="text-xl font-bold">
+            {user.fullName || user.username || "Unknown"}
+          </h2>
+          <p className="text-sm text-gray-400">{user.email || "No email"}</p>
+          <p className="text-lg font-semibold text-blue-400">
+            Rating: {user.computedRating ?? "N/A"}
+          </p>
+          <p className="text-sm text-green-400">
+            Solved: {user.solvedProblems?.length || 0}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const LeaderboardTable = ({ users, startRank }) => {
   if (!users.length) {
@@ -59,9 +64,9 @@ const LeaderboardTable = ({ users, startRank }) => {
                 #{startRank + idx}
               </td>
               <td className="px-6 py-4">
-                {user.fullName || user.username}
+                {user.fullName || user.username || "Unknown"}
               </td>
-              <td className="px-6 py-4 text-gray-400">{user.email}</td>
+              <td className="px-6 py-4 text-gray-400">{user.email || "N/A"}</td>
               <td className="px-6 py-4">
                 {user.solvedProblems?.length || 0}
               </td>
@@ -81,16 +86,16 @@ const Leaderboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 15;
 
-  const users = data?.data || [];
+  const users = Array.isArray(data?.data) ? data.data : [];
 
   const sortedUsers = [...users].sort(
-    (a, b) => (b.computedRating || 0) - (a.computedRating || 0)
+    (a, b) => Number(b.computedRating || 0) - Number(a.computedRating || 0)
   );
 
   const topThree = sortedUsers.slice(0, 3);
   const others = sortedUsers.slice(3);
 
-  const totalPages = Math.ceil(others.length / usersPerPage);
+  const totalPages = Math.max(1, Math.ceil(others.length / usersPerPage));
   const indexOfFirst = (currentPage - 1) * usersPerPage;
   const currentUsers = others.slice(indexOfFirst, indexOfFirst + usersPerPage);
 
@@ -99,7 +104,7 @@ const Leaderboard = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-6xl mx-auto">
-      <PageHeader heading={heading} />
+        <PageHeader heading={heading} />
 
         {isLoading ? (
           <div className="space-y-4 animate-pulse">
@@ -111,6 +116,10 @@ const Leaderboard = () => {
           <p className="text-red-500 text-center">
             Failed to load leaderboard.
           </p>
+        ) : users.length === 0 ? (
+          <p className="text-center text-gray-400">
+            No users found.
+          </p>
         ) : (
           <>
             <TopThree users={topThree} />
@@ -118,11 +127,13 @@ const Leaderboard = () => {
               users={currentUsers}
               startRank={indexOfFirst + 4}
             />
-            <AdminPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            {totalPages > 1 && (
+              <AdminPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </>
         )}
       </div>

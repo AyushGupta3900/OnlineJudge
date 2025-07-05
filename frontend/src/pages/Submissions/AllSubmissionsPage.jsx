@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaClock, FaChevronDown, FaChevronUp, FaClipboardList } from "react-icons/fa";
+import { FaClock, FaChevronDown, FaChevronUp } from "react-icons/fa";
+
 import useAuthUser from "../../hooks/useAuthUser";
 import { useGetProblemByIdQuery } from "../../redux/api/problemAPI";
-import AdminPagination from "../../components/AdminPagination"
+
+import AdminPagination from "../../components/AdminPagination";
 import PageHeader from "../../components/PageHeader";
 
 const verdictColors = {
@@ -19,8 +21,8 @@ const verdictColors = {
 const ProblemName = ({ problemId }) => {
   const { data, isLoading, isError } = useGetProblemByIdQuery(problemId);
   if (isLoading) return <span className="text-gray-400">Loading...</span>;
-  if (isError || !data) return <span className="text-red-400">Error</span>;
-  return <span>{data?.data?.title || problemId}</span>;
+  if (isError || !data?.data?.title) return <span className="text-red-400">Unknown Problem</span>;
+  return <span>{data.data.title}</span>;
 };
 
 const SkeletonLoader = () => (
@@ -63,58 +65,63 @@ const SubmissionsTable = ({
         </tr>
       </thead>
       <tbody>
-        {submissions.map((s, idx) => (
-          <React.Fragment key={indexOfFirst + idx}>
-            <tr className="border-t border-gray-800 hover:bg-gray-800 transition">
-              <td className="px-6 py-4 text-sm">{indexOfFirst + idx + 1}</td>
-              <td className="px-6 py-4 text-sm">
-                <Link
-                  to={`/problems/${s.problemId}`}
-                  className="text-blue-400 hover:underline"
+        {submissions.map((s, idx) => {
+          const dateStr = s.submittedAt
+            ? new Date(s.submittedAt).toLocaleString()
+            : "N/A";
+          return (
+            <React.Fragment key={indexOfFirst + idx}>
+              <tr className="border-t border-gray-800 hover:bg-gray-800 transition">
+                <td className="px-6 py-4 text-sm">{indexOfFirst + idx + 1}</td>
+                <td className="px-6 py-4 text-sm">
+                  <Link
+                    to={`/problems/${s.problemId}`}
+                    className="text-blue-400 hover:underline"
+                  >
+                    <ProblemName problemId={s.problemId} />
+                  </Link>
+                </td>
+                <td className="px-6 py-4 text-sm capitalize">{s.language}</td>
+                <td
+                  className={`px-6 py-4 text-sm font-semibold ${
+                    verdictColors[s.status] || "text-gray-300"
+                  }`}
                 >
-                  <ProblemName problemId={s.problemId} />
-                </Link>
-              </td>
-              <td className="px-6 py-4 text-sm capitalize">{s.language}</td>
-              <td
-                className={`px-6 py-4 text-sm font-semibold ${
-                  verdictColors[s.status] || "text-gray-300"
-                }`}
-              >
-                {s.status}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-400 flex gap-1 items-center">
-                <FaClock />
-                {new Date(s.submittedAt).toLocaleString()}
-              </td>
-              <td className="px-6 py-4 text-sm">
-                <button
-                  onClick={() => toggleRow(indexOfFirst + idx)}
-                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-                >
-                  {expandedRows[indexOfFirst + idx] ? (
-                    <>
-                      <FaChevronUp /> Hide
-                    </>
-                  ) : (
-                    <>
-                      <FaChevronDown /> Show
-                    </>
-                  )}
-                </button>
-              </td>
-            </tr>
-            {expandedRows[indexOfFirst + idx] && (
-              <tr>
-                <td colSpan={6} className="p-3 bg-gray-900">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-200 bg-gray-800 rounded p-2 overflow-x-auto">
-                    {s.code}
-                  </pre>
+                  {s.status}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-400 flex gap-1 items-center">
+                  <FaClock />
+                  {dateStr}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <button
+                    onClick={() => toggleRow(indexOfFirst + idx)}
+                    className="text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                  >
+                    {expandedRows[indexOfFirst + idx] ? (
+                      <>
+                        <FaChevronUp /> Hide
+                      </>
+                    ) : (
+                      <>
+                        <FaChevronDown /> Show
+                      </>
+                    )}
+                  </button>
                 </td>
               </tr>
-            )}
-          </React.Fragment>
-        ))}
+              {expandedRows[indexOfFirst + idx] && (
+                <tr>
+                  <td colSpan={6} className="p-3 bg-gray-900">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-200 bg-gray-800 rounded p-2 overflow-x-auto">
+                      {s.code || "// No code available"}
+                    </pre>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          );
+        })}
       </tbody>
     </table>
   </div>
@@ -130,8 +137,11 @@ const AllSubmissionsPage = () => {
   if (isLoading) return <SkeletonLoader />;
   if (isError || !user) return <ErrorMessage />;
 
-  const submissions = user.submissions?.slice().reverse() || [];
-  const totalPages = Math.ceil(submissions.length / submissionsPerPage);
+  const submissions = Array.isArray(user.submissions)
+    ? user.submissions.slice().reverse()
+    : [];
+
+  const totalPages = Math.max(1, Math.ceil(submissions.length / submissionsPerPage));
 
   const indexOfLast = currentPage * submissionsPerPage;
   const indexOfFirst = indexOfLast - submissionsPerPage;
@@ -150,8 +160,7 @@ const AllSubmissionsPage = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-7xl mx-auto">
-        
-      <PageHeader heading={heading}/>
+        <PageHeader heading={heading} />
 
         {submissions.length === 0 ? (
           <p className="text-center text-gray-400">No submissions yet.</p>

@@ -1,21 +1,23 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+
 import useAuthUser from "../../hooks/useAuthUser.js";
 import {
   useDeleteUserAccountMutation,
   useUpdateUserAccountMutation,
 } from "../../redux/api/authAPI.js";
 import { logout } from "../../redux/reducers/authReducer.js";
+
 import {
   FaLock, FaUser, FaStar, FaCheckCircle, FaTimesCircle, FaRocket,
   FaMedal, FaCrown, FaLightbulb, FaCode, FaTrophy, FaStar as FaLegend
 } from "react-icons/fa";
 import { PiCodeBlockBold } from "react-icons/pi";
+
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
@@ -25,9 +27,10 @@ const MySwal = withReactContent(Swal);
 const COLORS = { Easy: "#00C49F", Medium: "#FFBB28", Hard: "#FF4444" };
 
 const getDifficultyStats = (solvedProblems = [], solvedCountByDifficulty = {}) => {
+  if (!solvedCountByDifficulty) solvedCountByDifficulty = {};
   return ["Easy", "Medium", "Hard"].map(difficulty => ({
     name: difficulty,
-    value: solvedCountByDifficulty[difficulty] || 0,
+    value: Number(solvedCountByDifficulty[difficulty] || 0),
     fill: COLORS[difficulty]
   }));
 };
@@ -61,9 +64,9 @@ const HeroSection = ({ user }) => (
       />
     </Link>
     <div className="mt-16 text-center p-4">
-      <h1 className="text-2xl font-bold">{user.fullName || user.username}</h1>
-      <p className="text-gray-400">{user.email}</p>
-      {user.bio && (
+      <h1 className="text-2xl font-bold">{user?.fullName || user?.username || "User"}</h1>
+      <p className="text-gray-400">{user?.email || "No email"}</p>
+      {user?.bio && (
         <p className="text-sm italic mt-1 text-gray-500">{user.bio}</p>
       )}
     </div>
@@ -73,11 +76,11 @@ const HeroSection = ({ user }) => (
 const StatsGrid = ({ user }) => {
   const wrongSubmissions = user?.submissions?.filter(s => s.status !== "Accepted").length || 0;
   const stats = [
-    { label: "Username", value: user.username, icon: <FaUser /> },
-    { label: "Rating", value: user.computedRating ?? user.rating, icon: <FaStar /> },
-    { label: "Role", value: user.role, icon: <FaLock /> },
-    { label: "Solved", value: user.solvedProblems?.length || 0, icon: <FaCheckCircle /> },
-    { label: "Submissions", value: user.submissions?.length || 0, icon: <PiCodeBlockBold /> },
+    { label: "Username", value: user?.username, icon: <FaUser /> },
+    { label: "Rating", value: user?.computedRating ?? user?.rating, icon: <FaStar /> },
+    { label: "Role", value: user?.role, icon: <FaLock /> },
+    { label: "Solved", value: user?.solvedProblems?.length || 0, icon: <FaCheckCircle /> },
+    { label: "Submissions", value: user?.submissions?.length || 0, icon: <PiCodeBlockBold /> },
     { label: "Wrong Submissions", value: wrongSubmissions, icon: <FaTimesCircle className="text-red-500" /> }
   ];
 
@@ -174,12 +177,11 @@ const AccountActions = ({ handleUpdate, handleDelete, createdAt, navigate }) => 
     <p className="text-center text-xs text-gray-500 mt-4">
       🎉 Account created:{" "}
       <span className="text-gray-300">
-        {new Date(createdAt).toDateString()}
+        {createdAt ? new Date(createdAt).toDateString() : "N/A"}
       </span>
     </p>
   </>
 );
-
 
 const ProfilePage = () => {
   const { authUser: user } = useAuthUser();
@@ -188,6 +190,14 @@ const ProfilePage = () => {
 
   const [deleteUserAccount] = useDeleteUserAccountMutation();
   const [updateUserAccount] = useUpdateUserAccountMutation();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
 
   const pieData = getDifficultyStats(user?.solvedProblems, user?.solvedCountByDifficulty);
 
