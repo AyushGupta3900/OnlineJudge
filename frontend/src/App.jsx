@@ -1,14 +1,13 @@
-import { lazy, Suspense} from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
-// Components
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
 import ScrollToTop from "./components/ScrollToTop";
-import ComingSoon from "./components/ComingSoon"
+import ComingSoon from "./components/ComingSoon";
 
 import useAuthUser from "./hooks/useAuthUser";
 
@@ -57,17 +56,17 @@ export default function App() {
   const requireOnboarding = (component) =>
     isAuthenticated && !isOnboarded ? component : <Navigate to="/" />;
 
-  if(isLoading){
-    return <PageLoader/>
+  if (isLoading) {
+    return <PageLoader />;
   }
 
   return (
     <Router>
-      <Nav />
-        <Toaster position="top-center" reverseOrder={false} />
-          <ScrollToTop />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
+      <Toaster position="top-center" reverseOrder={false} />
+      <ScrollToTop />
+      <Suspense fallback={<PageLoader />}>
+        <Nav />
+        <Routes>
           {/* Public Routes */}
           <Route path="/login" element={requirePublic(<Login />)} />
           <Route path="/signup" element={requirePublic(<Signup />)} />
@@ -88,7 +87,6 @@ export default function App() {
           <Route path="/leaderboard" element={requireAuth(<Leaderboard />)} />
           <Route path="/about" element={requireAuth(<About />)} />
 
-
           {/* Admin Routes */}
           <Route path="/admin" element={requireAuth(<AdminDashboard />)} />
           <Route path="/admin/add-problem" element={requireAuth(<CreateProblem />)} />
@@ -98,9 +96,9 @@ export default function App() {
 
           {/* Catch-All */}
           <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+        </Routes>
         <Footer />
+      </Suspense>
     </Router>
   );
 }
