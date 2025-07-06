@@ -6,17 +6,27 @@ import express from "express";
 
 // importing routes 
 import authRoutes from "./src/routes/auth.routes.js"
+import userRoutes from "./src/routes/user.routes.js"
 import problemRoutes from "./src/routes/problem.routes.js"
 import submissionRoutes from "./src/routes/submission.routes.js"
 import contactRoutes from "./src/routes/contact.routes.js";
 
-import {connectDB} from "./src/utils/db.js"
+import {connectDB} from "./src/utils/config/db.js"
+import {connectRabbitMQ} from "./src/utils/config/rabbitmq.js"
+import {redisClient} from "./src/utils/config/redisClient.js"
+import { globalErrorHandler } from "./src/middlewares/error.middleware.js";
 
 // configuring .env
 dotenv.config();
 
 // connecting to DB 
 connectDB();
+
+// Connect to Redis
+redisClient.on("ready", () => console.log("Redis is connected"));
+
+// Connect to RabbitMQ
+connectRabbitMQ();
 
 const app = express();
 const PORT = process.env.PORT || 5000; 
@@ -45,10 +55,12 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/api/v1/auth",authRoutes);
+app.use("/api/v1/user",userRoutes);
 app.use("/api/v1/problem",problemRoutes);
 app.use("/api/v1/submission",submissionRoutes);
 app.use("/api/v1/contact", contactRoutes);
 
+app.use(globalErrorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);

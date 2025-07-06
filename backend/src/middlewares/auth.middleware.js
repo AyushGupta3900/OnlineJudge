@@ -1,26 +1,27 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { AppError } from "../utils/AppError.js";
+import { TryCatch } from "../utils/TryCatch.js";
 
-export const protectedRoute = async (req, res, next) => {
-  try {
-    const token = req.cookies.jwt;
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized - No token provided" });
-    }
-    // verifying the token 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    if (!decoded) {
-      return res.status(401).json({ message: "Unauthorized - Invalid token" });
-    }
-    // veryfying the user 
-    const user = await User.findById(decoded.userId).select("-password");
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized - User not found" });
-    }
-    req.user = user;
-    next();
-  } catch (error) {
-    console.log("Error in protectRoute middleware", error);
-    res.status(500).json({ message: "Internal Server Error" });
+export const protectedRoute = TryCatch(async (req, res, next) => {
+  const token = req.cookies.jwt;
+
+  if (!token) {
+    throw new AppError("Unauthorized - No token provided", 401);
   }
-};
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  } catch (err) {
+    throw new AppError("Unauthorized - Invalid token", 401);
+  }
+
+  const user = await User.findById(decoded.userId).select("-password");
+  if (!user) {
+    throw new AppError("Unauthorized - User not found", 401);
+  }
+
+  req.user = user;
+  next();
+});

@@ -1,84 +1,115 @@
 import Submission from "../models/Submission.js";
 import axios from "axios";
+import { TryCatch } from "../middlewares/TryCatch.js";
+import { AppError } from "../utils/AppError.js";
+import { publishToQueue } from "../utils/rabbitmq.js";
 
-export async function submitProblem(req, res) {
-  try {
-    const { problemId, code, language } = req.body;
-    const userId = req.user._id;
-    if (!problemId || !code || !language) {
-      return res.status(400).json({ message: "All fields are required." });
-    }
-    // 1. Save with "Pending"
-    const submission = new Submission({
-      user: userId,
-      problem: problemId,
-      code,
-      language,
-      verdict: "Pending",
-    });
+export const submitProblem = TryCatch(async (req, res) => {
+  const { problemId, code, language } = req.body;
+  const userId = req.user._id;
 
-    await submission.save();
-    // 2. Send submissionId to compiler
-    const compilerBaseURL = process.env.COMPILER_BASE_URL;
-    await axios.post(`${compilerBaseURL}/api/compile/submit`, {
-      submissionId: submission._id,
-    });
-
-    // 3. Respond to frontend
-    res.status(201).json({
-      message: "Submission received and sent to judge system.",
-      submission,
-    });
-  } catch (error) {
-    console.error("Error in submitProblem:", error.message);
-    res.status(500).json({ message: "Internal server error." });
+  if (!problemId || !code || !language) {
+    throw new AppError("All fields are required", 400);
   }
-} 
 
-export async function  getSubmissionsByUserOnProblem(req, res){
-  try {
-    const userId = req.user._id;
-    const problemId = req.params.id;
+  // Save submission with 'Pending'
+  const submission = await Submission.create({
+    user: userId,
+    problem: problemId,
+    code,
+    language,
+    verdict: "Pending",
+  });
 
-    const submissions = await Submission.find({
-      user: userId,
-      problem: problemId,
-    }).sort({ submittedAt: -1 });
+  // Publish to RabbitMQ queue for judging
+  await publishToQueue("submissionQueue", {
+    submissionId: submission._id.toString(),
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Submission received and sent to judge system",
+    data: submission,
+  });
+});
+
+export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+  const { page = 1, limit = 10 } = req.query;
+
+  const redisKey = `userSubmissions:${userId}:${page}:${limit}`;
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    return res.status(200).json({
+      success: true,
+      message: "User submissions fetched from cache",
+      ...JSON.parse(cached),
+    });
+  }
+
+  const { results, total, totalPages } = await paginateQuery(Submission, { user: userId }, {
+    page,
+    limit,
+    sort: "-submittedAt",
+    populate: { path: "problem", select: "title" },
+  });
+
+  const response = {
+    data: results,
+    total,
+    totalPages,
+    page: Number(page),
+  };
+
+  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
+
+  res.status(200).json({
+    success: true,
+    message: "User submissions fetched successfully",
+    ...response,
+  });
+});
+
+export const getSingleSubmission = TryCatch(async (req, res) => {
+  const submissionId = req.params.id;
+  const userId = req.user._id;
+
+  const redisKey = `submission:${submissionId}`;
+
+  // Check cache
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    const submission = JSON.parse(cached);
+    if (submission.user._id !== userId.toString()) {
+      throw new AppError("Unauthorized", 403);
+    }
 
     return res.status(200).json({
       success: true,
-      submissions,
-    });
-  } catch (err) {
-    console.error("Error in getSubmissionsByUserOnProblem:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export async function getSingleSubmission(req, res) {
-  try {
-    const submissionId = req.params.id;
-    const userId = req.user._id;
-
-    const submission = await Submission.findById(submissionId)
-      .populate("problem", "title")
-      .populate("user", "username");
-
-    if (!submission) {
-      return res.status(404).json({ success: false, message: "Submission not found" });
-    }
-
-    if (submission.user._id.toString() !== userId.toString()) {
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
-
-    return res.status(200).json({
-      success: true,
       submission,
+      source: "cache",
     });
-
-  } catch (err) {
-    console.error("Error in getSingleSubmission:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
   }
-};
+
+  // Fetch from DB
+  const submission = await Submission.findById(submissionId)
+    .populate("problem", "title")
+    .populate("user", "username");
+
+  if (!submission) {
+    throw new AppError("Submission not found", 404);
+  }
+
+  if (submission.user._id.toString() !== userId.toString()) {
+    throw new AppError("Unauthorized", 403);
+  }
+
+  // Save to Redis for next requests
+  await redisClient.setEx(redisKey, 300, JSON.stringify(submission));
+
+  return res.status(200).json({
+    success: true,
+    submission,
+    source: "db",
+  });
+});

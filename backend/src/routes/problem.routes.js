@@ -1,5 +1,5 @@
 import express from "express";
-import {getAllProblems,getProblem,createProblem,editProblem, deleteProblem} from "../controllers/problem.controller.js";
+import {getAllProblems,getProblem,createProblem,editProblem, deleteProblem, getProblemStatus} from "../controllers/problem.controller.js";
 import { protectedRoute } from "../middlewares/auth.middleware.js";
 import {adminOnly} from "../middlewares/adminOnly.middleware.js"
 import { createProblemFromArray } from "../controllers/problem.controller.js";
@@ -12,5 +12,6 @@ router.patch("/admin/:id",protectedRoute,adminOnly,editProblem);
 router.delete("/admin/:id",protectedRoute,adminOnly,deleteProblem);
 router.post("/batch-create",protectedRoute,adminOnly, createProblemFromArray);
 router.get("/:id",getProblem);
+router.get("/status/:id", protectedRoute, getProblemStatus);
 
 export default router;
