@@ -30,10 +30,12 @@ const CodeEditor = ({ problemId: propId }) => {
 
   const { code, language, updateCode, updateLanguage, reset } = useCode(problemId);
 
+  // Load boilerplate code initially
   useEffect(() => {
     if (!code) loadBoilerplate(language, updateCode);
   }, [problemId]);
 
+  // Polling for submission verdict
   useEffect(() => {
     if (!submissionId || !isPolling) return;
     const interval = pollSubmission(
@@ -114,6 +116,8 @@ const CodeEditor = ({ problemId: propId }) => {
 };
 
 export default CodeEditor;
+
+// ---------------- Subcomponents ----------------
 
 const LanguageSelector = ({ language, setLanguage }) => (
   <div className="flex items-center gap-3">
@@ -250,7 +254,7 @@ const OutputBox = ({ output, verdict }) => {
   );
 };
 
-// 🔷 Utilities
+// ---------------- Utilities ----------------
 
 function loadBoilerplate(language, setCode) {
   fetch("/data.json")

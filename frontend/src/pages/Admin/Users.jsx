@@ -1,26 +1,30 @@
 import React, { useState } from "react";
 import {
   useGetAllUsersQuery,
-  useMakeUserAdminMutation,
-} from "../../redux/api/authAPI.js";
+  useMakeAdminMutation,
+} from "../../redux/api/userAPI.js";
 import AdminPagination from "../../components/AdminPagination.jsx";
 import PageHeader from "../../components/PageHeader.jsx";
 
 const Users = () => {
-  const { data, isLoading, isError, refetch } = useGetAllUsersQuery();
-  const [makeUserAdmin, { isLoading: isPromoting }] =
-    useMakeUserAdminMutation();
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const usersPerPage = 10;
 
-  const users = data?.data || [];
-  const totalPages = Math.ceil(users.length / usersPerPage);
+  const { data, isLoading, isFetching, isError, refetch } =
+    useGetAllUsersQuery({
+      page: currentPage,
+      limit: usersPerPage,
+      sortBy: "rating",
+      order: "desc",
+      search: searchTerm,
+    });
 
-  const currentUsers = users.slice(
-    (currentPage - 1) * usersPerPage,
-    currentPage * usersPerPage
-  );
+  const [makeUserAdmin, { isLoading: isPromoting }] = useMakeAdminMutation();
+
+  const users = data?.data || [];
+  const totalPages = data?.totalPages || 1;
 
   const handleMakeAdmin = async (id) => {
     try {
@@ -35,6 +39,11 @@ const Users = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   const heading = "All Users";
 
   return (
@@ -42,14 +51,24 @@ const Users = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         <PageHeader heading={heading} />
 
-        {isLoading ? (
-          <SkeletonLoader />
-        ) : isError ? (
+        <div className="flex justify-end">
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="bg-gray-800 text-white px-4 py-2 rounded-md w-full max-w-xs placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-500"
+          />
+        </div>
+
+        {isError ? (
           <p className="text-red-500">Failed to fetch users.</p>
+        ) : isLoading || isFetching ? (
+          <TableSkeleton rows={usersPerPage} />
         ) : (
           <>
             <UsersTable
-              users={currentUsers}
+              users={users}
               isPromoting={isPromoting}
               onMakeAdmin={handleMakeAdmin}
             />
@@ -68,7 +87,7 @@ const Users = () => {
   );
 };
 
-// 📌 Table Component
+// 📌 Table
 const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
   <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-md overflow-x-auto">
     {users.length === 0 ? (
@@ -91,9 +110,7 @@ const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
               key={user._id}
               className="border-t border-gray-800 hover:bg-gray-800 transition"
             >
-              <td className="px-6 py-4">
-                {user.fullName || user.username}
-              </td>
+              <td className="px-6 py-4">{user.fullName || user.username}</td>
               <td className="px-6 py-4 text-gray-400">{user.email}</td>
               <td className="px-6 py-4">
                 <span
@@ -127,12 +144,45 @@ const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
   </div>
 );
 
-// 📌 Skeleton Loader
-const SkeletonLoader = () => (
-  <div className="space-y-4 animate-pulse">
-    {[...Array(5)].map((_, i) => (
-      <div key={i} className="bg-gray-800 rounded-md h-12 w-full"></div>
-    ))}
+// 📌 Skeleton Table
+const TableSkeleton = ({ rows = 10 }) => (
+  <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-md overflow-x-auto animate-pulse">
+    <table className="w-full table-auto text-left">
+      <thead className="bg-gray-800 text-gray-300 text-sm uppercase tracking-wide">
+        <tr>
+          <th className="px-6 py-4">Name</th>
+          <th className="px-6 py-4">Email</th>
+          <th className="px-6 py-4">Role</th>
+          <th className="px-6 py-4">Solved</th>
+          <th className="px-6 py-4">Rating</th>
+          <th className="px-6 py-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {Array.from({ length: rows }).map((_, idx) => (
+          <tr key={idx} className="border-t border-gray-800">
+            <td className="px-6 py-6">
+              <div className="h-4 w-24 bg-gray-700 rounded"></div>
+            </td>
+            <td className="px-6 py-6">
+              <div className="h-4 w-32 bg-gray-700 rounded"></div>
+            </td>
+            <td className="px-6 py-6">
+              <div className="h-4 w-16 bg-gray-700 rounded"></div>
+            </td>
+            <td className="px-6 py-6">
+              <div className="h-4 w-12 bg-gray-700 rounded"></div>
+            </td>
+            <td className="px-6 py-6">
+              <div className="h-4 w-12 bg-gray-700 rounded"></div>
+            </td>
+            <td className="px-6 py-6">
+              <div className="h-6 w-24 bg-gray-700 rounded"></div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
 );
 

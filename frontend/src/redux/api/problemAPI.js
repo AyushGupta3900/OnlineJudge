@@ -13,7 +13,29 @@ export const problemAPI = createApi({
 
   endpoints: (builder) => ({
     getAllProblems: builder.query({
-      query: () => '/all',
+      query: ({
+        page = 1,
+        limit = 12,
+        search = '',
+        sortBy = 'createdAt',
+        order = 'desc',
+        difficulty,
+        status,
+        tag,
+      } = {}) => {
+        const params = new URLSearchParams();
+
+        params.set('page', page);
+        params.set('limit', limit);
+        params.set('search', search);
+        params.set('sortBy', sortBy);
+        params.set('order', order);
+        if (difficulty) params.set('difficulty', difficulty);
+        if (status) params.set('status', status);
+        if (tag) params.set('tag', tag);
+
+        return `/all?${params.toString()}`;
+      },
       providesTags: ['Problem'],
     }),
     getProblemById: builder.query({
@@ -57,6 +79,10 @@ export const problemAPI = createApi({
       }),
       invalidatesTags: ['Problem'],
     }),
+    getProblemStatus: builder.query({
+      query: (problemId) => `/status/${problemId}`,
+      providesTags: (result, error, problemId) => [{ type: 'Problem', id: problemId }],
+    }),
   }),
 });
 
@@ -67,4 +93,5 @@ export const {
   useUpdateProblemMutation,
   useDeleteProblemMutation,
   useCreateProblemBatchMutation,
+  useGetProblemStatusQuery,
 } = problemAPI;

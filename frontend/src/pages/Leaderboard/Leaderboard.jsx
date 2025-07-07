@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useGetAllUsersQuery } from "../../redux/api/authAPI.js";
+import { useGetLeaderboardQuery } from "../../redux/api/userAPI.js";
 import { FaMedal } from "react-icons/fa";
 import AdminPagination from "../../components/AdminPagination.jsx";
 import PageHeader from "../../components/PageHeader.jsx";
@@ -36,9 +36,7 @@ const TopThree = ({ users }) => {
 const LeaderboardTable = ({ users, startRank }) => {
   if (!users.length) {
     return (
-      <p className="text-center py-8 text-gray-400">
-        No more users found.
-      </p>
+      <p className="text-center py-8 text-gray-400">No more users found.</p>
     );
   }
 
@@ -67,9 +65,7 @@ const LeaderboardTable = ({ users, startRank }) => {
                 {user.fullName || user.username || "Unknown"}
               </td>
               <td className="px-6 py-4 text-gray-400">{user.email || "N/A"}</td>
-              <td className="px-6 py-4">
-                {user.solvedProblems?.length || 0}
-              </td>
+              <td className="px-6 py-4">{user.solvedProblems?.length || 0}</td>
               <td className="px-6 py-4 font-bold text-blue-400">
                 {user.computedRating ?? "N/A"}
               </td>
@@ -82,24 +78,19 @@ const LeaderboardTable = ({ users, startRank }) => {
 };
 
 const Leaderboard = () => {
-  const { data, isLoading, isError } = useGetAllUsersQuery();
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 15;
+  const usersPerPage = 8;
 
-  const users = Array.isArray(data?.data) ? data.data : [];
-
-  const sortedUsers = [...users].sort(
-    (a, b) => Number(b.computedRating || 0) - Number(a.computedRating || 0)
-  );
-
-  const topThree = sortedUsers.slice(0, 3);
-  const others = sortedUsers.slice(3);
-
-  const totalPages = Math.max(1, Math.ceil(others.length / usersPerPage));
-  const indexOfFirst = (currentPage - 1) * usersPerPage;
-  const currentUsers = others.slice(indexOfFirst, indexOfFirst + usersPerPage);
+  const { data, isLoading, isFetching, isError } = useGetLeaderboardQuery({
+    page: currentPage,
+    limit: usersPerPage,
+  });
 
   const heading = "Leaderboard";
+
+  const topThree = data?.topThree || [];
+  const users = data?.users || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
@@ -107,32 +98,31 @@ const Leaderboard = () => {
         <PageHeader heading={heading} />
 
         {isLoading ? (
-          <div className="space-y-4 animate-pulse">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-gray-800 rounded-md h-12 w-full"></div>
-            ))}
-          </div>
+          <PageLoadingSkeleton />
         ) : isError ? (
-          <p className="text-red-500 text-center">
-            Failed to load leaderboard.
-          </p>
-        ) : users.length === 0 ? (
-          <p className="text-center text-gray-400">
-            No users found.
-          </p>
+          <p className="text-red-500 text-center">Failed to load leaderboard.</p>
+        ) : !users.length && !topThree.length ? (
+          <p className="text-center text-gray-400">No users found.</p>
         ) : (
           <>
             <TopThree users={topThree} />
-            <LeaderboardTable
-              users={currentUsers}
-              startRank={indexOfFirst + 4}
-            />
-            {totalPages > 1 && (
-              <AdminPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+
+            {isFetching ? (
+              <LeaderboardTableSkeleton />
+            ) : (
+              <>
+                <LeaderboardTable
+                  users={users}
+                  startRank={(currentPage - 1) * usersPerPage + 4}
+                />
+                {totalPages > 1 && (
+                  <AdminPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -142,3 +132,29 @@ const Leaderboard = () => {
 };
 
 export default Leaderboard;
+
+const PageLoadingSkeleton = () => (
+  <>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 animate-pulse">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="bg-gray-800 rounded-xl h-32 w-full"
+        ></div>
+      ))}
+    </div>
+
+    <LeaderboardTableSkeleton />
+  </>
+);
+
+const LeaderboardTableSkeleton = () => (
+  <div className="space-y-2 animate-pulse">
+    {[...Array(8)].map((_, i) => (
+      <div
+        key={i}
+        className="bg-gray-800 rounded-md h-10 w-full"
+      ></div>
+    ))}
+  </div>
+);

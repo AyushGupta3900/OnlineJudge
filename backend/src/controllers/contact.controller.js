@@ -3,7 +3,9 @@ import { TryCatch } from "../utils/TryCatch.js";
 import redisClient from "../utils/config/redisClient.js";
 import { AppError } from "../utils/AppError.js";
 import { paginateQuery } from "../utils/paginateQuery.js";
+import { deleteKeysByPattern } from "../utils/deleteKeysByPattern.js";
 
+// on sending message invalidate getAllContactMessages
 export const sendContactMessage = TryCatch(async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -12,6 +14,8 @@ export const sendContactMessage = TryCatch(async (req, res) => {
   }
 
   const newMessage = await ContactMessage.create({ name, email, message });
+
+    await deleteKeysByPattern("contactMessages:*");
 
   res.status(201).json({
     success: true,
@@ -55,7 +59,7 @@ export const getAllContactMessages = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
 
   res.status(200).json({

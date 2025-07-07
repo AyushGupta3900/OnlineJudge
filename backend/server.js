@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import morgan from "morgan";
 
 // importing routes 
 import authRoutes from "./src/routes/auth.routes.js"
@@ -45,6 +46,7 @@ app.use(cors(
     }
 ));
 app.use(cookieParser());
+app.use(morgan('dev')); 
 
 app.get("/",(req,res)=>{
     res.send("This server is working");

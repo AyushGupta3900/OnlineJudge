@@ -8,7 +8,8 @@ export const submissionAPI = createApi({
     baseUrl,
     credentials: "include",
   }),
-  tagTypes: ["User"],
+  tagTypes: ["Submission", "User"],
+
   endpoints: (builder) => ({
     submitCode: builder.mutation({
       query: ({ problemId, code, language }) => ({
@@ -16,13 +17,20 @@ export const submissionAPI = createApi({
         method: "POST",
         body: { problemId, code, language },
       }),
-      invalidatesTags: ["User"], 
+      invalidatesTags: ["Submission", "User"], 
     }),
     getSubmissionById: builder.query({
       query: (submissionId) => `/${submissionId}`,
+      providesTags: (result, error, id) => [{ type: "Submission", id }],
     }),
     getSubmissionsByProblem: builder.query({
-      query: (problemId) => `/user/${problemId}`,
+      query: ({ problemId, page = 1, limit = 10 }) => {
+        const params = new URLSearchParams();
+        params.set("page", page);
+        params.set("limit", limit);
+        return `/user/${problemId}?${params.toString()}`;
+      },
+      providesTags: ["Submission"],
     }),
   }),
 });

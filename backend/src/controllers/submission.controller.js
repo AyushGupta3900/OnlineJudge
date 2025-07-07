@@ -1,10 +1,15 @@
 import Submission from "../models/Submission.js";
 import Problem from "../models/Problem.js";
 import { TryCatch } from "../utils/TryCatch.js";
-import redisClient  from "../utils/config/redisClient.js";
+import redisClient from "../utils/config/redisClient.js";
 import { AppError } from "../utils/AppError.js";
 import { publishToQueue } from "../utils/rabbitmq.js";
+import { paginateQuery } from "../utils/paginateQuery.js"
+import { deleteKeysByPattern } from "../utils/deleteKeysByPattern.js";
+import mongoose  from "mongoose";
 
+// on submitting problem invalidate leaderboard, profileStats, users, userSubmissions,
+// This invalidation is not working  
 export const submitProblem = TryCatch(async (req, res) => {
   const { problemId, code, language } = req.body;
 
@@ -25,10 +30,19 @@ export const submitProblem = TryCatch(async (req, res) => {
     verdict: "Pending",
     submittedAt: new Date(),
   });
-
+  
   await publishToQueue("submissionQueue", {
     submissionId: submission._id.toString()
   });
+
+  const userId = req.user?._id;
+  await deleteKeysByPattern("leaderboard:*");
+  await deleteKeysByPattern(`profileStats:${userId}`);
+  await deleteKeysByPattern("users:*");
+  await deleteKeysByPattern(`userSubmissions:${userId}:*`);
+  await deleteKeysByPattern(`problemStatus:${userId}:${problemId}`);
+  await deleteKeysByPattern(`user:${userId}:*`);
+
 
   res.status(201).json({
     success: true,
@@ -42,9 +56,17 @@ export const submitProblem = TryCatch(async (req, res) => {
 
 export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
   const userId = req.user._id;
-  const { page = 1, limit = 10 } = req.query;
+  const problemId = req.params.id;
 
-  const redisKey = `userSubmissions:${userId}:${page}:${limit}`;
+  if (!mongoose.Types.ObjectId.isValid(problemId)) {
+    throw new AppError("Invalid problem ID", 400);
+  }
+
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit) || 10);
+
+  const redisKey = `userSubmissions:${userId}:${problemId}:${page}:${limit}`;
+
   const cached = await redisClient.get(redisKey);
   if (cached) {
     return res.status(200).json({
@@ -54,10 +76,13 @@ export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
     });
   }
 
-  const { results, total, totalPages } = await paginateQuery(Submission, { user: userId }, {
+  const { results, total, totalPages } = await paginateQuery({
+    model: Submission,
+    query: { user: userId, problem: problemId },
     page,
     limit,
-    sort: "-submittedAt",
+    sortBy: "submittedAt",
+    order: "desc",
     populate: { path: "problem", select: "title" },
   });
 
@@ -65,10 +90,10 @@ export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
     data: results,
     total,
     totalPages,
-    page: Number(page),
+    page,
   };
 
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
   res.status(200).json({
     success: true,

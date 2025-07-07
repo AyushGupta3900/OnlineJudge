@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useGetSubmissionsByProblemQuery } from "../../redux/api/submissionAPI.js";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
-import AdminPagination from "../../components/AdminPagination.jsx";
-import PageHeader from "../../components/PageHeader.jsx";
 
-// TestCase Table
+import { useGetSubmissionsByProblemQuery } from "../../redux/api/submissionAPI.js";
+import AdminPagination from "../../components/AdminPagination";
+import PageHeader from "../../components/PageHeader";
+
+// 🔷 TestCaseTable
 const TestCaseTable = ({ testCaseResults = [] }) => (
   <div className="mt-3 overflow-x-auto">
     <table className="min-w-full text-xs text-left border border-gray-700">
@@ -56,14 +57,11 @@ const TestCaseTable = ({ testCaseResults = [] }) => (
   </div>
 );
 
-// Submission Card
+// 🔷 SubmissionCard
 const SubmissionCard = ({ submission, delay, expanded, toggleExpand }) => {
-  let timeAgo = "N/A";
-  try {
-    timeAgo = formatDistanceToNow(new Date(submission.createdAt), { addSuffix: true });
-  } catch {
-    timeAgo = "Invalid Date";
-  }
+  const timeAgo = submission.createdAt
+    ? formatDistanceToNow(new Date(submission.createdAt), { addSuffix: true })
+    : "N/A";
 
   return (
     <motion.div
@@ -132,32 +130,49 @@ const SubmissionCard = ({ submission, delay, expanded, toggleExpand }) => {
   );
 };
 
-// Main Component
-const SubmissionPage = () => {
-  const { id } = useParams();
-  const { data, isLoading, isError } = useGetSubmissionsByProblemQuery(id);
+// 🔷 SkeletonCard
+const SkeletonCard = ({ delay }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+    className="rounded-xl border border-gray-700 bg-gray-900 shadow-md p-4 animate-pulse"
+  >
+    <div className="flex justify-between text-sm mb-1">
+      <div className="h-4 bg-gray-700 rounded w-32"></div>
+      <div className="h-4 bg-gray-700 rounded w-20"></div>
+    </div>
+    <div className="flex gap-4 text-sm mb-2">
+      <div className="h-4 bg-gray-700 rounded w-24"></div>
+      <div className="h-4 bg-gray-700 rounded w-16"></div>
+      <div className="h-4 bg-gray-700 rounded w-20"></div>
+    </div>
+    <div className="h-32 bg-gray-800 rounded"></div>
+  </motion.div>
+);
 
-  const submissions = Array.isArray(data?.submissions) ? data.submissions : [];
-  const sortedSubmissions = [...submissions].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-
+// 🔷 Main Component
+const SubmissionsPage = () => {
+  const { id: problemId } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [expanded, setExpanded] = useState(null);
 
-  const submissionsPerPage = 5;
-  const totalPages = Math.max(1, Math.ceil(sortedSubmissions.length / submissionsPerPage));
-
-  const currentSubmissions = sortedSubmissions.slice(
-    (currentPage - 1) * submissionsPerPage,
-    currentPage * submissionsPerPage
-  );
+  const { data, isLoading, isError, isFetching } = useGetSubmissionsByProblemQuery({
+    problemId,
+    page: currentPage,
+    limit: 5,
+  });
 
   const handleToggleExpand = (id) => {
     setExpanded((prev) => (prev === id ? null : id));
   };
 
-  const heading = "Submissions Dashboard";
+  const heading = "Your Submissions";
+
+  // 🔷 Scroll to top on pagination
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   return (
     <motion.div
@@ -173,26 +188,30 @@ const SubmissionPage = () => {
           <p className="text-blue-300 animate-pulse">Loading submissions...</p>
         ) : isError ? (
           <p className="text-red-500">⚠️ Failed to load submissions.</p>
-        ) : sortedSubmissions.length === 0 ? (
+        ) : !data?.data?.length ? (
           <p className="text-gray-400">No submissions yet for this problem.</p>
         ) : (
           <>
             <div className="grid gap-6">
-              {currentSubmissions.map((sub, idx) => (
-                <SubmissionCard
-                  key={sub._id}
-                  submission={sub}
-                  delay={idx * 0.05}
-                  expanded={expanded}
-                  toggleExpand={handleToggleExpand}
-                />
-              ))}
+              {isFetching
+                ? Array.from({ length: 3 }).map((_, idx) => (
+                    <SkeletonCard key={idx} delay={idx * 0.05} />
+                  ))
+                : data.data.map((sub, idx) => (
+                    <SubmissionCard
+                      key={sub._id}
+                      submission={sub}
+                      delay={idx * 0.05}
+                      expanded={expanded}
+                      toggleExpand={handleToggleExpand}
+                    />
+                  ))}
             </div>
 
-            {totalPages > 1 && (
+            {data.totalPages > 1 && (
               <AdminPagination
                 currentPage={currentPage}
-                totalPages={totalPages}
+                totalPages={data.totalPages}
                 onPageChange={setCurrentPage}
               />
             )}
@@ -203,4 +222,4 @@ const SubmissionPage = () => {
   );
 };
 
-export default SubmissionPage;
+export default SubmissionsPage;

@@ -2,22 +2,21 @@ import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BiSolidLeftArrow, BiSolidDownArrow } from "react-icons/bi";
-import { useGetProblemByIdQuery } from "../../redux/api/problemAPI";
-import useAuthUser from "../../hooks/useAuthUser";
+
+import { useGetProblemByIdQuery, useGetProblemStatusQuery } from "../../redux/api/problemAPI";
 import CodeEditor from "../../components/CodeEditor";
 
 const ProblemPage = () => {
   const { id } = useParams();
   const [viewMode, setViewMode] = useState("side");
 
-  const { data, isLoading, isError } = useGetProblemByIdQuery(id);
-  const problem = data?.data;
+  const { data: problemData, isLoading, isError } = useGetProblemByIdQuery(id);
+  const { data: statusData, isLoading: isStatusLoading } = useGetProblemStatusQuery(id);
 
-  const { authUser } = useAuthUser();
-  const solvedProblemIds = authUser?.solvedProblems?.map((p) => p.toString()) || [];
-  const isSolved = problem && solvedProblemIds.includes(problem._id);
+  const problem = problemData?.data;
+  const isSolved = statusData?.status === "solved";
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading || isStatusLoading) return <LoadingState />;
   if (isError || !problem) return <ErrorState />;
 
   return (
@@ -158,7 +157,9 @@ const TagsAndDifficulty = ({ problem }) => (
 const Section = ({ title, content }) => (
   <section>
     <h2 className="text-2xl font-semibold mb-2">{title}</h2>
-    <p className="text-gray-300 leading-relaxed whitespace-pre-line">{content}</p>
+    <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+      {content}
+    </p>
   </section>
 );
 
@@ -187,10 +188,12 @@ const SampleTestCases = ({ testCases }) => (
         >
           <p className="text-sm text-gray-400">Test Case {index + 1}</p>
           <p>
-            <span className="text-blue-400 font-medium">Input:</span> {test.input}
+            <span className="text-blue-400 font-medium">Input:</span>{" "}
+            {test.input}
           </p>
           <p>
-            <span className="text-green-400 font-medium">Output:</span> {test.output}
+            <span className="text-green-400 font-medium">Output:</span>{" "}
+            {test.output}
           </p>
           <p>
             <span className="text-yellow-400 font-medium">Explanation:</span>{" "}

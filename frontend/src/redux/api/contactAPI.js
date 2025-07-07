@@ -6,19 +6,38 @@ export const contactAPI = createApi({
     baseUrl: import.meta.env.VITE_API_URL,
     credentials: "include",
   }),
+  tagTypes: ["ContactMessage"],
+
   endpoints: (builder) => ({
+    // POST /contact
     sendContactMessage: builder.mutation({
       query: (body) => ({
         url: "/contact",
         method: "POST",
         body,
       }),
+      invalidatesTags: ["ContactMessage"],
     }),
+
+    // GET /contact/admin/all
     getContactMessages: builder.query({
-      query: () => ({
-        url: "/contact/admin/all",
-        method: "GET",
-      }),
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        sortBy = "createdAt",
+        order = "desc",
+      } = {}) => {
+        const params = new URLSearchParams();
+        params.set("page", page);
+        params.set("limit", limit);
+        params.set("search", search);
+        params.set("sortBy", sortBy);
+        params.set("order", order);
+
+        return `/contact/admin/all?${params.toString()}`;
+      },
+      providesTags: ["ContactMessage"],
     }),
   }),
 });

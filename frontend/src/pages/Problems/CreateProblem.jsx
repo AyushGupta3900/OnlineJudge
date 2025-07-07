@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useCreateProblemMutation } from "../../redux/api/problemAPI";
 import { FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1, when: "beforeChildren" } },
+  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1 } },
 };
 
 const fieldVariants = {
@@ -156,11 +157,12 @@ const CreateProblem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const payload = {
       title,
       description,
       difficulty,
-      tags: tags.split(",").map(tag => tag.trim()),
+      tags: tags.split(",").map(tag => tag.trim()).filter(Boolean),
       constraints: constraints.filter(c => c.trim() !== ""),
       inputFormat: inputFormat.filter(c => c.trim() !== ""),
       outputFormat: outputFormat.filter(c => c.trim() !== ""),
@@ -172,9 +174,11 @@ const CreateProblem = () => {
 
     try {
       await createProblem(payload).unwrap();
+      toast.success("✅ Problem created!");
       navigate("/admin");
     } catch (err) {
-      console.error("Error creating problem:", err);
+      console.error(err);
+      toast.error("❌ Failed to create problem");
     }
   };
 
@@ -186,21 +190,18 @@ const CreateProblem = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">📝 Create New Problem</h2>
 
         <motion.form onSubmit={handleSubmit} className="space-y-6" variants={containerVariants}>
-          {/* Title */}
           <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-1">Title</label>
             <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md" />
           </motion.div>
 
-          {/* Description */}
           <motion.div variants={fieldVariants}>
             <label className="block text-sm font-semibold mb-1">Description</label>
             <textarea required value={description} onChange={(e) => setDescription(e.target.value)}
               rows={4} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md resize-y" />
           </motion.div>
 
-          {/* Difficulty & Tags */}
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-4" variants={fieldVariants}>
             <div>
               <label className="block text-sm font-semibold mb-1">Difficulty</label>
@@ -218,31 +219,30 @@ const CreateProblem = () => {
             </div>
           </motion.div>
 
-          {/* Dynamic Fields */}
           <DynamicField label="Constraints" values={constraints} setValues={setConstraints} />
           <DynamicField label="Input Format" values={inputFormat} setValues={setInputFormat} />
           <DynamicField label="Output Format" values={outputFormat} setValues={setOutputFormat} />
 
-          {/* Time & Memory */}
           <motion.div className="grid grid-cols-2 gap-4" variants={fieldVariants}>
             <div>
               <label className="block text-sm font-semibold mb-1">Time Limit (s)</label>
-              <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))}
+              <input type="number" min={1} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))}
                 className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md" />
             </div>
             <div>
               <label className="block text-sm font-semibold mb-1">Memory Limit (MB)</label>
-              <input type="number" value={memoryLimit} onChange={(e) => setMemoryLimit(Number(e.target.value))}
+              <input type="number" min={1} value={memoryLimit} onChange={(e) => setMemoryLimit(Number(e.target.value))}
                 className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md" />
             </div>
           </motion.div>
 
-          {/* Test Cases */}
           <TestCasesSection title="Sample Test Cases" testCases={sampleTestCases} setTestCases={setSampleTestCases} hasExplanation />
           <TestCasesSection title="Hidden Test Cases" testCases={hiddenTestCases} setTestCases={setHiddenTestCases} hasExplanation={false} />
 
           <motion.button type="submit" disabled={isLoading}
-            className="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md font-semibold cursor-pointer"
+            className={`w-full px-4 py-2 rounded-md font-semibold cursor-pointer ${
+              isLoading ? "bg-gray-700" : "bg-green-600 hover:bg-green-500"
+            }`}
             variants={buttonVariants} whileHover="hover" whileTap="tap">
             {isLoading ? "Creating..." : "Create Problem"}
           </motion.button>

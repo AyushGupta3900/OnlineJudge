@@ -4,8 +4,9 @@ import Submission from "../models/Submission.js";
 import User from "../models/User.js";
 import { AppError } from "../utils/AppError.js";
 import { TryCatch } from "../utils/TryCatch.js";
-import redisClient  from "../utils/config/redisClient.js";
+import redisClient from "../utils/config/redisClient.js";
 import { paginateQuery } from "../utils/paginateQuery.js";
+import { deleteKeysByPattern } from "../utils/deleteKeysByPattern.js";
 
 export const getAllProblems = TryCatch(async (req, res) => {
   const {
@@ -15,11 +16,10 @@ export const getAllProblems = TryCatch(async (req, res) => {
     sortBy = "createdAt",
     order = "desc",
     difficulty,
-    status,
     tag,
   } = req.query;
 
-  const redisKey = `problems:${page}:${limit}:${search}:${sortBy}:${order}:${difficulty}:${status}:${tag}`;
+  const redisKey = `problems:${page}:${limit}:${search}:${sortBy}:${order}:${difficulty}:${tag}`;
 
   const cached = await redisClient.get(redisKey);
   if (cached) {
@@ -35,11 +35,6 @@ export const getAllProblems = TryCatch(async (req, res) => {
 
   if (difficulty) query.difficulty = difficulty;
   if (tag) query.tags = tag;
-
-  if (status && req.user) {
-    if (status === "solved") query._id = { $in: req.user.solvedProblems };
-    if (status === "unsolved") query._id = { $nin: req.user.solvedProblems };
-  }
 
   const { results, total, totalPages } = await paginateQuery({
     model: Problem,
@@ -62,8 +57,7 @@ export const getAllProblems = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
-
+  await redisClient.set(redisKey, JSON.stringify(response), "EX", 60);
 
   res.status(200).json({
     success: true,
@@ -72,6 +66,7 @@ export const getAllProblems = TryCatch(async (req, res) => {
   });
 });
 
+// on creating problem invalidate getAllProblems 
 export const createProblem = TryCatch(async (req, res) => {
   const {
     title,
@@ -88,11 +83,15 @@ export const createProblem = TryCatch(async (req, res) => {
   } = req.body;
 
   if (!title || !description || !sampleTestCases?.length) {
-    throw new AppError("Title, description and at least one sample test case are required.", 400);
+    throw new AppError(
+      "Title, description and at least one sample test case are required.",
+      400
+    );
   }
 
   const existing = await Problem.findOne({ title });
-  if (existing) throw new AppError("A problem with this title already exists.", 409);
+  if (existing)
+    throw new AppError("A problem with this title already exists.", 409);
 
   const newProblem = await Problem.create({
     title,
@@ -109,6 +108,8 @@ export const createProblem = TryCatch(async (req, res) => {
     createdBy: req.user._id,
   });
 
+  await deleteKeysByPattern("problems:*");
+
   res.status(201).json({
     success: true,
     message: "Problem created successfully",
@@ -116,6 +117,7 @@ export const createProblem = TryCatch(async (req, res) => {
   });
 });
 
+// on editing problem invalidate getAllProblems, getProblem 
 export const editProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
   const updates = req.body;
@@ -130,6 +132,9 @@ export const editProblem = TryCatch(async (req, res) => {
   Object.assign(problem, updates);
   await problem.save();
 
+  await deleteKeysByPattern("problems:*");
+  await deleteKeysByPattern(`problem:${problemId}`);
+
   res.status(200).json({
     success: true,
     message: "Problem updated successfully",
@@ -137,6 +142,7 @@ export const editProblem = TryCatch(async (req, res) => {
   });
 });
 
+// on deleting problem invalidate getAllProblems, getProblem 
 export const deleteProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
 
@@ -152,16 +158,23 @@ export const deleteProblem = TryCatch(async (req, res) => {
   const users = await User.find({ solvedProblems: problemId });
   for (const user of users) {
     user.solvedProblems.pull(problemId);
-    if (problem.difficulty && user.solvedCountByDifficulty[problem.difficulty] > 0) {
+    if (
+      problem.difficulty &&
+      user.solvedCountByDifficulty[problem.difficulty] > 0
+    ) {
       user.solvedCountByDifficulty[problem.difficulty] -= 1;
     }
     await user.save();
   }
   await problem.deleteOne();
 
+  await deleteKeysByPattern("problems:*");
+  await deleteKeysByPattern(`problem:${problemId}`);
+
   res.status(200).json({
     success: true,
-    message: "Problem, related submissions and user references deleted successfully",
+    message:
+      "Problem, related submissions and user references deleted successfully",
   });
 });
 
@@ -179,10 +192,13 @@ export const getProblem = TryCatch(async (req, res) => {
     });
   }
 
-  const problem = await Problem.findById(problemId).populate("createdBy", "username email");
+  const problem = await Problem.findById(problemId).populate(
+    "createdBy",
+    "username email"
+  );
   if (!problem) throw new AppError("Problem not found", 404);
 
-  await redisClient.setEx(redisKey, 60, JSON.stringify(problem));
+  await redisClient.set(redisKey, JSON.stringify(problem), "EX", 60);
 
   res.status(200).json({
     success: true,
@@ -191,11 +207,15 @@ export const getProblem = TryCatch(async (req, res) => {
   });
 });
 
+// on creating problem invalidate getAllProblems 
 export const createProblemFromArray = TryCatch(async (req, res) => {
   const problemsArray = req.body;
 
   if (!Array.isArray(problemsArray) || problemsArray.length === 0) {
-    throw new AppError("Request body must be a non-empty array of problems.", 400);
+    throw new AppError(
+      "Request body must be a non-empty array of problems.",
+      400
+    );
   }
 
   const createdProblems = [];
@@ -245,6 +265,8 @@ export const createProblemFromArray = TryCatch(async (req, res) => {
     createdProblems.push(newProblem);
   }
 
+  await deleteKeysByPattern("problems:*");
+
   res.status(201).json({
     success: true,
     message: "Batch problem creation completed",
@@ -258,18 +280,34 @@ export const createProblemFromArray = TryCatch(async (req, res) => {
 export const getProblemStatus = TryCatch(async (req, res) => {
   const { problemId } = req.params;
 
+  const cacheKey = `problemStatus:${req.user._id}:${problemId}`;
+  const cached = await redisClient.get(cacheKey);
+
+  if (cached) {
+    return res.status(200).json(JSON.parse(cached));
+  }
+
   if (!mongoose.Types.ObjectId.isValid(problemId)) {
     throw new AppError("Invalid problem ID", 400);
   }
 
-  const isSolved = req.user.solvedProblems.some(
+  const user = await User.findById(req.user._id).select("solvedProblems");
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const isSolved = user.solvedProblems.some(
     (id) => id.toString() === problemId
   );
 
-  res.status(200).json({
+  const response = {
     success: true,
     problemId,
     status: isSolved ? "solved" : "unsolved",
-  });
+  };
+
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+  res.status(200).json(response);
 });
 

@@ -10,6 +10,7 @@ import { problemAPI } from "../api/problemAPI.js";
 import { compilerAPI } from "../api/compilerAPI.js";
 import { submissionAPI } from "../api/submissionAPI.js";
 import { contactAPI } from "../api/contactAPI.js";
+import { userAPI } from "../api/userAPI.js";
 
 const authPersistConfig = {
   key: "auth",
@@ -33,6 +34,7 @@ export const store = configureStore({
     [compilerAPI.reducerPath]: compilerAPI.reducer,
     [submissionAPI.reducerPath]: submissionAPI.reducer,
     [contactAPI.reducerPath]: contactAPI.reducer,
+    [userAPI.reducerPath]: userAPI.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -42,7 +44,8 @@ export const store = configureStore({
       .concat(problemAPI.middleware)
       .concat(compilerAPI.middleware)
       .concat(submissionAPI.middleware)
-      .concat(contactAPI.middleware),
+      .concat(contactAPI.middleware)
+      .concat(userAPI.middleware),
 });
 
 export const persistor = persistStore(store);

@@ -4,7 +4,9 @@ import redisClient from "../utils/config/redisClient.js";
 import { paginateQuery } from "../utils/paginateQuery.js";
 import { AppError } from "../utils/AppError.js";
 import { TryCatch } from "../utils/TryCatch.js";
+import { deleteKeysByPattern } from "../utils/deleteKeysByPattern.js";
 
+// on delete account invalidate profileStats, Leaderboard and adminUsers
 export const deleteUserAccount = TryCatch(async (req, res) => {
   const userId = req.user._id;
 
@@ -16,12 +18,18 @@ export const deleteUserAccount = TryCatch(async (req, res) => {
   await Submission.deleteMany({ user: userId });
   await user.deleteOne();
 
+  await deleteKeysByPattern(`user:${userId}:*`);
+  await deleteKeysByPattern(`profileStats:${userId}`);
+  await deleteKeysByPattern("leaderboard:*");
+  await deleteKeysByPattern("users:*");
+
   res.status(200).json({
     success: true,
     message: "Account and all related submissions deleted successfully",
   });
 });
 
+// on update account invalidate profileStats, Leaderboard and adminUsers
 export const updateUserAccount = TryCatch(async (req, res) => {
   const userId = req.user._id;
 
@@ -48,6 +56,10 @@ export const updateUserAccount = TryCatch(async (req, res) => {
     throw new AppError("User not found", 404);
   }
 
+  await deleteKeysByPattern(`profileStats:${userId}`);
+  await deleteKeysByPattern("leaderboard:*");
+  await deleteKeysByPattern("users:*");
+
   res.status(200).json({
     success: true,
     message: "Account updated successfully",
@@ -58,7 +70,7 @@ export const updateUserAccount = TryCatch(async (req, res) => {
 export const getLeaderboard = TryCatch(async (req, res) => {
   const {
     page = 1,
-    limit = 10,
+    limit = 12,
     search = "",
     sort = "-rating", 
   } = req.query;
@@ -79,6 +91,19 @@ export const getLeaderboard = TryCatch(async (req, res) => {
     query.username = { $regex: search, $options: "i" };
   }
 
+  // fetch top 3 globally
+  const topThree = await User.find({})
+    .sort({ rating: -1 })
+    .limit(3)
+    .select("username fullName email computedRating avatar solvedProblems");
+
+  // exclude top 3 from paginated results
+  const excludeIds = topThree.map(u => u._id);
+
+  if (excludeIds.length > 0) {
+    query._id = { $nin: excludeIds };
+  }
+
   const { results, total, totalPages } = await paginateQuery({
     model: User,
     query,
@@ -86,17 +111,18 @@ export const getLeaderboard = TryCatch(async (req, res) => {
     limit: Number(limit),
     sortBy: "rating",
     order: sort.startsWith("-") ? "desc" : "asc",
-    projection: "username rating avatar solvedProblems",
+    projection: "username fullName email computedRating avatar solvedProblems",
   });
 
   const response = {
-    data: results,
+    topThree,
+    users: results,
     total,
     totalPages,
     page: Number(page),
   };
 
-  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+  await redisClient.set(redisKey, JSON.stringify(response), "EX", 60);
 
   res.status(200).json({
     success: true,

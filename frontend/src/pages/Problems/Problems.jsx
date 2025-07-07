@@ -1,53 +1,25 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useGetAllProblemsQuery } from "../../redux/api/problemAPI.js";
-import useAuthUser from "../../hooks/useAuthUser.js";
+import { useGetAllProblemsQuery, useGetProblemStatusQuery } from "../../redux/api/problemAPI.js";
 import Pagination from "../../components/Pagination.jsx";
 
 const Problems = () => {
-  const { data, isLoading, isError } = useGetAllProblemsQuery();
-  const problems = data?.data || [];
   const [search, setSearch] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState("card");
 
-  const { authUser } = useAuthUser();
-  const solvedProblemIds =
-    authUser?.solvedProblems?.map((id) => id.toString()) || [];
-
-  const problemsPerPage = 12;
-
-  const markedProblems = problems.map((problem) => ({
-    ...problem,
-    status: solvedProblemIds.includes(problem._id) ? "solved" : "unsolved",
-  }));
-
-  const filteredProblems = markedProblems.filter((problem) => {
-    const matchesSearch =
-      problem.title.toLowerCase().includes(search.toLowerCase()) ||
-      problem.tags.some((tag) =>
-        tag.toLowerCase().includes(search.toLowerCase())
-      );
-
-    const matchesDifficulty =
-      !selectedDifficulty ||
-      problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
-
-    const matchesStatus = !selectedStatus || problem.status === selectedStatus;
-
-    return matchesSearch && matchesDifficulty && matchesStatus;
+  const { data, isLoading, isFetching, isError } = useGetAllProblemsQuery({
+    page: currentPage,
+    search,
+    difficulty: selectedDifficulty,
+    status: "solved",
   });
 
-  const indexOfLastProblem = currentPage * problemsPerPage;
-  const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
-  const currentProblems = filteredProblems.slice(
-    indexOfFirstProblem,
-    indexOfLastProblem
-  );
-  const totalPages = Math.ceil(filteredProblems.length / problemsPerPage);
+  const problems = data?.data || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen px-4 py-10">
@@ -63,11 +35,7 @@ const Problems = () => {
         setCurrentPage={setCurrentPage}
       />
 
-      {isLoading && (
-        <div className="text-center text-blue-400 font-medium py-10">
-          Loading problems...
-        </div>
-      )}
+      {(isLoading || isFetching) && <SkeletonLoader viewMode={viewMode} />}
 
       {isError && (
         <div className="text-center text-red-500 font-medium py-10">
@@ -75,12 +43,12 @@ const Problems = () => {
         </div>
       )}
 
-      {!isLoading && !isError && (
+      {!isLoading && !isFetching && !isError && (
         <>
           {viewMode === "card" ? (
-            <CardView problems={currentProblems} />
+            <CardView problems={problems} />
           ) : (
-            <TableView problems={currentProblems} />
+            <TableView problems={problems} />
           )}
 
           <Pagination
@@ -96,6 +64,7 @@ const Problems = () => {
 
 export default Problems;
 
+// ================= Header =================
 const Header = ({ viewMode, setViewMode }) => (
   <motion.div
     initial={{ opacity: 0, y: -20 }}
@@ -113,10 +82,10 @@ const Header = ({ viewMode, setViewMode }) => (
     >
       {viewMode === "card" ? "Table View" : "Card View"}
     </button>
-    
   </motion.div>
 );
 
+// ================= Filters =================
 const Filters = ({
   search,
   setSearch,
@@ -167,82 +136,83 @@ const Filters = ({
         className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 shadow-md cursor-pointer"
       >
         <option value="">All Statuses</option>
-        <option value="solved">Solved</option>
-        <option value="unsolved">Unsolved</option>
+        <option value="solved">✅ Solved</option>
+        <option value="unsolved">⭕ Unsolved</option>
       </select>
     </div>
   </motion.div>
 );
 
+// ================= Card View =================
 const CardView = ({ problems }) => (
-  <motion.div
-    initial="hidden"
-    animate="visible"
-    variants={{
-      hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.05 } },
-    }}
-    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-  >
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {problems.map((problem) => (
-      <motion.div
-        key={problem._id}
-        variants={{
-          hidden: { opacity: 0, y: 10 },
-          visible: { opacity: 1, y: 0 },
-        }}
-        className="bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 flex flex-col justify-between min-h-[220px]"
-      >
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">
-              {problem.title}
-            </h3>
-            <span
-              className={`px-3 py-1 text-xs rounded-full font-medium uppercase tracking-wide ${
-                problem.difficulty === "Easy"
-                  ? "bg-green-600"
-                  : problem.difficulty === "Medium"
-                  ? "bg-yellow-500 text-black"
-                  : "bg-red-600"
-              }`}
-            >
-              {problem.difficulty}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            {problem.tags.map((tag, i) => (
-              <span
-                key={i}
-                className="bg-gray-700 text-sm px-2 py-0.5 rounded-full text-gray-300"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center mt-auto">
-          <span
-            className={`text-sm font-medium ${
-              problem.status === "solved" ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            {problem.status === "solved" ? "✅ Solved" : "⭕ Unsolved"}
-          </span>
-          <Link
-            to={`/problems/${problem._id}`}
-            className="text-blue-400 hover:underline text-sm"
-          >
-            Solve →
-          </Link>
-        </div>
-      </motion.div>
+      <ProblemCard key={problem._id} problem={problem} />
     ))}
-  </motion.div>
+  </div>
 );
 
+const ProblemCard = ({ problem }) => {
+  const { data: status, isLoading } = useGetProblemStatusQuery(problem._id);
+
+  return (
+    <div className="bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 flex flex-col justify-between min-h-[220px]">
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">{problem.title}</h3>
+          <span
+            className={`px-3 py-1 text-xs rounded-full font-medium uppercase tracking-wide ${
+              problem.difficulty === "Easy"
+                ? "bg-green-600"
+                : problem.difficulty === "Medium"
+                ? "bg-yellow-500 text-black"
+                : "bg-red-600"
+            }`}
+          >
+            {problem.difficulty}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {problem.tags.map((tag, i) => (
+            <span
+              key={i}
+              className="bg-gray-700 text-sm px-2 py-0.5 rounded-full text-gray-300"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center mt-auto">
+        <span
+          className={`text-sm font-medium ${
+            status === "solved"
+              ? "text-green-400"
+              : status === "unsolved"
+              ? "text-red-400"
+              : "text-gray-400"
+          }`}
+        >
+          {isLoading
+            ? "Checking..."
+            : status === "solved"
+            ? "✅ Solved"
+            : "⭕ Unsolved"}
+        </span>
+        <Link
+          to={`/problems/${problem._id}`}
+          className="text-blue-400 hover:underline text-sm"
+        >
+          Solve →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+// ================= Table View =================
 const TableView = ({ problems }) => (
   <div className="overflow-x-auto mt-4 bg-gray-800 rounded-xl shadow-xl">
     <table className="min-w-full text-sm text-left">
@@ -256,49 +226,84 @@ const TableView = ({ problems }) => (
       </thead>
       <tbody>
         {problems.map((problem) => (
-          <tr
-            key={problem._id}
-            className="border-b border-gray-700 hover:bg-gray-700 transition"
-          >
-            <td className="px-6 py-3">
-              <Link
-                to={`/problems/${problem._id}`}
-                className="text-blue-400 hover:underline"
-              >
-                {problem.title}
-              </Link>
-            </td>
-            <td className="px-6 py-3">
-              <span
-                className={`px-2 py-1 text-xs rounded-full font-medium ${
-                  problem.difficulty === "Easy"
-                    ? "bg-green-600"
-                    : problem.difficulty === "Medium"
-                    ? "bg-yellow-500 text-black"
-                    : "bg-red-600"
-                }`}
-              >
-                {problem.difficulty}
-              </span>
-            </td>
-            <td className="px-6 py-3">
-              <div className="flex flex-wrap gap-2">
-                {problem.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="bg-gray-600 text-gray-200 px-2 py-0.5 rounded-full text-xs"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </td>
-            <td className="px-6 py-3">
-              {problem.status === "solved" ? "✅" : "⭕"}
-            </td>
-          </tr>
+          <ProblemRow key={problem._id} problem={problem} />
         ))}
       </tbody>
     </table>
   </div>
 );
+
+const ProblemRow = ({ problem }) => {
+  const { data: status, isLoading } = useGetProblemStatusQuery(problem._id);
+
+  return (
+    <tr className="border-b border-gray-700 hover:bg-gray-700 transition">
+      <td className="px-6 py-3">
+        <Link
+          to={`/problems/${problem._id}`}
+          className="text-blue-400 hover:underline"
+        >
+          {problem.title}
+        </Link>
+      </td>
+      <td className="px-6 py-3">
+        <span
+          className={`px-2 py-1 text-xs rounded-full font-medium ${
+            problem.difficulty === "Easy"
+              ? "bg-green-600"
+              : problem.difficulty === "Medium"
+              ? "bg-yellow-500 text-black"
+              : "bg-red-600"
+          }`}
+        >
+          {problem.difficulty}
+        </span>
+      </td>
+      <td className="px-6 py-3">
+        <div className="flex flex-wrap gap-2">
+          {problem.tags.map((tag, i) => (
+            <span
+              key={i}
+              className="bg-gray-600 text-gray-200 px-2 py-0.5 rounded-full text-xs"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </td>
+      <td className="px-6 py-3">
+        {isLoading
+          ? "Checking..."
+          : status === "solved"
+          ? "✅"
+          : "⭕"}
+      </td>
+    </tr>
+  );
+};
+
+// ================= Skeleton Loader =================
+const SkeletonLoader = ({ viewMode }) => {
+  const skeletons = Array.from({ length: 12 });
+  if (viewMode === "card") {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {skeletons.map((_, i) => (
+          <div
+            key={i}
+            className="bg-gray-800 p-6 rounded-2xl shadow animate-pulse min-h-[220px]"
+          >
+            <div className="h-6 bg-gray-700 mb-4 w-3/4 rounded"></div>
+            <div className="h-4 bg-gray-700 mb-2 w-1/2 rounded"></div>
+            <div className="h-4 bg-gray-700 mb-2 w-1/3 rounded"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="text-center text-blue-400 font-medium py-10">
+      Loading problems...
+    </div>
+  );
+};
