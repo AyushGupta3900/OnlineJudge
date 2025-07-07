@@ -1,8 +1,8 @@
 import ContactMessage from "../models/ContactMessage.js";
-import { TryCatch } from "../middlewares/TryCatch.js";
+import { TryCatch } from "../utils/TryCatch.js";
+import redisClient from "../utils/config/redisClient.js";
 import { AppError } from "../utils/AppError.js";
 import { paginateQuery } from "../utils/paginateQuery.js";
-import { redisClient } from "../config/redis.js";
 
 export const sendContactMessage = TryCatch(async (req, res) => {
   const { name, email, message } = req.body;
@@ -21,9 +21,9 @@ export const sendContactMessage = TryCatch(async (req, res) => {
 });
 
 export const getAllContactMessages = TryCatch(async (req, res) => {
-  const { page = 1, limit = 10, search = "", sort = "-createdAt" } = req.query;
+  const { page = 1, limit = 10, search = "", sortBy = "createdAt", order = "desc" } = req.query;
 
-  const redisKey = `contactMessages:${page}:${limit}:${search}:${sort}`;
+  const redisKey = `contactMessages:${page}:${limit}:${search}:${sortBy}:${order}`;
   const cached = await redisClient.get(redisKey);
 
   if (cached) {
@@ -35,18 +35,17 @@ export const getAllContactMessages = TryCatch(async (req, res) => {
   }
 
   const query = {};
-  if (search) {
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-      { message: { $regex: search, $options: "i" } },
-    ];
-  }
+  const searchFields = ["name", "email", "message"];
 
-  const { results, total, totalPages } = await paginateQuery(ContactMessage, query, {
-    page,
-    limit,
-    sort,
+  const { results, total, totalPages } = await paginateQuery({
+    model: ContactMessage,
+    query,
+    search,
+    searchFields,
+    page: Number(page),
+    limit: Number(limit),
+    sortBy,
+    order,
   });
 
   const response = {
@@ -56,7 +55,8 @@ export const getAllContactMessages = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
+await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+
 
   res.status(200).json({
     success: true,

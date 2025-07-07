@@ -12,7 +12,7 @@ router.patch("/update-account",updateUserAccount);
 router.get("/leaderboard",getLeaderboard);
 router.get("/profile-stats",getProfileStats);
 router.get("/all-submissions",getUserSubmissions);
-router.get("/admin/all",adminOnly,getAllUsers);
+router.get("/admin/all",getAllUsers);
 router.patch("/admin/make/:id",adminOnly,makeAdmin);
 
 export default router;

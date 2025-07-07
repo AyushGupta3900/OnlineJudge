@@ -5,6 +5,217 @@ import { paginateQuery } from "../utils/paginateQuery.js";
 import { AppError } from "../utils/AppError.js";
 import { TryCatch } from "../utils/TryCatch.js";
 
+export const deleteUserAccount = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  await Submission.deleteMany({ user: userId });
+  await user.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Account and all related submissions deleted successfully",
+  });
+});
+
+export const updateUserAccount = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+
+  const allowedFields = ["fullName", "bio"];
+  const updates = {};
+
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  });
+
+  if (Object.keys(updates).length === 0) {
+    throw new AppError("No valid fields provided to update", 400);
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updates },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Account updated successfully",
+    user: updatedUser,
+  });
+});
+
+export const getLeaderboard = TryCatch(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    sort = "-rating", 
+  } = req.query;
+
+  const redisKey = `leaderboard:${page}:${limit}:${search}:${sort}`;
+
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    return res.status(200).json({
+      success: true,
+      message: "Leaderboard fetched successfully (from cache)",
+      ...JSON.parse(cached),
+    });
+  }
+
+  const query = {};
+  if (search) {
+    query.username = { $regex: search, $options: "i" };
+  }
+
+  const { results, total, totalPages } = await paginateQuery({
+    model: User,
+    query,
+    page: Number(page),
+    limit: Number(limit),
+    sortBy: "rating",
+    order: sort.startsWith("-") ? "desc" : "asc",
+    projection: "username rating avatar solvedProblems",
+  });
+
+  const response = {
+    data: results,
+    total,
+    totalPages,
+    page: Number(page),
+  };
+
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+
+  res.status(200).json({
+    success: true,
+    message: "Leaderboard fetched successfully",
+    ...response,
+  });
+});
+
+export const getProfileStats = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+
+  const redisKey = `profileStats:${userId}`;
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    return res.status(200).json({
+      success: true,
+      message: "Profile stats fetched successfully (from cache)",
+      ...JSON.parse(cached),
+    });
+  }
+
+  const user = await User.findById(userId).select(
+    "username fullName email bio avatar solvedProblems solvedCountByDifficulty rating role"
+  );
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // Count wrong submissions
+  const wrongCount = await Submission.countDocuments({
+    user: userId,
+    verdict: { $ne: "Accepted" },
+  });
+
+  // Count total submissions
+  const totalSubmissions = await Submission.countDocuments({
+    user: userId,
+  });
+
+  const response = {
+    username: user.username,
+    fullName: user.fullName || "",
+    email: user.email || "",
+    bio: user.bio || "",
+    avatar: user.avatar,
+    rating: user.rating || 0,
+    role: user.role || "user",
+    solvedCountByDifficulty: user.solvedCountByDifficulty || {
+      Easy: 0,
+      Medium: 0,
+      Hard: 0,
+    },
+    totalSolved: user.solvedProblems.length,
+    totalWrongSubmissions: wrongCount,
+    totalSubmissions,
+  };
+
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+
+  res.status(200).json({
+    success: true,
+    message: "Profile stats fetched successfully",
+    ...response,
+  });
+});
+
+export const getUserSubmissions = TryCatch(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    verdict,
+    language,
+    sortBy = "submittedAt",
+    order = "desc",
+  } = req.query;
+
+  const userId = req.user._id;
+
+  const redisKey = `userSubmissions:${userId}:${page}:${limit}:${verdict || "all"}:${language || "all"}:${sortBy}:${order}`;
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    return res.status(200).json({
+      success: true,
+      message: "User submissions fetched successfully (from cache)",
+      ...JSON.parse(cached),
+    });
+  }
+
+  const query = { user: userId };
+  if (verdict) query.verdict = verdict;
+  if (language) query.language = language;
+
+  const { results, total, totalPages } = await paginateQuery({
+    model: Submission,
+    query,
+    page: Number(page),
+    limit: Number(limit),
+    sortBy,
+    order,
+    populate: { path: "problem", select: "title difficulty" },
+  });
+
+  const response = {
+    submissions: results,
+    total,
+    totalPages,
+    page: Number(page),
+  };
+
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+
+  res.status(200).json({
+    success: true,
+    message: "User submissions fetched successfully",
+    ...response,
+  });
+});
+
 export const getAllUsers = TryCatch(async (req, res) => {
   const {
     page = 1,
@@ -50,7 +261,7 @@ export const getAllUsers = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
   res.status(200).json({
     success: true,
@@ -78,193 +289,5 @@ export const makeAdmin = TryCatch(async (req, res) => {
     success: true,
     message: "User promoted to admin successfully",
     user,
-  });
-});
-
-export const updateUserAccount = TryCatch(async (req, res) => {
-  const userId = req.user._id;
-
-  const allowedFields = ["fullName", "bio"];
-  const updates = {};
-
-  allowedFields.forEach((field) => {
-    if (req.body[field] !== undefined) {
-      updates[field] = req.body[field];
-    }
-  });
-
-  if (Object.keys(updates).length === 0) {
-    throw new AppError("No valid fields provided to update", 400);
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { $set: updates },
-    { new: true }
-  );
-
-  if (!updatedUser) {
-    throw new AppError("User not found", 404);
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Account updated successfully",
-    user: updatedUser,
-  });
-});
-
-export const deleteUserAccount = TryCatch(async (req, res) => {
-  const userId = req.user._id;
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
-
-  await Submission.deleteMany({ user: userId });
-  await user.deleteOne();
-
-  res.status(200).json({
-    success: true,
-    message: "Account and all related submissions deleted successfully",
-  });
-});
-
-export const getLeaderboard = TryCatch(async (req, res) => {
-  const {
-    page = 1,
-    limit = 10,
-    search = "",
-    sort = "-rating", // default sort: highest rating first
-  } = req.query;
-
-  const redisKey = `leaderboard:${page}:${limit}:${search}:${sort}`;
-
-  const cached = await redisClient.get(redisKey);
-  if (cached) {
-    return res.status(200).json({
-      success: true,
-      message: "Leaderboard fetched successfully (from cache)",
-      ...JSON.parse(cached),
-    });
-  }
-
-  const query = {};
-  if (search) {
-    query.username = { $regex: search, $options: "i" };
-  }
-
-  const { results, total, totalPages } = await paginateQuery({
-    model: User,
-    query,
-    page: Number(page),
-    limit: Number(limit),
-    sortBy: "rating",
-    order: sort.startsWith("-") ? "desc" : "asc",
-    projection: "username rating avatar solvedProblems",
-  });
-
-  const response = {
-    data: results,
-    total,
-    totalPages,
-    page: Number(page),
-  };
-
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
-
-  res.status(200).json({
-    success: true,
-    message: "Leaderboard fetched successfully",
-    ...response,
-  });
-});
-
-export const getProfileStats = TryCatch(async (req, res) => {
-  const userId = req.user._id;
-
-  const redisKey = `profileStats:${userId}`;
-  const cached = await redisClient.get(redisKey);
-  if (cached) {
-    return res.status(200).json({
-      success: true,
-      message: "Profile stats fetched successfully (from cache)",
-      ...JSON.parse(cached),
-    });
-  }
-
-  const user = await User.findById(userId).select(
-    "username avatar solvedProblems solvedCountByDifficulty"
-  );
-
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
-
-  // Count wrong submissions
-  const wrongCount = await Submission.countDocuments({
-    user: userId,
-    verdict: { $ne: "Accepted" },
-  });
-
-  const response = {
-    username: user.username,
-    avatar: user.avatar,
-    solvedCountByDifficulty: user.solvedCountByDifficulty || {
-      Easy: 0,
-      Medium: 0,
-      Hard: 0,
-    },
-    totalSolved: user.solvedProblems.length,
-    totalWrongSubmissions: wrongCount,
-  };
-
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
-
-  res.status(200).json({
-    success: true,
-    message: "Profile stats fetched successfully",
-    ...response,
-  });
-});
-
-export const getUserSubmissions = TryCatch(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-  const userId = req.user._id;
-
-  const redisKey = `userSubmissions:${userId}:${page}:${limit}`;
-  const cached = await redisClient.get(redisKey);
-  if (cached) {
-    return res.status(200).json({
-      success: true,
-      message: "User submissions fetched successfully (from cache)",
-      ...JSON.parse(cached),
-    });
-  }
-
-  const { results, total, totalPages } = await paginateQuery({
-    model: Submission,
-    query: { user: userId },
-    page: Number(page),
-    limit: Number(limit),
-    sortBy: "submittedAt",
-    order: "desc",
-    populate: { path: "problem", select: "title" },
-  });
-
-  const response = {
-    submissions: results,
-    total,
-    totalPages,
-    page: Number(page),
-  };
-
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
-
-  res.status(200).json({
-    success: true,
-    message: "User submissions fetched successfully",
-    ...response,
   });
 });

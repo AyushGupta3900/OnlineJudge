@@ -6,7 +6,7 @@ import { createProblemFromArray } from "../controllers/problem.controller.js";
 
 const router = express.Router();
 
-router.get("/all",getAllProblems);
+router.get("/all",adminOnly,getAllProblems);
 router.post("/admin/new",protectedRoute,adminOnly,createProblem);
 router.patch("/admin/:id",protectedRoute,adminOnly,editProblem);
 router.delete("/admin/:id",protectedRoute,adminOnly,deleteProblem);

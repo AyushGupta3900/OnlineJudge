@@ -1,35 +1,42 @@
 import Submission from "../models/Submission.js";
-import axios from "axios";
-import { TryCatch } from "../middlewares/TryCatch.js";
+import Problem from "../models/Problem.js";
+import { TryCatch } from "../utils/TryCatch.js";
+import redisClient  from "../utils/config/redisClient.js";
 import { AppError } from "../utils/AppError.js";
 import { publishToQueue } from "../utils/rabbitmq.js";
 
 export const submitProblem = TryCatch(async (req, res) => {
   const { problemId, code, language } = req.body;
-  const userId = req.user._id;
 
   if (!problemId || !code || !language) {
-    throw new AppError("All fields are required", 400);
+    throw new AppError("Problem ID, code, and language are required", 400);
   }
 
-  // Save submission with 'Pending'
+  const problem = await Problem.findById(problemId);
+  if (!problem) {
+    throw new AppError("Problem not found", 404);
+  }
+
   const submission = await Submission.create({
-    user: userId,
+    user: req.user._id,
     problem: problemId,
     code,
     language,
     verdict: "Pending",
+    submittedAt: new Date(),
   });
 
-  // Publish to RabbitMQ queue for judging
   await publishToQueue("submissionQueue", {
-    submissionId: submission._id.toString(),
+    submissionId: submission._id.toString()
   });
 
   res.status(201).json({
     success: true,
-    message: "Submission received and sent to judge system",
-    data: submission,
+    message: "Your submission has been received and queued for judging.",
+    data: {
+      submissionId: submission._id,
+      status: "Pending"
+    }
   });
 });
 
@@ -76,7 +83,6 @@ export const getSingleSubmission = TryCatch(async (req, res) => {
 
   const redisKey = `submission:${submissionId}`;
 
-  // Check cache
   const cached = await redisClient.get(redisKey);
   if (cached) {
     const submission = JSON.parse(cached);
@@ -104,8 +110,8 @@ export const getSingleSubmission = TryCatch(async (req, res) => {
     throw new AppError("Unauthorized", 403);
   }
 
-  // Save to Redis for next requests
-  await redisClient.setEx(redisKey, 300, JSON.stringify(submission));
+  await redisClient.set(redisKey, JSON.stringify(submission), 'EX', 60);
+
 
   return res.status(200).json({
     success: true,

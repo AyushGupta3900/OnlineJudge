@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import Problem from "../models/Problem.js";
 import Submission from "../models/Submission.js";
 import User from "../models/User.js";
 import { AppError } from "../utils/AppError.js";
-import { TryCatch } from "../middlewares/TryCatch.js";
-import { redisClient } from "../config/redis.js";
+import { TryCatch } from "../utils/TryCatch.js";
+import redisClient  from "../utils/config/redisClient.js";
 import { paginateQuery } from "../utils/paginateQuery.js";
 
 export const getAllProblems = TryCatch(async (req, res) => {
@@ -35,7 +36,6 @@ export const getAllProblems = TryCatch(async (req, res) => {
   if (difficulty) query.difficulty = difficulty;
   if (tag) query.tags = tag;
 
-  // optional: filter by solved/unsolved for logged-in user
   if (status && req.user) {
     if (status === "solved") query._id = { $in: req.user.solvedProblems };
     if (status === "unsolved") query._id = { $nin: req.user.solvedProblems };
@@ -62,38 +62,13 @@ export const getAllProblems = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-  await redisClient.setEx(redisKey, 60, JSON.stringify(response));
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+
 
   res.status(200).json({
     success: true,
     message: "Problems fetched successfully",
     ...response,
-  });
-});
-
-export const getProblem = TryCatch(async (req, res) => {
-  const problemId = req.params.id;
-  if (!problemId) throw new AppError("Problem ID is required", 400);
-
-  const redisKey = `problem:${problemId}`;
-  const cached = await redisClient.get(redisKey);
-  if (cached) {
-    return res.status(200).json({
-      success: true,
-      message: "Problem fetched successfully (from cache)",
-      data: JSON.parse(cached),
-    });
-  }
-
-  const problem = await Problem.findById(problemId).populate("createdBy", "username email");
-  if (!problem) throw new AppError("Problem not found", 404);
-
-  await redisClient.setEx(redisKey, 60, JSON.stringify(problem));
-
-  res.status(200).json({
-    success: true,
-    message: "Problem fetched successfully",
-    data: problem,
   });
 });
 
@@ -187,6 +162,32 @@ export const deleteProblem = TryCatch(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Problem, related submissions and user references deleted successfully",
+  });
+});
+
+export const getProblem = TryCatch(async (req, res) => {
+  const problemId = req.params.id;
+  if (!problemId) throw new AppError("Problem ID is required", 400);
+
+  const redisKey = `problem:${problemId}`;
+  const cached = await redisClient.get(redisKey);
+  if (cached) {
+    return res.status(200).json({
+      success: true,
+      message: "Problem fetched successfully (from cache)",
+      data: JSON.parse(cached),
+    });
+  }
+
+  const problem = await Problem.findById(problemId).populate("createdBy", "username email");
+  if (!problem) throw new AppError("Problem not found", 404);
+
+  await redisClient.setEx(redisKey, 60, JSON.stringify(problem));
+
+  res.status(200).json({
+    success: true,
+    message: "Problem fetched successfully",
+    data: problem,
   });
 });
 

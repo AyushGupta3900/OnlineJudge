@@ -2,12 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { generateFile } from "./src/utils/generateFile.js";
-import { executeCpp } from "./src/utils/executeCpp.js";
-import { executePython } from "./src/utils/executePython.js";
-import { executeJava } from "./src/utils/executeJava.js";
-import { executeJs } from "./src/utils/executeJS.js";
-import { connectDB } from "./src/utils/db.js";
-import compileRoutes from "./src/routes/compile.routes.js";
+import { executeCpp } from "./src/utils/executeCode/executeCpp.js";
+import { executePython } from "./src/utils/executeCode/executePython.js";
+import { executeJava } from "./src/utils/executeCode/executeJava.js";
+import { executeJs } from "./src/utils/executeCode/executeJS.js";
+import { connectDB } from "./src/config/db.js";
 
 dotenv.config();
 
@@ -20,15 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: process.env.ORIGIN_URL,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  credentials: true,
+  methods: ['GET', 'POST'],
 }));
 
 app.get("/", (req, res) => {
   res.send("<h1>Home Page</h1>");
 });
 
-app.post("/api/run", async (req, res) => {
+app.post("/api/v1/run", async (req, res) => {
   const { language = "cpp", code, input = "" } = req.body;
 
   if (!code) {
@@ -77,8 +75,6 @@ app.post("/api/run", async (req, res) => {
   }
 });
 
-app.use("/api/compile", compileRoutes);
-
 app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}`);
+  console.log(`Compiler Server is running at http://localhost:${PORT}`);
 });

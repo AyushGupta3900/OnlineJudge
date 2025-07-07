@@ -13,7 +13,6 @@ import contactRoutes from "./src/routes/contact.routes.js";
 
 import {connectDB} from "./src/utils/config/db.js"
 import {connectRabbitMQ} from "./src/utils/config/rabbitmq.js"
-import {redisClient} from "./src/utils/config/redisClient.js"
 import { globalErrorHandler } from "./src/middlewares/error.middleware.js";
 
 // configuring .env
@@ -21,9 +20,6 @@ dotenv.config();
 
 // connecting to DB 
 connectDB();
-
-// Connect to Redis
-redisClient.on("ready", () => console.log("Redis is connected"));
 
 // Connect to RabbitMQ
 connectRabbitMQ();

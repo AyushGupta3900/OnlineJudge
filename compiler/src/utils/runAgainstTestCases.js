@@ -3,10 +3,10 @@ import path from "path";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
 
-import { executeCpp } from "./executeCpp.js";
-import { executePython } from "./executePython.js";
-import { executeJava } from "./executeJava.js";
-import { executeJs } from "./executeJS.js";
+import { executeCpp } from "./executeCode/executeCpp.js";
+import { executePython } from "./executeCode/executePython.js";
+import { executeJava } from "./executeCode/executeJava.js";
+import { executeJs } from "./executeCode/executeJS.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +25,7 @@ const executorMap = {
   java: executeJava,
   javascript: executeJs,
 };
+
 export async function runCodeAgainstTestCases({
   code,
   testCases,
