@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import dotenv from "dotenv"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -11,7 +11,7 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-const GNU_TIME = "/usr/bin/time";
+const GNU_TIME = "/opt/homebrew/bin/gtime";
 
 export const executePython = (filepath, input = "") => {
   return new Promise((resolve, reject) => {
@@ -53,10 +53,9 @@ export const executePython = (filepath, input = "") => {
       const elapsedMs = sec * 1000 + nanosec / 1e6;
 
       fs.readFile(memFile, "utf8", (err, memData) => {
-        fs.unlink(memFile, () => {}); // cleanup
+        fs.unlink(memFile, () => {}); 
 
         const memoryKb = err ? null : parseInt(memData.trim(), 10);
-        console.log(memoryKb)
         if (code !== 0) {
           return reject({
             type: "runtime",

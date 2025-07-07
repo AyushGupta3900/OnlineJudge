@@ -1,5 +1,4 @@
-import { AppError } from "./AppError.js";
-import { getRabbitChannel } from "../utils/config/rabbitmq.js";
+import { getRabbitChannel } from "../config/rabbitmq.js";
 
 export const consumeFromQueue = async (queue, onMessage) => {
   const channel = getRabbitChannel();
@@ -19,6 +18,6 @@ export const consumeFromQueue = async (queue, onMessage) => {
       }
     });
   } catch (err) {
-    throw new AppError(`Failed to consume from queue: ${queue}`, 500);
+    throw new Error(`Failed to consume from queue: ${queue}`, 500);
   }
 };

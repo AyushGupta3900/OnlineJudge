@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import {connectDB} from "./src/config/db.js"
 import { connectRabbitMQ } from "./src/config/rabbitmq.js";
-import { consumeFromQueue } from "./src/rabbitmq.js";
+import { consumeFromQueue } from "./src/utils/rabbitmq.js";
 import { judgeSubmission } from "./src/services/judgeSubmission.js"; 
 
 dotenv.config();
