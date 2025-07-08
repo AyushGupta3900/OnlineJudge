@@ -12,7 +12,6 @@ const problemApi = baseApi.injectEndpoints({
       },
       providesTags: ['Problem'],
     }),
-
     getProblemById: builder.query({
       query: (id) => `/problem/${id}`,
       providesTags: (result, error, id) => [{ type: 'Problem', id }],
