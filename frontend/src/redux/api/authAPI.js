@@ -1,26 +1,18 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { baseApi } from './baseAPI.js';
 
-const baseUrl = import.meta.env.VITE_API_URL + '/auth';
-
-export const authAPI = createApi({
-  reducerPath: 'authAPI',
-  baseQuery: fetchBaseQuery({
-    baseUrl,
-    credentials: 'include',
-  }),
-  tagTypes: ["User","Problem","Submission"],
+const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (data) => ({
-        url: '/login',
+        url: '/auth/login',
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ['User','Problem','Submission'],
+      invalidatesTags: ['User', 'Problem', 'Submission'],
     }),
     signupUser: builder.mutation({
       query: (data) => ({
-        url: '/signup',
+        url: '/auth/signup',
         method: 'POST',
         body: data,
       }),
@@ -28,25 +20,22 @@ export const authAPI = createApi({
     }),
     logoutUser: builder.mutation({
       query: () => ({
-        url: '/logout',
+        url: '/auth/logout',
         method: 'POST',
       }),
-      invalidatesTags: ["User","Problem","Submission"],
+      invalidatesTags: ['User', 'Problem', 'Submission'],
     }),
     completeOnboarding: builder.mutation({
       query: (data) => ({
-        url: '/onboarding',
+        url: '/auth/onboarding',
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ['User'],
     }),
     getAuthUser: builder.query({
-      query: () => ({
-        url: '/me',
-        method: 'GET',
-      }),
-      providesTags: ["User"],
+      query: () => '/auth/me',
+      providesTags: ['User'],
     }),
   }),
 });
@@ -57,4 +46,4 @@ export const {
   useLogoutUserMutation,
   useCompleteOnboardingMutation,
   useGetAuthUserQuery,
-} = authAPI;
+} = authApi;

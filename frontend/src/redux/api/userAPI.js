@@ -1,89 +1,55 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi } from './baseAPI.js';
 
-const baseUrl = import.meta.env.VITE_API_URL + "/user";
-
-export const userAPI = createApi({
-  reducerPath: "userAPI",
-  baseQuery: fetchBaseQuery({
-    baseUrl,
-    credentials: "include",
-  }),
-  tagTypes: ["User","Problem","Submission"],
+const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     deleteAccount: builder.mutation({
       query: () => ({
-        url: `/delete-account`,
-        method: "DELETE",
+        url: '/user/delete-account',
+        method: 'DELETE',
       }),
-      invalidatesTags: ["User","Problem","Submission"],
+      invalidatesTags: ['User', 'Problem', 'Submission'],
     }),
     updateAccount: builder.mutation({
       query: (data) => ({
-        url: `/update-account`,
-        method: "PATCH",
+        url: '/user/update-account',
+        method: 'PATCH',
         body: data,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ['User'],
     }),
     getLeaderboard: builder.query({
-      query: ({ page = 1, limit = 10, search = "", sort = "-rating" } = {}) => {
-        const params = new URLSearchParams();
-        params.set("page", page);
-        params.set("limit", limit);
-        params.set("search", search);
-        params.set("sort", sort);
-        return `/leaderboard?${params.toString()}`;
+      query: ({ page = 1, limit = 10, search = '', sort = '-rating' } = {}) => {
+        const params = new URLSearchParams({ page, limit, search, sort });
+        return `/user/leaderboard?${params.toString()}`;
       },
-      providesTags: ["User"],
+      providesTags: ['User'],
     }),
     getProfileStats: builder.query({
-      query: () => `/profile-stats`,
-      providesTags: ["User"],
+      query: () => `/user/profile-stats`,
+      providesTags: ['User'],
     }),
     getAllUserSubmissions: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        verdict,
-        language,
-        sortBy = "createdAt",
-        order = "desc",
-      } = {}) => {
-        const params = new URLSearchParams();
-        params.set("page", page);
-        params.set("limit", limit);
-        params.set("sortBy", sortBy);
-        params.set("order", order);
-        if (verdict) params.set("verdict", verdict);
-        if (language) params.set("language", language);
-        return `/all-submissions?${params.toString()}`;
+      query: ({ page = 1, limit = 10, verdict, language, sortBy = 'createdAt', order = 'desc' } = {}) => {
+        const params = new URLSearchParams({ page, limit, sortBy, order });
+        if (verdict) params.set('verdict', verdict);
+        if (language) params.set('language', language);
+        return `/user/all-submissions?${params.toString()}`;
       },
-      providesTags: ["User"],
+      providesTags: ['User'],
     }),
     getAllUsers: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        search = "",
-        sortBy = "rating",
-        order = "desc",
-      } = {}) => {
-        const params = new URLSearchParams();
-        params.set("page", page);
-        params.set("limit", limit);
-        params.set("search", search);
-        params.set("sortBy", sortBy);
-        params.set("order", order);
-        return `/admin/all?${params.toString()}`;
+      query: ({ page = 1, limit = 10, search = '', sortBy = 'rating', order = 'desc' } = {}) => {
+        const params = new URLSearchParams({ page, limit, search, sortBy, order });
+        return `/user/admin/all?${params.toString()}`;
       },
-      providesTags: ["User"],
+      providesTags: ['User'],
     }),
     makeAdmin: builder.mutation({
       query: (id) => ({
-        url: `/admin/make/${id}`,
-        method: "PATCH",
+        url: `/user/admin/make/${id}`,
+        method: 'PATCH',
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ['User'],
     }),
   }),
 });
@@ -96,4 +62,4 @@ export const {
   useGetAllUserSubmissionsQuery,
   useGetAllUsersQuery,
   useMakeAdminMutation,
-} = userAPI;
+} = userApi;

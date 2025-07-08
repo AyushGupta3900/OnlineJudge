@@ -5,12 +5,9 @@ import storage from "redux-persist/lib/storage";
 import authReducer from "../reducers/authReducer.js";
 import codeReducer from "../reducers/codeReducer.js";
 
-import { authAPI } from "../api/authAPI.js";
-import { problemAPI } from "../api/problemAPI.js";
+import { baseApi } from "../api/baseAPI.js"; // merged auth/problem/submission/user
 import { compilerAPI } from "../api/compilerAPI.js";
-import { submissionAPI } from "../api/submissionAPI.js";
 import { contactAPI } from "../api/contactAPI.js";
-import { userAPI } from "../api/userAPI.js";
 
 const authPersistConfig = {
   key: "auth",
@@ -29,23 +26,17 @@ export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     code: persistedCodeReducer,
-    [authAPI.reducerPath]: authAPI.reducer,
-    [problemAPI.reducerPath]: problemAPI.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
     [compilerAPI.reducerPath]: compilerAPI.reducer,
-    [submissionAPI.reducerPath]: submissionAPI.reducer,
     [contactAPI.reducerPath]: contactAPI.reducer,
-    [userAPI.reducerPath]: userAPI.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
     })
-      .concat(authAPI.middleware)
-      .concat(problemAPI.middleware)
+      .concat(baseApi.middleware)
       .concat(compilerAPI.middleware)
-      .concat(submissionAPI.middleware)
-      .concat(contactAPI.middleware)
-      .concat(userAPI.middleware),
+      .concat(contactAPI.middleware),
 });
 
 export const persistor = persistStore(store);
