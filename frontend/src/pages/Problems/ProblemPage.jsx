@@ -11,25 +11,29 @@ const ProblemPage = () => {
   const [viewMode, setViewMode] = useState("side");
 
   const { data: problemData, isLoading, isError } = useGetProblemByIdQuery(id);
-  const { data: statusData, isLoading: isStatusLoading } = useGetProblemStatusQuery(id);
+  const {
+    data: statusData,
+    isLoading: isStatusLoading,
+    isError: isStatusError,
+  } = useGetProblemStatusQuery(id);
 
   const problem = problemData?.data;
   const isSolved = statusData?.status === "solved";
 
   if (isLoading || isStatusLoading) return <LoadingState />;
-  if (isError || !problem) return <ErrorState />;
+  if (isError || isStatusError || !problem) return <ErrorState />;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="bg-gray-900 text-white min-h-screen px-4 py-6"
+      transition={{ duration: 0.4 }}
+      className="bg-[#0e1117] text-white min-h-screen px-4 py-6"
     >
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
         className="max-w-[1600px] mx-auto"
       >
         <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
@@ -53,13 +57,13 @@ const ProblemPage = () => {
 export default ProblemPage;
 
 const LoadingState = () => (
-  <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-    <p className="text-lg text-gray-400 animate-pulse">Loading problem...</p>
+  <div className="bg-[#0e1117] text-white min-h-screen flex items-center justify-center">
+    <p className="text-lg text-blue-400 animate-pulse">Loading problem…</p>
   </div>
 );
 
 const ErrorState = () => (
-  <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+  <div className="bg-[#0e1117] text-white min-h-screen flex items-center justify-center">
     <p className="text-lg text-red-500">Failed to load problem.</p>
   </div>
 );
@@ -68,17 +72,17 @@ const ViewToggle = ({ viewMode, setViewMode }) => (
   <div className="hidden lg:flex justify-end mb-4">
     <button
       onClick={() => setViewMode(viewMode === "side" ? "bottom" : "side")}
-      className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium px-4 py-2 rounded-md border border-gray-700 flex items-center gap-2 transition cursor-pointer"
+      className="bg-[#1e2330] hover:bg-[#2b3042] text-blue-300 text-sm font-medium px-4 py-2 rounded-md border border-[#2a2f3d] flex items-center gap-2 transition cursor-pointer"
     >
       {viewMode === "side" ? (
         <>
           <BiSolidDownArrow className="text-lg" />
-          Move Editor to Bottom
+          Editor Below
         </>
       ) : (
         <>
           <BiSolidLeftArrow className="text-lg" />
-          Move Editor to Side
+          Editor Side
         </>
       )}
     </button>
@@ -89,7 +93,7 @@ const EditorPanel = () => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.3 }}
+    transition={{ duration: 0.4, delay: 0.2 }}
     className="overflow-y-auto max-h-[calc(150vh-3rem)]"
   >
     <CodeEditor />
@@ -100,8 +104,8 @@ const ProblemContent = ({ problem, isSolved }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.2 }}
-    className="space-y-6 overflow-y-auto max-h-[calc(150vh-3rem)] pr-2"
+    transition={{ duration: 0.4, delay: 0.1 }}
+    className="space-y-6 overflow-y-auto max-h-[calc(180vh-3rem)] pr-2"
   >
     <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
       {problem.title}
@@ -146,7 +150,7 @@ const TagsAndDifficulty = ({ problem }) => (
     {problem.tags.map((tag, i) => (
       <span
         key={i}
-        className="bg-gray-800 text-xs px-3 py-1 rounded-full text-gray-300 border border-gray-700"
+        className="bg-[#1e2330] text-xs px-3 py-1 rounded-full text-blue-300 border border-[#2a2f3d]"
       >
         #{tag}
       </span>
@@ -156,7 +160,7 @@ const TagsAndDifficulty = ({ problem }) => (
 
 const Section = ({ title, content }) => (
   <section>
-    <h2 className="text-2xl font-semibold mb-2">{title}</h2>
+    <h2 className="text-xl font-semibold mb-2 text-blue-400">{title}</h2>
     <p className="text-gray-300 leading-relaxed whitespace-pre-line">
       {content}
     </p>
@@ -165,8 +169,8 @@ const Section = ({ title, content }) => (
 
 const ListSection = ({ title, items }) => (
   <section>
-    <h2 className="text-xl font-semibold mb-2">{title}</h2>
-    <ul className="bg-gray-800 p-4 rounded-md text-sm text-gray-200 space-y-1 list-disc pl-6">
+    <h2 className="text-lg font-semibold mb-2 text-blue-300">{title}</h2>
+    <ul className="bg-[#1e2330] p-4 rounded-md text-sm text-gray-200 space-y-1 list-disc pl-6 border border-[#2a2f3d]">
       {items.map((item, idx) => (
         <li key={idx}>{item}</li>
       ))}
@@ -176,28 +180,25 @@ const ListSection = ({ title, items }) => (
 
 const SampleTestCases = ({ testCases }) => (
   <section>
-    <h2 className="text-xl font-semibold mb-4">🧪 Sample Test Cases</h2>
+    <h2 className="text-lg font-semibold mb-4 text-blue-300">🧪 Sample Test Cases</h2>
     <div className="space-y-4">
       {testCases.map((test, index) => (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 * index }}
+          transition={{ delay: 0.05 * index }}
           key={index}
-          className="bg-gray-800 p-4 rounded-md space-y-1 border border-gray-700"
+          className="bg-[#1e2330] p-4 rounded-md space-y-1 border border-[#2a2f3d]"
         >
           <p className="text-sm text-gray-400">Test Case {index + 1}</p>
           <p>
-            <span className="text-blue-400 font-medium">Input:</span>{" "}
-            {test.input}
+            <span className="text-blue-400 font-medium">Input:</span> {test.input}
           </p>
           <p>
-            <span className="text-green-400 font-medium">Output:</span>{" "}
-            {test.output}
+            <span className="text-green-400 font-medium">Output:</span> {test.output}
           </p>
           <p>
-            <span className="text-yellow-400 font-medium">Explanation:</span>{" "}
-            {test.explanation}
+            <span className="text-yellow-400 font-medium">Explanation:</span> {test.explanation}
           </p>
         </motion.div>
       ))}
@@ -209,7 +210,7 @@ const SolvedState = ({ isSolved, problemId }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-4">
     <div className="text-sm font-medium">
       {isSolved ? (
-        <span className="text-green-400">✅ You have solved this problem</span>
+        <span className="text-green-400">✅ Solved</span>
       ) : (
         <span className="text-gray-400">🕒 Not Solved Yet</span>
       )}
@@ -219,7 +220,7 @@ const SolvedState = ({ isSolved, problemId }) => (
       to={`/submissions/problem/${problemId}`}
       className="inline-block bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-md"
     >
-      📄 View Your Submissions
+      📄 View Submissions
     </Link>
   </div>
 );

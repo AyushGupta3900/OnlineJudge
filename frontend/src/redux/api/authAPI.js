@@ -8,7 +8,7 @@ export const authAPI = createApi({
     baseUrl,
     credentials: 'include',
   }),
-  tagTypes: ["User"],
+  tagTypes: ["User","Problem","Submission"],
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (data) => ({
@@ -16,7 +16,7 @@ export const authAPI = createApi({
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User','Problem','Submission'],
     }),
     signupUser: builder.mutation({
       query: (data) => ({
@@ -31,7 +31,7 @@ export const authAPI = createApi({
         url: '/logout',
         method: 'POST',
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User","Problem","Submission"],
     }),
     completeOnboarding: builder.mutation({
       query: (data) => ({

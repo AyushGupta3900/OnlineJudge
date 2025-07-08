@@ -9,7 +9,6 @@ export const contactAPI = createApi({
   tagTypes: ["ContactMessage"],
 
   endpoints: (builder) => ({
-    // POST /contact
     sendContactMessage: builder.mutation({
       query: (body) => ({
         url: "/contact",
@@ -18,8 +17,6 @@ export const contactAPI = createApi({
       }),
       invalidatesTags: ["ContactMessage"],
     }),
-
-    // GET /contact/admin/all
     getContactMessages: builder.query({
       query: ({
         page = 1,

@@ -17,9 +17,11 @@ export const getAllProblems = TryCatch(async (req, res) => {
     order = "desc",
     difficulty,
     tag,
+    status,
   } = req.query;
 
-  const redisKey = `problems:${page}:${limit}:${search}:${sortBy}:${order}:${difficulty}:${tag}`;
+  const userId = req.user?._id || "guest";
+  const redisKey = `problems:${userId}:${page}:${limit}:${search}:${sortBy}:${order}:${difficulty}:${tag}:${status}`;
 
   const cached = await redisClient.get(redisKey);
   if (cached) {
@@ -32,32 +34,56 @@ export const getAllProblems = TryCatch(async (req, res) => {
 
   const query = {};
   const searchFields = ["title", "tags"];
-
   if (difficulty) query.difficulty = difficulty;
   if (tag) query.tags = tag;
 
-  const { results, total, totalPages } = await paginateQuery({
+  const { results: allResults } = await paginateQuery({
     model: Problem,
     query,
     search,
     searchFields,
-    page: Number(page),
-    limit: Number(limit),
+    page: 1,
+    limit: Number.MAX_SAFE_INTEGER,
     sortBy,
     order,
     populate: { path: "createdBy", select: "username email" },
   });
 
-  if (!results.length) throw new AppError("No problems found", 404);
+  let solvedSet = new Set();
+  if (req.user?._id) {
+    const user = await User.findById(req.user._id).select("solvedProblems");
+    if (!user) throw new AppError("User not found", 404);
+    solvedSet = new Set(user.solvedProblems.map(id => id.toString()));
+  }
+
+  let problemsWithStatus = allResults.map(problem => {
+    return {
+      ...problem.toObject(),
+      isSolved: solvedSet.has(problem._id.toString()),
+    };
+  });
+
+
+  if (status === "solved") {
+    problemsWithStatus = problemsWithStatus.filter(p => p.isSolved);
+  } else if (status === "unsolved") {
+    problemsWithStatus = problemsWithStatus.filter(p => !p.isSolved);
+  }
+
+  const total = problemsWithStatus.length;
+  const totalPages = Math.ceil(total / limit);
+  const startIdx = (page - 1) * limit;
+  const endIdx = startIdx + Number(limit);
+  const paginatedData = problemsWithStatus.slice(startIdx, endIdx);
 
   const response = {
-    data: results,
+    data: paginatedData,
     total,
     totalPages,
     page: Number(page),
   };
 
-  await redisClient.set(redisKey, JSON.stringify(response), "EX", 60);
+await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
   res.status(200).json({
     success: true,
@@ -117,7 +143,7 @@ export const createProblem = TryCatch(async (req, res) => {
   });
 });
 
-// on editing problem invalidate getAllProblems, getProblem 
+// on editing problem invalidate getAllProblems, getProblem, ProfileStats, Submissions (All Submissions, Problem Submissions)
 export const editProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
   const updates = req.body;
@@ -134,6 +160,8 @@ export const editProblem = TryCatch(async (req, res) => {
 
   await deleteKeysByPattern("problems:*");
   await deleteKeysByPattern(`problem:${problemId}`);
+  await deleteKeysByPattern(`userSubmissions:*`);
+  await deleteKeysByPattern(`profileStats:*`);
 
   res.status(200).json({
     success: true,
@@ -142,9 +170,11 @@ export const editProblem = TryCatch(async (req, res) => {
   });
 });
 
-// on deleting problem invalidate getAllProblems, getProblem 
+// on deleting problem invalidate getAllProblems, getProblem, ProfileStats, Submissions(All Submissions, Problem Submissions)
+
 export const deleteProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
+  const userId = req.user?._id;
 
   const problem = await Problem.findById(problemId);
   if (!problem) throw new AppError("Problem not found", 404);
@@ -170,6 +200,8 @@ export const deleteProblem = TryCatch(async (req, res) => {
 
   await deleteKeysByPattern("problems:*");
   await deleteKeysByPattern(`problem:${problemId}`);
+  await deleteKeysByPattern(`userSubmissions:*`);
+  await deleteKeysByPattern(`profileStats:*`);
 
   res.status(200).json({
     success: true,
@@ -180,6 +212,7 @@ export const deleteProblem = TryCatch(async (req, res) => {
 
 export const getProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
+  console.log(problemId)
   if (!problemId) throw new AppError("Problem ID is required", 400);
 
   const redisKey = `problem:${problemId}`;
@@ -191,12 +224,12 @@ export const getProblem = TryCatch(async (req, res) => {
       data: JSON.parse(cached),
     });
   }
-
   const problem = await Problem.findById(problemId).populate(
     "createdBy",
     "username email"
   );
   if (!problem) throw new AppError("Problem not found", 404);
+  console.log(problem)
 
   await redisClient.set(redisKey, JSON.stringify(problem), "EX", 60);
 
@@ -278,7 +311,21 @@ export const createProblemFromArray = TryCatch(async (req, res) => {
 });
 
 export const getProblemStatus = TryCatch(async (req, res) => {
-  const { problemId } = req.params;
+  const problemId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(problemId)) {
+    throw new AppError("Invalid problem ID", 400);
+  }
+
+  // If user is not logged in
+  if (!req.user || !req.user._id) {
+    const response = {
+      success: true,
+      problemId,
+      status: "unsolved",
+    };
+    return res.status(200).json(response);
+  }
 
   const cacheKey = `problemStatus:${req.user._id}:${problemId}`;
   const cached = await redisClient.get(cacheKey);
@@ -287,12 +334,7 @@ export const getProblemStatus = TryCatch(async (req, res) => {
     return res.status(200).json(JSON.parse(cached));
   }
 
-  if (!mongoose.Types.ObjectId.isValid(problemId)) {
-    throw new AppError("Invalid problem ID", 400);
-  }
-
   const user = await User.findById(req.user._id).select("solvedProblems");
-
   if (!user) {
     throw new AppError("User not found", 404);
   }
@@ -307,7 +349,7 @@ export const getProblemStatus = TryCatch(async (req, res) => {
     status: isSolved ? "solved" : "unsolved",
   };
 
-  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
-  res.status(200).json(response);
-});
+  await redisClient.set(cacheKey, JSON.stringify(response), "EX", 60);
 
+  return res.status(200).json(response);
+});

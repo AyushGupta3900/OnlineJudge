@@ -310,6 +310,8 @@ export const makeAdmin = TryCatch(async (req, res) => {
 
   user.role = "admin";
   await user.save();
+  
+  await deleteKeysByPattern("users:*");
 
   res.status(200).json({
     success: true,

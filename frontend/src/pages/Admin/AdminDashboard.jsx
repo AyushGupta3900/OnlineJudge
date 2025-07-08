@@ -75,7 +75,7 @@ const AdminDashboard = () => {
         <div className="flex justify-end">
           <input
             type="text"
-            placeholder="Search problems"
+            placeholder="Search by problem name or tag"
             value={searchTerm}
             onChange={handleSearchChange}
             className="bg-gray-800 text-white px-4 py-2 rounded-md w-full max-w-xs placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-500"

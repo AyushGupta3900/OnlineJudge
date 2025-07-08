@@ -31,5 +31,5 @@ backend/.env
 
 compiler/node_modules/
 compiler/.env
-compiler/codes
-compiler/outputs
+compiler/utils/codes
+compiler/utils/executeCode/outputs

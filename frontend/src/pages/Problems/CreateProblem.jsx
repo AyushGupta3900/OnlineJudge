@@ -174,7 +174,7 @@ const CreateProblem = () => {
 
     try {
       await createProblem(payload).unwrap();
-      toast.success("✅ Problem created!");
+      toast.success("Problem created!");
       navigate("/admin");
     } catch (err) {
       console.error(err);

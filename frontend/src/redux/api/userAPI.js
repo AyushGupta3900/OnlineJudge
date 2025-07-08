@@ -8,14 +8,14 @@ export const userAPI = createApi({
     baseUrl,
     credentials: "include",
   }),
-  tagTypes: ["User"],
+  tagTypes: ["User","Problem","Submission"],
   endpoints: (builder) => ({
     deleteAccount: builder.mutation({
       query: () => ({
         url: `/delete-account`,
         method: "DELETE",
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User","Problem","Submission"],
     }),
     updateAccount: builder.mutation({
       query: (data) => ({
@@ -46,7 +46,7 @@ export const userAPI = createApi({
         limit = 10,
         verdict,
         language,
-        sortBy = "submittedAt",
+        sortBy = "createdAt",
         order = "desc",
       } = {}) => {
         const params = new URLSearchParams();

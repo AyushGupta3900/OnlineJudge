@@ -8,8 +8,7 @@ export const submissionAPI = createApi({
     baseUrl,
     credentials: "include",
   }),
-  tagTypes: ["Submission", "User"],
-
+  tagTypes: ["Submission", "User","Problem"],
   endpoints: (builder) => ({
     submitCode: builder.mutation({
       query: ({ problemId, code, language }) => ({
@@ -17,7 +16,7 @@ export const submissionAPI = createApi({
         method: "POST",
         body: { problemId, code, language },
       }),
-      invalidatesTags: ["Submission", "User"], 
+      invalidatesTags: ["Submission", "User","Problem"], 
     }),
     getSubmissionById: builder.query({
       query: (submissionId) => `/${submissionId}`,

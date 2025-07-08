@@ -78,8 +78,8 @@ const SubmissionsTable = ({ submissions, expandedRows, toggleRow, startIndex }) 
       </thead>
       <tbody>
         {submissions.map((s, idx) => {
-          const dateStr = s.submittedAt
-            ? new Date(s.submittedAt).toLocaleString()
+          const dateStr = s.createdAt
+            ? new Date(s.createdAt).toLocaleString()
             : "N/A";
           return (
             <React.Fragment key={startIndex + idx}>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useGetAllProblemsQuery, useGetProblemStatusQuery } from "../../redux/api/problemAPI.js";
+import { useGetAllProblemsQuery } from "../../redux/api/problemAPI.js";
 import Pagination from "../../components/Pagination.jsx";
 
 const Problems = () => {
@@ -15,7 +15,8 @@ const Problems = () => {
     page: currentPage,
     search,
     difficulty: selectedDifficulty,
-    status: "solved",
+    tag: "", 
+    status: selectedStatus, // ✅ pass to server
   });
 
   const problems = data?.data || [];
@@ -153,8 +154,6 @@ const CardView = ({ problems }) => (
 );
 
 const ProblemCard = ({ problem }) => {
-  const { data: status, isLoading } = useGetProblemStatusQuery(problem._id);
-
   return (
     <div className="bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 flex flex-col justify-between min-h-[220px]">
       <div>
@@ -188,18 +187,10 @@ const ProblemCard = ({ problem }) => {
       <div className="flex justify-between items-center mt-auto">
         <span
           className={`text-sm font-medium ${
-            status === "solved"
-              ? "text-green-400"
-              : status === "unsolved"
-              ? "text-red-400"
-              : "text-gray-400"
+            problem.isSolved ? "text-green-400" : "text-red-400"
           }`}
         >
-          {isLoading
-            ? "Checking..."
-            : status === "solved"
-            ? "✅ Solved"
-            : "⭕ Unsolved"}
+          {problem.isSolved ? "✅ Solved" : "⭕ Unsolved"}
         </span>
         <Link
           to={`/problems/${problem._id}`}
@@ -226,61 +217,52 @@ const TableView = ({ problems }) => (
       </thead>
       <tbody>
         {problems.map((problem) => (
-          <ProblemRow key={problem._id} problem={problem} />
+          <tr
+            key={problem._id}
+            className="border-b border-gray-700 hover:bg-gray-700 transition"
+          >
+            <td className="px-6 py-3">
+              <Link
+                to={`/problems/${problem._id}`}
+                className="text-blue-400 hover:underline"
+              >
+                {problem.title}
+              </Link>
+            </td>
+            <td className="px-6 py-3">
+              <span
+                className={`px-2 py-1 text-xs rounded-full font-medium ${
+                  problem.difficulty === "Easy"
+                    ? "bg-green-600"
+                    : problem.difficulty === "Medium"
+                    ? "bg-yellow-500 text-black"
+                    : "bg-red-600"
+                }`}
+              >
+                {problem.difficulty}
+              </span>
+            </td>
+            <td className="px-6 py-3">
+              <div className="flex flex-wrap gap-2">
+                {problem.tags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="bg-gray-600 text-gray-200 px-2 py-0.5 rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </td>
+            <td className="px-6 py-3">
+              {problem.isSolved ? "✅" : "⭕"}
+            </td>
+          </tr>
         ))}
       </tbody>
     </table>
   </div>
 );
-
-const ProblemRow = ({ problem }) => {
-  const { data: status, isLoading } = useGetProblemStatusQuery(problem._id);
-
-  return (
-    <tr className="border-b border-gray-700 hover:bg-gray-700 transition">
-      <td className="px-6 py-3">
-        <Link
-          to={`/problems/${problem._id}`}
-          className="text-blue-400 hover:underline"
-        >
-          {problem.title}
-        </Link>
-      </td>
-      <td className="px-6 py-3">
-        <span
-          className={`px-2 py-1 text-xs rounded-full font-medium ${
-            problem.difficulty === "Easy"
-              ? "bg-green-600"
-              : problem.difficulty === "Medium"
-              ? "bg-yellow-500 text-black"
-              : "bg-red-600"
-          }`}
-        >
-          {problem.difficulty}
-        </span>
-      </td>
-      <td className="px-6 py-3">
-        <div className="flex flex-wrap gap-2">
-          {problem.tags.map((tag, i) => (
-            <span
-              key={i}
-              className="bg-gray-600 text-gray-200 px-2 py-0.5 rounded-full text-xs"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </td>
-      <td className="px-6 py-3">
-        {isLoading
-          ? "Checking..."
-          : status === "solved"
-          ? "✅"
-          : "⭕"}
-      </td>
-    </tr>
-  );
-};
 
 // ================= Skeleton Loader =================
 const SkeletonLoader = ({ viewMode }) => {

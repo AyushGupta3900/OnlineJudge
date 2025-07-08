@@ -6,6 +6,78 @@ import PageHeader from "../../components/PageHeader.jsx";
 
 const medalColors = ["text-yellow-400", "text-gray-300", "text-orange-400"];
 
+const Leaderboard = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const usersPerPage = 8;
+
+  const { data, isLoading, isFetching, isError } = useGetLeaderboardQuery({
+    page: currentPage,
+    limit: usersPerPage,
+    search,
+  });
+
+  const heading = "Leaderboard";
+
+  const topThree = data?.topThree || [];
+  const users = data?.users || [];
+  const totalPages = data?.totalPages || 1;
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader heading={heading} />
+
+        {/* Search Box */}
+        <div className="flex justify-end mb-4">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1); // reset to first page
+            }}
+            placeholder="Search by username or name..."
+            className="bg-gray-800 text-white px-4 py-2 rounded-md border border-gray-700 w-full max-w-sm"
+          />
+        </div>
+
+        {isLoading ? (
+          <PageLoadingSkeleton />
+        ) : isError ? (
+          <p className="text-red-500 text-center">Failed to load leaderboard.</p>
+        ) : !users.length && !topThree.length ? (
+          <p className="text-center text-gray-400">No users found.</p>
+        ) : (
+          <>
+            <TopThree users={topThree} />
+
+            {isFetching ? (
+              <LeaderboardTableSkeleton />
+            ) : (
+              <>
+                <LeaderboardTable
+                  users={users}
+                  startRank={(currentPage - 1) * usersPerPage + 4}
+                />
+                {totalPages > 1 && (
+                  <AdminPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Leaderboard;
+
 const TopThree = ({ users }) => {
   if (!users.length) return null;
 
@@ -76,62 +148,6 @@ const LeaderboardTable = ({ users, startRank }) => {
     </div>
   );
 };
-
-const Leaderboard = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 8;
-
-  const { data, isLoading, isFetching, isError } = useGetLeaderboardQuery({
-    page: currentPage,
-    limit: usersPerPage,
-  });
-
-  const heading = "Leaderboard";
-
-  const topThree = data?.topThree || [];
-  const users = data?.users || [];
-  const totalPages = data?.totalPages || 1;
-
-  return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <PageHeader heading={heading} />
-
-        {isLoading ? (
-          <PageLoadingSkeleton />
-        ) : isError ? (
-          <p className="text-red-500 text-center">Failed to load leaderboard.</p>
-        ) : !users.length && !topThree.length ? (
-          <p className="text-center text-gray-400">No users found.</p>
-        ) : (
-          <>
-            <TopThree users={topThree} />
-
-            {isFetching ? (
-              <LeaderboardTableSkeleton />
-            ) : (
-              <>
-                <LeaderboardTable
-                  users={users}
-                  startRank={(currentPage - 1) * usersPerPage + 4}
-                />
-                {totalPages > 1 && (
-                  <AdminPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default Leaderboard;
 
 const PageLoadingSkeleton = () => (
   <>

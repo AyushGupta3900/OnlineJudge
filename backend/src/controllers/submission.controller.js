@@ -81,7 +81,7 @@ export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
     query: { user: userId, problem: problemId },
     page,
     limit,
-    sortBy: "submittedAt",
+    sortBy: "createdAt",
     order: "desc",
     populate: { path: "problem", select: "title" },
   });

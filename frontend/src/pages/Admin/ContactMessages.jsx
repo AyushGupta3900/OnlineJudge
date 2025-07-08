@@ -25,7 +25,7 @@ const ContactMessages = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // reset to first page on search
+    setCurrentPage(1); 
   };
 
   const heading = "Contact Messages";
@@ -38,7 +38,7 @@ const ContactMessages = () => {
         <div className="flex justify-end">
           <input
             type="text"
-            placeholder="Search messages"
+            placeholder="Search by name, email or message"
             value={searchTerm}
             onChange={handleSearchChange}
             className="bg-gray-800 text-white px-4 py-2 rounded-md w-full max-w-xs placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-500"
