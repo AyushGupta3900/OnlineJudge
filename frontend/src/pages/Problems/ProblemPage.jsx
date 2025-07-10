@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BiSolidLeftArrow, BiSolidDownArrow } from "react-icons/bi";
+import toast from "react-hot-toast";
 
 import { useGetProblemByIdQuery, useGetProblemStatusQuery } from "../../redux/api/problemAPI";
 import CodeEditor from "../../components/CodeEditor";
@@ -20,7 +21,12 @@ const ProblemPage = () => {
   const problem = problemData?.data;
   const isSolved = statusData?.status === "solved";
 
-  if (isLoading || isStatusLoading) return <LoadingState />;
+  const handleAIReview = () => {
+    toast("🤖 AI Review requested!", { icon: "🤖" });
+    // You can later integrate actual API call here
+  };
+
+  if (isLoading || isStatusLoading) return <Skeleton viewMode={viewMode} />;
   if (isError || isStatusError || !problem) return <ErrorState />;
 
   return (
@@ -30,37 +36,26 @@ const ProblemPage = () => {
       transition={{ duration: 0.4 }}
       className="bg-[#0e1117] text-white min-h-screen px-4 py-6"
     >
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="max-w-[1600px] mx-auto"
-      >
+      <div className="max-w-[1600px] mx-auto">
         <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
         {viewMode === "side" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ProblemContent problem={problem} isSolved={isSolved} />
-            <EditorPanel />
+            <EditorPanel handleAIReview={handleAIReview} />
           </div>
         ) : (
           <div className="flex flex-col gap-6">
             <ProblemContent problem={problem} isSolved={isSolved} />
-            <EditorPanel />
+            <EditorPanel handleAIReview={handleAIReview} />
           </div>
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
 
 export default ProblemPage;
-
-const LoadingState = () => (
-  <div className="bg-[#0e1117] text-white min-h-screen flex items-center justify-center">
-    <p className="text-lg text-blue-400 animate-pulse">Loading problem…</p>
-  </div>
-);
 
 const ErrorState = () => (
   <div className="bg-[#0e1117] text-white min-h-screen flex items-center justify-center">
@@ -89,14 +84,14 @@ const ViewToggle = ({ viewMode, setViewMode }) => (
   </div>
 );
 
-const EditorPanel = () => (
+const EditorPanel = ({ handleAIReview }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.2 }}
+    transition={{ duration: 0.4 }}
     className="overflow-y-auto max-h-[calc(150vh-3rem)]"
   >
-    <CodeEditor />
+    <CodeEditor onAIReview={handleAIReview} />
   </motion.div>
 );
 
@@ -104,7 +99,7 @@ const ProblemContent = ({ problem, isSolved }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.1 }}
+    transition={{ duration: 0.4 }}
     className="space-y-6 overflow-y-auto max-h-[calc(180vh-3rem)] pr-2"
   >
     <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
@@ -222,5 +217,74 @@ const SolvedState = ({ isSolved, problemId }) => (
     >
       📄 View Submissions
     </Link>
+  </div>
+);
+
+const SkeletonBox = ({ className }) => (
+  <div className={`animate-pulse bg-[#1e2330] rounded-md ${className}`} />
+);
+
+const Skeleton = ({ viewMode }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.4 }}
+    className="bg-[#0e1117] text-white min-h-screen px-4 py-6"
+  >
+    <div className="max-w-[1600px] mx-auto space-y-4">
+      <div className="hidden lg:flex justify-end mb-4">
+        <SkeletonBox className="w-40 h-8" />
+      </div>
+
+      {viewMode === "side" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonContent />
+          <SkeletonEditor />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <SkeletonContent />
+          <SkeletonEditor />
+        </div>
+      )}
+    </div>
+  </motion.div>
+);
+
+const SkeletonContent = () => (
+  <div className="space-y-4">
+    <SkeletonBox className="h-10 w-1/2" />
+    <div className="flex gap-3">
+      <SkeletonBox className="w-20 h-6" />
+      <SkeletonBox className="w-12 h-6" />
+      <SkeletonBox className="w-12 h-6" />
+    </div>
+    <SkeletonBox className="h-24 w-full" />
+    <SkeletonBox className="h-20 w-full" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <SkeletonBox className="h-20 w-full" />
+      <SkeletonBox className="h-20 w-full" />
+    </div>
+    <SkeletonBox className="h-32 w-full" />
+    <div className="flex gap-4">
+      <SkeletonBox className="h-8 w-32" />
+      <SkeletonBox className="h-8 w-40" />
+    </div>
+  </div>
+);
+
+const SkeletonEditor = () => (
+  <div className="space-y-4">
+    <div className="flex flex-wrap justify-between gap-3">
+      <SkeletonBox className="h-8 w-32" />
+      <div className="flex gap-3">
+        <SkeletonBox className="h-8 w-20" />
+        <SkeletonBox className="h-8 w-20" />
+        <SkeletonBox className="h-8 w-24" /> 
+      </div>
+    </div>
+    <SkeletonBox className="h-[420px] w-full" />
+    <SkeletonBox className="h-24 w-full" />
+    <SkeletonBox className="h-10 w-full" />
   </div>
 );

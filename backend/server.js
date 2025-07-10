@@ -11,9 +11,10 @@ import userRoutes from "./src/routes/user.routes.js"
 import problemRoutes from "./src/routes/problem.routes.js"
 import submissionRoutes from "./src/routes/submission.routes.js"
 import contactRoutes from "./src/routes/contact.routes.js";
+import aiRoutes from "./src/routes/ai.routes.js";
 
-import {connectDB} from "./src/utils/config/db.js"
-import {connectRabbitMQ} from "./src/utils/config/rabbitmq.js"
+import {connectDB} from "./src/utils/config/db.js";
+import {connectRabbitMQ} from "./src/utils/config/rabbitmq.js";
 import { globalErrorHandler } from "./src/middlewares/error.middleware.js";
 
 // configuring .env
@@ -57,6 +58,7 @@ app.use("/api/v1/user",userRoutes);
 app.use("/api/v1/problem",problemRoutes);
 app.use("/api/v1/submission",submissionRoutes);
 app.use("/api/v1/contact", contactRoutes);
+app.use("/api/v1/ai",aiRoutes);
 
 app.use(globalErrorHandler);
 

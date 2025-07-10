@@ -5,9 +5,10 @@ import storage from "redux-persist/lib/storage";
 import authReducer from "../reducers/authReducer.js";
 import codeReducer from "../reducers/codeReducer.js";
 
-import { baseApi } from "../api/baseAPI.js"; // merged auth/problem/submission/user
+import { baseApi } from "../api/baseAPI.js";
 import { compilerAPI } from "../api/compilerAPI.js";
 import { contactAPI } from "../api/contactAPI.js";
+import { aiAPI} from "../api/aiAPI.js";
 
 const authPersistConfig = {
   key: "auth",
@@ -29,6 +30,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
     [compilerAPI.reducerPath]: compilerAPI.reducer,
     [contactAPI.reducerPath]: contactAPI.reducer,
+    [aiAPI.reducerPath]: aiAPI.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -36,7 +38,8 @@ export const store = configureStore({
     })
       .concat(baseApi.middleware)
       .concat(compilerAPI.middleware)
-      .concat(contactAPI.middleware),
+      .concat(contactAPI.middleware)
+      .concat(aiAPI.middleware),
 });
 
 export const persistor = persistStore(store);
