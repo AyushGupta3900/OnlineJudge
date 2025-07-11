@@ -4,6 +4,7 @@ import {
   useGetProblemByIdQuery,
   useUpdateProblemMutation,
 } from "../../redux/api/problemAPI";
+import { useGenerateTestCasesMutation } from "../../redux/api/aiAPI";
 import toast from "react-hot-toast";
 import PageLoader from "../../components/PageLoader";
 import { FiX } from "react-icons/fi";
@@ -46,10 +47,8 @@ const DynamicArrayField = ({ label, values, setValues }) => (
         {values.length > 1 && (
           <motion.button
             type="button"
-            onClick={() =>
-              setValues(values.filter((_, idx) => idx !== i))
-            }
-            className="text-red-500 hover:text-red-400"
+            onClick={() => setValues(values.filter((_, idx) => idx !== i))}
+            className="text-red-500 hover:text-red-400 cursor-pointer"
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -61,7 +60,7 @@ const DynamicArrayField = ({ label, values, setValues }) => (
     <motion.button
       type="button"
       onClick={() => setValues([...values, ""])}
-      className="mt-1 px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-sm"
+      className="mt-1 px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-sm cursor-pointer"
       variants={buttonVariants}
       whileHover="hover"
       whileTap="tap"
@@ -103,32 +102,28 @@ const TestCaseSection = ({ title, testCases, setTestCases, hasExplanation }) => 
           <motion.button
             type="button"
             onClick={() => removeCase(idx)}
-            className="absolute top-2 right-2 text-red-500 hover:text-red-400"
+            className="absolute top-2 right-2 text-red-500 hover:text-red-400 cursor-pointer"
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
           >
             <FiX size={18} />
           </motion.button>
-          {Object.keys(tc)
-            .filter((key) => key !== "_id")
-            .map((key) => (
-              <textarea
-                key={key}
-                placeholder={key}
-                value={tc[key]}
-                onChange={(e) =>
-                  handleChange(idx, key, e.target.value)
-                }
-                rows={key === "explanation" ? 2 : 3}
-                className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
-              />
-            ))}
+          {Object.keys(tc).map((key) => (
+            <textarea
+              key={key}
+              placeholder={key}
+              value={tc[key]}
+              onChange={(e) => handleChange(idx, key, e.target.value)}
+              rows={key === "explanation" ? 2 : 3}
+              className="w-full bg-gray-900 border border-gray-700 px-3 py-2 rounded-md resize-y mb-2"
+            />
+          ))}
         </motion.div>
       ))}
       <motion.button
         type="button"
         onClick={addCase}
-        className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md"
+        className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-md cursor-pointer"
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
@@ -145,6 +140,7 @@ const UpdateProblem = () => {
 
   const { data, isLoading: isFetching, error } = useGetProblemByIdQuery(id);
   const [updateProblem, { isLoading }] = useUpdateProblemMutation();
+  const [generateTestCases, { isLoading: isGenerating }] = useGenerateTestCasesMutation();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -170,10 +166,7 @@ const UpdateProblem = () => {
   useEffect(() => {
     if (data?.data) {
       const p = data.data;
-
-      // Remove `_id` from test cases
-      const stripId = (arr) =>
-        arr.map(({ _id, ...rest }) => rest);
+      const stripId = (arr) => arr.map(({ _id, ...rest }) => rest);
 
       setFormData({
         title: p.title,
@@ -226,6 +219,41 @@ const UpdateProblem = () => {
     }
   };
 
+  const handleGenerateAITestCases = async () => {
+    const payload = {
+      problemId: id,
+    };
+
+    try {
+      const { testCases } = await generateTestCases(payload).unwrap();
+
+      const parsedTestCases = [];
+      const regex =
+        /Input:\s*([\s\S]*?)Expected Output:\s*([\s\S]*?)(?:```|$)/g;
+
+      let match;
+      while ((match = regex.exec(testCases)) !== null) {
+        parsedTestCases.push({
+          input: match[1].trim(),
+          output: match[2].trim(),
+        });
+      }
+
+      if (parsedTestCases.length > 0) {
+        setFormData((p) => ({
+          ...p,
+          hiddenTestCases: [...p.hiddenTestCases, ...parsedTestCases],
+        }));
+        toast.success(`✅ ${parsedTestCases.length} AI test cases added!`);
+      } else {
+        toast.error("⚠️ Could not parse AI test cases.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("❌ Failed to generate AI test cases");
+    }
+  };
+
   if (isFetching) return <PageLoader />;
 
   return (
@@ -239,9 +267,7 @@ const UpdateProblem = () => {
         className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 shadow"
         variants={fieldVariants}
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          ✏️ Update Problem
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">✏️ Update Problem</h2>
 
         <motion.form
           onSubmit={handleSubmit}
@@ -304,23 +330,17 @@ const UpdateProblem = () => {
           <DynamicArrayField
             label="Constraints"
             values={formData.constraints}
-            setValues={(v) =>
-              setFormData((p) => ({ ...p, constraints: v }))
-            }
+            setValues={(v) => setFormData((p) => ({ ...p, constraints: v }))}
           />
           <DynamicArrayField
             label="Input Format"
             values={formData.inputFormat}
-            setValues={(v) =>
-              setFormData((p) => ({ ...p, inputFormat: v }))
-            }
+            setValues={(v) => setFormData((p) => ({ ...p, inputFormat: v }))}
           />
           <DynamicArrayField
             label="Output Format"
             values={formData.outputFormat}
-            setValues={(v) =>
-              setFormData((p) => ({ ...p, outputFormat: v }))
-            }
+            setValues={(v) => setFormData((p) => ({ ...p, outputFormat: v }))}
           />
 
           <motion.div
@@ -352,24 +372,38 @@ const UpdateProblem = () => {
           <TestCaseSection
             title="Sample Test Cases"
             testCases={formData.sampleTestCases}
-            setTestCases={(v) =>
-              setFormData((p) => ({ ...p, sampleTestCases: v }))
-            }
+            setTestCases={(v) => setFormData((p) => ({ ...p, sampleTestCases: v }))}
             hasExplanation
           />
+
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Hidden Test Cases</h3>
+            <motion.button
+              type="button"
+              onClick={handleGenerateAITestCases}
+              disabled={isGenerating}
+              className={`px-4 py-2 rounded-md font-semibold cursor-pointer ${
+                isGenerating ? "bg-gray-700" : "bg-purple-600 hover:bg-purple-500"
+              }`}
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              {isGenerating ? "Generating..." : "Generate AI Test Cases"}
+            </motion.button>
+          </div>
+
           <TestCaseSection
-            title="Hidden Test Cases"
+            title=""
             testCases={formData.hiddenTestCases}
-            setTestCases={(v) =>
-              setFormData((p) => ({ ...p, hiddenTestCases: v }))
-            }
+            setTestCases={(v) => setFormData((p) => ({ ...p, hiddenTestCases: v }))}
             hasExplanation={false}
           />
 
           <motion.button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md font-semibold"
+            className="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md font-semibold cursor-pointer"
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"

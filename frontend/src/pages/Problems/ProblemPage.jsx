@@ -23,7 +23,6 @@ const ProblemPage = () => {
 
   const handleAIReview = () => {
     toast("🤖 AI Review requested!", { icon: "🤖" });
-    // You can later integrate actual API call here
   };
 
   if (isLoading || isStatusLoading) return <Skeleton viewMode={viewMode} />;

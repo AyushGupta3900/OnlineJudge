@@ -62,7 +62,37 @@ export default function App() {
 
   return (
     <Router>
-      <Toaster position="top-center" reverseOrder={false} />
+<Toaster
+  position="top-center"
+  reverseOrder={false}
+  toastOptions={{
+    style: {
+      background: "#1e2330",
+      color: "#e2e8f0",
+      border: "1px solid #2a2f3d",
+      fontSize: "14px",
+    },
+    success: {
+      iconTheme: {
+        primary: "#10b981", // green
+        secondary: "#1e2330",
+      },
+    },
+    error: {
+      iconTheme: {
+        primary: "#ef4444", // red
+        secondary: "#1e2330",
+      },
+    },
+    loading: {
+      iconTheme: {
+        primary: "#3b82f6", // blue spinner
+        secondary: "#1e2330",
+      },
+    },
+  }}
+/>
+
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Nav />

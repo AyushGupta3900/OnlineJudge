@@ -98,12 +98,12 @@ export const handleAIReview = async (
 ) => {
   setAiReviewVisible(true);
   setAiReviewText("");
-toast.loading("Generating AI Review...");
+  toast.loading("Generating AI Review...");
   try {
     const res = await getAIReview({
       code,
       language,
-      problemTitle: problemId,
+      problemId,
     }).unwrap();
     setAiReviewText(res.review || "No review available.");
     toast.dismiss();
@@ -130,9 +130,43 @@ export const handleAIBoilerplate = async (
     const res = await generateBoilerplate({ language, problemId }).unwrap();
     updateCode(res.boilerplate || "");
     toast.dismiss();
-    toast.success("AI Boilerplate generate");
+    toast.success("AI Boilerplate generated");
   } catch (err) {
     toast.dismiss();
     toast.error(err?.data?.message || "Failed to generate AI boilerplate.");
+  }
+};
+
+export const handleAIHint = async (
+  problemId,
+  code,
+  language,
+  setHintVisible,
+  setHintText,
+  generateAiHint
+) => {
+  if (!problemId) {
+    toast.error("⚠️ Problem ID not found.");
+    return;
+  }
+
+  setHintVisible(true);
+  setHintText("");
+  toast.loading("Generating AI Hint...");
+
+  try {
+    const res = await generateAiHint({
+      problemId,
+      code: code || "",           
+      language: language,
+    }).unwrap();
+
+    setHintText(res.hint || "No hint available.");
+    toast.dismiss();
+    toast.success("Hint generated");
+  } catch (err) {
+    toast.dismiss();
+    toast.error(err?.data?.message || "Failed to generate AI hint.");
+    setHintText(err?.data?.message || "Failed to fetch AI hint.");
   }
 };

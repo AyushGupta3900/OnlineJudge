@@ -6,7 +6,7 @@ export const aiAPI = createApi({
     baseUrl: import.meta.env.VITE_API_URL,
     credentials: "include",
   }),
-  tagTypes: ["AIReview", "Boilerplate", "TestCases"],
+  tagTypes: ["AIReview", "Boilerplate", "TestCases", "AIHint"],
 
   endpoints: (builder) => ({
     getAIReview: builder.mutation({
@@ -28,12 +28,21 @@ export const aiAPI = createApi({
     }),
 
     generateTestCases: builder.mutation({
-      query: ({ problemId }) => ({
+      query: (payload) => ({
         url: "/ai/generate-testcases",
         method: "POST",
-        body: { problemId },
+        body: payload,
       }),
       invalidatesTags: ["TestCases"],
+    }),
+
+    generateAiHint: builder.mutation({
+      query: (payload) => ({
+        url: "/ai/generate-ai-hint",
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["AIHint"],
     }),
   }),
 });
@@ -42,4 +51,5 @@ export const {
   useGetAIReviewMutation,
   useGenerateBoilerplateMutation,
   useGenerateTestCasesMutation,
+  useGenerateAiHintMutation,
 } = aiAPI;

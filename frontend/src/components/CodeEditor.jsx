@@ -12,6 +12,7 @@ import { useRunCodeMutation } from "../redux/api/compilerAPI.js";
 import {
   useGetAIReviewMutation,
   useGenerateBoilerplateMutation,
+  useGenerateAiHintMutation,
 } from "../redux/api/aiAPI.js";
 
 import useCode from "../hooks/useCode";
@@ -24,7 +25,8 @@ import {
   handleReset,
   handleAIReview,
   handleAIBoilerplate,
-  loadBoilerplate
+  loadBoilerplate,
+  handleAIHint,
 } from "../utils/codeEditorUtils.js";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
@@ -45,11 +47,15 @@ const CodeEditor = ({ problemId: propId }) => {
   const [getAIReview, { isLoading: aiReviewLoading }] =
     useGetAIReviewMutation();
   const [generateBoilerplate] = useGenerateBoilerplateMutation();
+  const [generateAiHint, {isLoading: aiHintLoading}] = useGenerateAiHintMutation();
 
   const { code, language, updateCode, updateLanguage } = useCode(problemId);
 
   const [aiReviewVisible, setAiReviewVisible] = useState(false);
   const [aiReviewText, setAiReviewText] = useState("");
+
+  const [hintVisible, setHintVisible] = useState(false);
+  const [hintText, setHintText] = useState("");
 
   useEffect(() => {
     if (code === null) loadBoilerplate(language, updateCode);
@@ -206,6 +212,23 @@ const CodeEditor = ({ problemId: propId }) => {
             generateBoilerplate
           )
         }
+        onHint={() =>
+          handleAIHint(
+            problemId,
+            code,
+            language,
+            setHintVisible,
+            setHintText,
+            generateAiHint
+          )
+        }
+      />
+
+      <HintModal
+        visible={hintVisible}
+        onClose={() => setHintVisible(false)}
+        hintText={hintText}
+        loading={aiHintLoading}
       />
     </div>
   );
@@ -225,5 +248,29 @@ const ActionButton = ({ onClick, label, icon, color, loading }) => (
     {loading ? `${label}…` : label}
   </button>
 );
+const HintModal = ({ visible, onClose, hintText, loading }) => {
+  if (!visible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-[#0e1117] border border-[#2a2f3d] rounded-lg shadow-lg p-6 max-w-lg w-full text-white">
+        <h2 className="text-lg font-semibold text-yellow-400 mb-3">💡 AI Hint</h2>
+        <div className="text-sm whitespace-pre-wrap text-gray-300 max-h-[300px] overflow-y-auto">
+          {loading
+            ? "Generating hint…"
+            : hintText || "No hint available."}
+        </div>
+        <div className="mt-4 text-right">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default CodeEditor;

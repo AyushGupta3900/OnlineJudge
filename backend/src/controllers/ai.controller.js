@@ -139,18 +139,54 @@ Output only the code, nothing else.
 });
 
 export const generateTestCases = TryCatch(async (req, res) => {
-  const { problemId } = req.body;
+  const {
+    problemId,
+    title,
+    description,
+    constraints,
+    inputFormat,
+    outputFormat,
+    difficulty,
+  } = req.body;
 
-  if (!problemId) {
-    throw new AppError("problemId is required", 400);
+  let problemContext = "";
+
+  if (problemId) {
+    const problem = await Problem.findById(problemId);
+    if (!problem) {
+      throw new AppError("Problem not found", 404);
+    }
+
+    problemContext = `Here is the problem description:
+Title: ${problem.title}
+Description: ${problem.description}
+Difficulty: ${problem.difficulty}
+Constraints: ${problem.constraints?.join(", ") || "N/A"}
+Input Format: ${problem.inputFormat?.join(", ") || "N/A"}
+Output Format: ${problem.outputFormat?.join(", ") || "N/A"}`;
+  } else {
+    // use provided form data
+    if (!title || !description) {
+      throw new AppError(
+        "Either problemId or full problem details (title & description) are required",
+        400
+      );
+    }
+
+    problemContext = `Here is the problem description:
+Title: ${title}
+Description: ${description}
+${difficulty ? `Difficulty: ${difficulty}` : ""}
+Constraints: ${
+      constraints?.length ? constraints.join(", ") : "N/A"
+    }
+Input Format: ${
+      inputFormat?.length ? inputFormat.join(", ") : "N/A"
+    }
+Output Format: ${
+      outputFormat?.length ? outputFormat.join(", ") : "N/A"
+    }`;
   }
-
-  const problem = await Problem.findById(problemId);
-  if (!problem) {
-    throw new AppError("Problem not found", 404);
-  }
-
-  const problemContext = `Here is the problem description:\nTitle: ${problem.title}\nDescription: ${problem.description}\nConstraints: ${problem.constraints?.join(", ") || "N/A"}`;
 
   const prompt = `
 You are a competitive programming test case generator assistant.
@@ -205,5 +241,85 @@ Output only the test cases, nothing else.
   res.status(200).json({
     success: true,
     testCases,
+  });
+});
+
+export const generateAiHint = TryCatch(async (req, res) => {
+  const { problemId, code, language } = req.body;
+
+  if (!problemId || !language) {
+    throw new AppError(
+      "Problem ID and language are required",
+      400
+    );
+  }
+
+  const problem = await Problem.findById(problemId);
+  if (!problem) {
+    throw new AppError("Problem not found", 404);
+  }
+
+  const problemContext = `Here is the problem description:
+Title: ${problem.title}
+Description: ${problem.description}
+Constraints: ${problem.constraints?.join(", ") || "N/A"}`;
+
+  const userCodeContext = `Here is the user's current solution in ${language}:
+\`\`\`${language}
+${code}
+\`\`\``;
+
+  const prompt = `
+You are a helpful programming assistant.  
+
+✅ Task:  
+Given the problem and the user's current code attempt, provide **one short hint** (1-2 sentences) that nudges the programmer towards solving the problem.  
+If their code has a clear mistake, point it out briefly and guide them.  
+If their code is close to correct, encourage them and suggest the next logical step.  
+Be concise, clear, and relevant to the problem & their code.  
+
+📄 Problem:  
+${problemContext}
+
+👨‍💻 User's Code:
+${userCodeContext}
+
+Output only the hint text, nothing else.
+`;
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new AppError("Gemini API key not configured", 500);
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new AppError(
+      `Gemini API error: ${errorData.error?.message || response.statusText}`,
+      500
+    );
+  }
+
+  const data = await response.json();
+  let hint = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+  if (!hint) {
+    throw new AppError("Failed to generate AI hint", 500);
+  }
+
+  hint = hint.replace(/^```[\s\S]*?\n/, "").replace(/```$/, "").trim();
+
+  res.status(200).json({
+    success: true,
+    hint,
   });
 });

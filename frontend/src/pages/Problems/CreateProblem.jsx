@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateProblemMutation } from "../../redux/api/problemAPI";
+import { useGenerateTestCasesMutation } from "../../redux/api/aiAPI";
 import { FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -63,7 +64,7 @@ const DynamicField = ({ label, values, setValues }) => (
 
 const TestCasesSection = ({ title, testCases, setTestCases, hasExplanation }) => (
   <motion.div variants={fieldVariants}>
-    <label className="block text-sm font-semibold mb-2">{title}</label>
+    {title && <label className="block text-sm font-semibold mb-2">{title}</label>}
     {testCases.map((tc, index) => (
       <motion.div
         key={index}
@@ -153,6 +154,8 @@ const CreateProblem = () => {
   const [hiddenTestCases, setHiddenTestCases] = useState([{ input: "", output: "" }]);
 
   const [createProblem, { isLoading }] = useCreateProblemMutation();
+  const [generateTestCases, { isLoading: isGenerating }] = useGenerateTestCasesMutation();
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -178,7 +181,49 @@ const CreateProblem = () => {
       navigate("/admin");
     } catch (err) {
       console.error(err);
-      toast.error("❌ Failed to create problem");
+      toast.error("Failed to create problem");
+    }
+  };
+
+  const handleGenerateAITestCases = async () => {
+    if (!title.trim() || !description.trim()) {
+      toast.error("Please fill Title and Description first");
+      return;
+    }
+
+    const payload = {
+      title,
+      description,
+      difficulty,
+      constraints: constraints.filter(c => c.trim() !== ""),
+      inputFormat: inputFormat.filter(c => c.trim() !== ""),
+      outputFormat: outputFormat.filter(c => c.trim() !== ""),
+    };
+
+    try {
+      const { testCases } = await generateTestCases(payload).unwrap();
+
+      const parsedTestCases = [];
+      const regex = /```[\s\S]*?Input:\s*([\s\S]*?)Expected Output:\s*([\s\S]*?)```/g;
+
+      let match;
+      while ((match = regex.exec(testCases)) !== null) {
+        parsedTestCases.push({
+          input: match[1].trim(),
+          output: match[2].trim(),
+        });
+      }
+
+      if (parsedTestCases.length === 0) {
+        setHiddenTestCases([...hiddenTestCases, { input: testCases, output: "" }]);
+        toast.error("Failed to parse test cases properly. Added as raw.");
+      } else {
+        setHiddenTestCases([...hiddenTestCases, ...parsedTestCases]);
+        toast.success(`${parsedTestCases.length} AI test cases added!`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate AI test cases");
     }
   };
 
@@ -223,21 +268,26 @@ const CreateProblem = () => {
           <DynamicField label="Input Format" values={inputFormat} setValues={setInputFormat} />
           <DynamicField label="Output Format" values={outputFormat} setValues={setOutputFormat} />
 
-          <motion.div className="grid grid-cols-2 gap-4" variants={fieldVariants}>
-            <div>
-              <label className="block text-sm font-semibold mb-1">Time Limit (s)</label>
-              <input type="number" min={1} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))}
-                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1">Memory Limit (MB)</label>
-              <input type="number" min={1} value={memoryLimit} onChange={(e) => setMemoryLimit(Number(e.target.value))}
-                className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-md" />
-            </div>
-          </motion.div>
-
           <TestCasesSection title="Sample Test Cases" testCases={sampleTestCases} setTestCases={setSampleTestCases} hasExplanation />
-          <TestCasesSection title="Hidden Test Cases" testCases={hiddenTestCases} setTestCases={setHiddenTestCases} hasExplanation={false} />
+
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Hidden Test Cases</h3>
+            <motion.button
+              type="button"
+              onClick={handleGenerateAITestCases}
+              disabled={isGenerating}
+              className={`px-4 py-2 rounded-md font-semibold cursor-pointer ${
+                isGenerating ? "bg-gray-700" : "bg-purple-600 hover:bg-purple-500"
+              }`}
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              {isGenerating ? "Generating..." : "Generate AI Test Cases"}
+            </motion.button>
+          </div>
+
+          <TestCasesSection title="" testCases={hiddenTestCases} setTestCases={setHiddenTestCases} hasExplanation={false} />
 
           <motion.button type="submit" disabled={isLoading}
             className={`w-full px-4 py-2 rounded-md font-semibold cursor-pointer ${

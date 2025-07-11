@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const FloatingAIButtons = ({ onReview, onBoilerplate }) => {
+const FloatingAIButtons = ({ onReview, onBoilerplate, onHint }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,6 +23,12 @@ const FloatingAIButtons = ({ onReview, onBoilerplate }) => {
             className="px-3 py-1 bg-[#1e2330] hover:bg-[#2a2f3d] text-sm rounded shadow text-green-300 border border-green-500/50 transition-colors cursor-pointer"
           >
             🧪 AI Boilerplate
+          </button>
+          <button
+            onClick={onHint}
+            className="px-3 py-1 bg-[#1e2330] hover:bg-[#2a2f3d] text-sm rounded shadow text-yellow-300 border border-yellow-500/50 transition-colors cursor-pointer"
+          >
+            💡 AI Hint
           </button>
         </motion.div>
       )}
