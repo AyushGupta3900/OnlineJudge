@@ -27,6 +27,7 @@ import {
   handleAIBoilerplate,
   loadBoilerplate,
   handleAIHint,
+  formatSubmissionOutput
 } from "../utils/codeEditorUtils.js";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
@@ -47,7 +48,7 @@ const CodeEditor = ({ problemId: propId }) => {
   const [getAIReview, { isLoading: aiReviewLoading }] =
     useGetAIReviewMutation();
   const [generateBoilerplate] = useGenerateBoilerplateMutation();
-  const [generateAiHint, {isLoading: aiHintLoading}] = useGenerateAiHintMutation();
+  const [generateAiHint, { isLoading: aiHintLoading }] = useGenerateAiHintMutation();
 
   const { code, language, updateCode, updateLanguage } = useCode(problemId);
 
@@ -60,14 +61,27 @@ const CodeEditor = ({ problemId: propId }) => {
   useEffect(() => {
     if (code === null) loadBoilerplate(language, updateCode);
   }, [problemId, language, code, updateCode]);
-
   useEffect(() => {
     if (!submissionId) return;
 
+    let elapsed = 0; 
+    const pollInterval = 2000; 
+    const maxTime = 100000;
+
     const interval = setInterval(async () => {
+      elapsed += pollInterval;
+
+      if (elapsed >= maxTime) {
+        setOutput("⏳ Timeout: Failed to get verdict in 10s.");
+        clearInterval(interval);
+        setPollingInterval(null);
+        return;
+      }
+
       try {
         const res = await fetchSubmission(submissionId).unwrap();
         const currentVerdict = res.submission?.verdict;
+        console.log(res)
 
         if (!currentVerdict) {
           setOutput("⚠️ Verdict not yet available.");
@@ -77,6 +91,7 @@ const CodeEditor = ({ problemId: propId }) => {
         setVerdict(currentVerdict);
 
         if (currentVerdict !== "Pending") {
+          setOutput(formatSubmissionOutput(res.submission));
           clearInterval(interval);
           setPollingInterval(null);
         }
@@ -85,7 +100,7 @@ const CodeEditor = ({ problemId: propId }) => {
         clearInterval(interval);
         setPollingInterval(null);
       }
-    }, 2000);
+    }, pollInterval);
 
     setPollingInterval(interval);
 
@@ -238,11 +253,10 @@ const ActionButton = ({ onClick, label, icon, color, loading }) => (
   <button
     onClick={onClick}
     disabled={loading}
-    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${
-      loading
+    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${loading
         ? "bg-gray-600 cursor-not-allowed"
         : `bg-${color}-700 hover:bg-${color}-600`
-    }`}
+      }`}
   >
     {icon}
     {loading ? `${label}…` : label}

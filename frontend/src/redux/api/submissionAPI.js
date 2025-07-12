@@ -13,6 +13,7 @@ const submissionApi = baseApi.injectEndpoints({
     getSubmissionById: builder.query({
       query: (submissionId) => `/submission/${submissionId}`,
       providesTags: (result, error, id) => [{ type: 'Submission', id }],
+      keepUnusedDataFor: 0,
     }),
     getSubmissionsByProblem: builder.query({
       query: ({ problemId, page = 1, limit = 10 }) => {
