@@ -76,6 +76,6 @@ app.post("/api/v1/run", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Compiler Server is running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Compiler Server is running at http://0.0.0.0:${PORT}`);
 });

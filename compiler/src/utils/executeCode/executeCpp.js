@@ -12,6 +12,7 @@ if (!fs.existsSync(outputPath)) {
 }
 
 const GNU_TIME = "/opt/homebrew/bin/gtime";
+// const GNU_TIME = "/usr/bin/time";
 
 export const executeCpp = (filepath, input = "") => {
   const jobId = path.basename(filepath).split(".")[0];
@@ -74,6 +75,8 @@ export const executeCpp = (filepath, input = "") => {
           const memoryKb = err ? null : parseInt(memData.trim(), 10);
 
           if (code !== 0) {
+            // delete binary even on failure
+            fs.unlink(binaryPath, () => {});
             return reject({
               type: "runtime",
               code,
@@ -82,6 +85,9 @@ export const executeCpp = (filepath, input = "") => {
               memoryKb,
             });
           }
+
+          // delete binary on success
+          fs.unlink(binaryPath, () => {});
 
           return resolve({
             output: stdout,
@@ -93,6 +99,7 @@ export const executeCpp = (filepath, input = "") => {
 
       child.on("error", (err) => {
         clearTimeout(timeout);
+        fs.unlink(binaryPath, () => {});
         return reject({
           type: "spawn",
           error: err.message,

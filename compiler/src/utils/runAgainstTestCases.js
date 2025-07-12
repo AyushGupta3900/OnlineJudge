@@ -8,8 +8,11 @@ import { executePython } from "./executeCode/executePython.js";
 import { executeJava } from "./executeCode/executeJava.js";
 import { executeJs } from "./executeCode/executeJS.js";
 
+// Get __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Directory to save temporary code files
 const codeDir = path.join(__dirname, "codes");
 
 const extensionMap = {
@@ -26,6 +29,9 @@ const executorMap = {
   javascript: executeJs,
 };
 
+/**
+ * Run user-submitted code against provided test cases.
+ */
 export async function runCodeAgainstTestCases({
   code,
   testCases,
@@ -34,6 +40,18 @@ export async function runCodeAgainstTestCases({
   memoryLimit = 256,
 }) {
   const ext = extensionMap[language];
+  if (!ext) {
+    return {
+      verdict: "Internal Error",
+      executionTime: 0,
+      memoryUsed: null,
+      passedTestCases: 0,
+      output: "",
+      error: `Unsupported language: ${language}`,
+      testCaseResults: [],
+    };
+  }
+
   const jobId = uuid();
   const codeFile = path.join(codeDir, `${jobId}.${ext}`);
 
@@ -41,17 +59,21 @@ export async function runCodeAgainstTestCases({
   const memoryLimitKb = memoryLimit * 1024;
 
   try {
+    // Ensure temp directory exists
     await fs.mkdir(codeDir, { recursive: true });
+
+    // writing code into the codefile
     await fs.writeFile(codeFile, code);
 
     const execute = executorMap[language];
-    if (!execute) throw new Error(`Unsupported language: ${language}`);
+    if (!execute) throw new Error(`No executor defined for: ${language}`);
 
     let totalTimeMs = 0;
     let totalMemoryKb = 0;
     let passedTestCases = 0;
-    const testCaseResults = [];
     let wrongAnswer = false;
+
+    const testCaseResults = [];
 
     for (let i = 0; i < testCases.length; i++) {
       const test = testCases[i];
@@ -80,7 +102,6 @@ export async function runCodeAgainstTestCases({
           memoryKb: result.memoryKb ?? null,
           status: passed ? "Passed" : "Failed",
         });
-
       } catch (err) {
         testCaseResults.push({
           testCase: i + 1,
@@ -118,7 +139,6 @@ export async function runCodeAgainstTestCases({
       }
     }
 
-    // 🔷 Check limits after running all test cases
     if (totalTimeMs > timeLimitMs) {
       return {
         verdict: "Time Limit Exceeded",
@@ -160,11 +180,10 @@ export async function runCodeAgainstTestCases({
       executionTime: totalTimeMs.toFixed(2),
       memoryUsed: totalMemoryKb || null,
       passedTestCases,
-      output: testCaseResults.map(tc => tc.actualOutput).join("\n"),
+      output: testCaseResults.map((tc) => tc.actualOutput).join("\n"),
       error: "",
       testCaseResults,
     };
-
   } catch (err) {
     return {
       verdict: "Internal Error",
@@ -175,9 +194,13 @@ export async function runCodeAgainstTestCases({
       error: err.message || "Something went wrong while running test cases.",
       testCaseResults: [],
     };
-  } finally {
+  }
+  finally {
     try {
       await fs.unlink(codeFile);
-    } catch (_) {}
+      console.log(`🧹 Deleted code file: ${codeFile}`);
+    } catch (err) {
+      console.warn(`⚠️ Could not delete code file: ${codeFile} (${err.message})`);
+    }
   }
 }

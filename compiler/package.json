@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon ./server.js",
-    "test": "npm run dev"
+    "test": "npm run dev",
+    "docker:build": "docker build -t compiler-server .",
+    "docker:run": "docker run -p 5008:5008 compiler-server"
   },
   "repository": {
     "type": "git",

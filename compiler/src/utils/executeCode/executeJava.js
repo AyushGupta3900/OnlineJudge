@@ -11,13 +11,16 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
+// Set GNU time path
 const GNU_TIME = "/opt/homebrew/bin/gtime";
+// const GNU_TIME = "/usr/bin/time";
 
 export const executeJava = (classname, input = "") => {
   return new Promise((resolve, reject) => {
     const startTime = process.hrtime();
 
     const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
+    const classFile = path.join(outputPath, `${classname}.class`);
 
     const child = spawn(
       GNU_TIME,
@@ -30,6 +33,8 @@ export const executeJava = (classname, input = "") => {
 
     const timeout = setTimeout(() => {
       child.kill("SIGKILL");
+      // also try deleting .class
+      fs.unlink(classFile, () => {});
       return reject({ type: "timeout", error: "Execution timed out." });
     }, 5000);
 
@@ -53,7 +58,8 @@ export const executeJava = (classname, input = "") => {
       const elapsedMs = sec * 1000 + nanosec / 1e6;
 
       fs.readFile(memFile, "utf8", (err, memData) => {
-        fs.unlink(memFile, () => {}); // cleanup
+        fs.unlink(memFile, () => {}); // cleanup mem file
+        fs.unlink(classFile, () => {}); // cleanup class file
 
         const memoryKb = err ? null : parseInt(memData.trim(), 10);
 
@@ -77,6 +83,7 @@ export const executeJava = (classname, input = "") => {
 
     child.on("error", (err) => {
       clearTimeout(timeout);
+      fs.unlink(classFile, () => {});
       return reject({ type: "spawn", error: err.message });
     });
   });

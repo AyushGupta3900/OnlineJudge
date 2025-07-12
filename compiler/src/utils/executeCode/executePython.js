@@ -12,6 +12,7 @@ if (!fs.existsSync(outputPath)) {
 }
 
 const GNU_TIME = "/opt/homebrew/bin/gtime";
+// const GNU_TIME = "/usr/bin/time";
 
 export const executePython = (filepath, input = "") => {
   return new Promise((resolve, reject) => {

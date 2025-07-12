@@ -26,4 +26,4 @@ COPY . .
 EXPOSE 5008
 
 # Start HTTP server + 3 workers
-CMD ["pm2-runtime", "ecosystem.config.js"]
+CMD ["pm2-runtime", "ecosystem.config.cjs"]
