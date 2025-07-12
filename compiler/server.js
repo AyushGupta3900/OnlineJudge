@@ -7,6 +7,7 @@ import { executePython } from "./src/utils/executeCode/executePython.js";
 import { executeJava } from "./src/utils/executeCode/executeJava.js";
 import { executeJs } from "./src/utils/executeCode/executeJS.js";
 import { connectDB } from "./src/config/db.js";
+import fs from "fs/promises";  
 
 dotenv.config();
 
@@ -37,8 +38,11 @@ app.post("/api/v1/run", async (req, res) => {
     });
   }
 
+  let filePath;
+
   try {
-    const filePath = await generateFile(language, code);
+    filePath = await generateFile(language, code);
+
     let result;
     switch (language) {
       case "cpp":
@@ -73,6 +77,15 @@ app.post("/api/v1/run", async (req, res) => {
       type: error?.type || "unknown",
       timeMs: error?.timeMs || null,
     });
+  } finally {
+    if (filePath) {
+      try {
+        await fs.unlink(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      } catch (err) {
+        console.error(`Failed to delete file: ${filePath}`, err);
+      }
+    }
   }
 });
 
