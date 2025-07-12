@@ -27,7 +27,7 @@ import {
   handleAIBoilerplate,
   loadBoilerplate,
   handleAIHint,
-  formatSubmissionOutput
+  formatSubmissionOutput,
 } from "../utils/codeEditorUtils.js";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
@@ -48,7 +48,8 @@ const CodeEditor = ({ problemId: propId }) => {
   const [getAIReview, { isLoading: aiReviewLoading }] =
     useGetAIReviewMutation();
   const [generateBoilerplate] = useGenerateBoilerplateMutation();
-  const [generateAiHint, { isLoading: aiHintLoading }] = useGenerateAiHintMutation();
+  const [generateAiHint, { isLoading: aiHintLoading }] =
+    useGenerateAiHintMutation();
 
   const { code, language, updateCode, updateLanguage } = useCode(problemId);
 
@@ -59,14 +60,17 @@ const CodeEditor = ({ problemId: propId }) => {
   const [hintText, setHintText] = useState("");
 
   useEffect(() => {
-    if (code === null) loadBoilerplate(language, updateCode);
-  }, [problemId, language, code, updateCode]);
+    if (!code) {
+      loadBoilerplate(language, updateCode);
+    }
+  }, [problemId]);
+
   useEffect(() => {
     if (!submissionId) return;
 
-    let elapsed = 0; 
-    const pollInterval = 2000; 
-    const maxTime = 100000;
+    let elapsed = 0;
+    const pollInterval = 2000;
+    const maxTime = 10000;
 
     const interval = setInterval(async () => {
       elapsed += pollInterval;
@@ -81,7 +85,6 @@ const CodeEditor = ({ problemId: propId }) => {
       try {
         const res = await fetchSubmission(submissionId).unwrap();
         const currentVerdict = res.submission?.verdict;
-        console.log(res)
 
         if (!currentVerdict) {
           setOutput("⚠️ Verdict not yet available.");
@@ -253,15 +256,17 @@ const ActionButton = ({ onClick, label, icon, color, loading }) => (
   <button
     onClick={onClick}
     disabled={loading}
-    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${loading
+    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white shadow transition cursor-pointer ${
+      loading
         ? "bg-gray-600 cursor-not-allowed"
         : `bg-${color}-700 hover:bg-${color}-600`
-      }`}
+    }`}
   >
     {icon}
     {loading ? `${label}…` : label}
   </button>
 );
+
 const HintModal = ({ visible, onClose, hintText, loading }) => {
   if (!visible) return null;
 
@@ -270,9 +275,7 @@ const HintModal = ({ visible, onClose, hintText, loading }) => {
       <div className="bg-[#0e1117] border border-[#2a2f3d] rounded-lg shadow-lg p-6 max-w-lg w-full text-white">
         <h2 className="text-lg font-semibold text-yellow-400 mb-3">💡 AI Hint</h2>
         <div className="text-sm whitespace-pre-wrap text-gray-300 max-h-[300px] overflow-y-auto">
-          {loading
-            ? "Generating hint…"
-            : hintText || "No hint available."}
+          {loading ? "Generating hint…" : hintText || "No hint available."}
         </div>
         <div className="mt-4 text-right">
           <button
