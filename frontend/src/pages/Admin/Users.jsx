@@ -16,7 +16,7 @@ const Users = () => {
     useGetAllUsersQuery({
       page: currentPage,
       limit: usersPerPage,
-      sortBy: "rating",
+      sortBy: "createdAt",
       order: "desc",
       search: searchTerm,
     });

@@ -18,7 +18,7 @@ const userApi = baseApi.injectEndpoints({
       invalidatesTags: ['User'],
     }),
     getLeaderboard: builder.query({
-      query: ({ page = 1, limit = 10, search = '', sort = '-rating' } = {}) => {
+      query: ({ page = 1, limit = 10, search = '', sort = '-computedRating' } = {}) => {
         const params = new URLSearchParams({ page, limit, search, sort });
         return `/user/leaderboard?${params.toString()}`;
       },

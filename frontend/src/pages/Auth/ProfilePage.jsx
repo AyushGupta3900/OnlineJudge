@@ -155,9 +155,10 @@ const HeroSection = ({ user }) => (
 );
 
 const StatsGrid = ({ user }) => {
+  console.log(user)
   const stats = [
     { label: "Username", value: user.username, icon: <FaUser /> },
-    { label: "Rating", value: user.rating, icon: <FaStar /> },
+    { label: "Rating", value: user.computedRating, icon: <FaStar /> },
     { label: "Role", value: user.role, icon: <FaLock /> },
     { label: "Solved", value: user.totalSolved, icon: <FaCheckCircle /> },
     {

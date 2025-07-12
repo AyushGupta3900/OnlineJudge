@@ -67,12 +67,13 @@ export const updateUserAccount = TryCatch(async (req, res) => {
   });
 });
 
+// on submission it should be invalidated 
 export const getLeaderboard = TryCatch(async (req, res) => {
   const {
     page = 1,
     limit = 12,
     search = "",
-    sort = "-rating", 
+    sort = "-computedRating",
   } = req.query;
 
   const redisKey = `leaderboard:${page}:${limit}:${search}:${sort}`;
@@ -91,37 +92,50 @@ export const getLeaderboard = TryCatch(async (req, res) => {
     query.username = { $regex: search, $options: "i" };
   }
 
-  // fetch top 3 globally
-  const topThree = await User.find({})
-    .sort({ rating: -1 })
-    .limit(3)
-    .select("username fullName email computedRating avatar solvedProblems");
+  // Fetch users
+  let allUsers = await User.find(query)
+    .select(
+      "username fullName email avatar solvedProblems solvedCountByDifficulty submissions rating role"
+    )
+    .exec();
 
-  // exclude top 3 from paginated results
-  const excludeIds = topThree.map(u => u._id);
+  // Convert to plain objects with virtuals
+  allUsers = allUsers.map((user) => user.toObject({ virtuals: true }));
 
-  if (excludeIds.length > 0) {
-    query._id = { $nin: excludeIds };
-  }
+  // Sort based on computedRating
+  allUsers.sort((a, b) => {
+    const aVal = a.computedRating ?? 0;
+    const bVal = b.computedRating ?? 0;
 
-  const { results, total, totalPages } = await paginateQuery({
-    model: User,
-    query,
-    page: Number(page),
-    limit: Number(limit),
-    sortBy: "rating",
-    order: sort.startsWith("-") ? "desc" : "asc",
-    projection: "username fullName email computedRating avatar solvedProblems",
+    if (sort.startsWith("-")) {
+      return bVal - aVal;
+    } else {
+      return aVal - bVal;
+    }
   });
+
+  const total = allUsers.length;
+  const totalPages = Math.ceil(total / limit);
+
+  // Top 3 globally
+  const topThree = allUsers.slice(0, 3);
+
+  // Remove top 3 from rest of list
+  const excludeIds = new Set(topThree.map((u) => String(u._id)));
+  const rest = allUsers.filter((u) => !excludeIds.has(String(u._id)));
+
+  // Paginate remaining
+  const paginated = rest.slice((page - 1) * limit, page * limit);
 
   const response = {
     topThree,
-    users: results,
+    users: paginated,
     total,
     totalPages,
     page: Number(page),
   };
 
+  // Cache for 60 seconds
   await redisClient.set(redisKey, JSON.stringify(response), "EX", 60);
 
   res.status(200).json({
@@ -131,6 +145,7 @@ export const getLeaderboard = TryCatch(async (req, res) => {
   });
 });
 
+// on submission it should be invalidated 
 export const getProfileStats = TryCatch(async (req, res) => {
   const userId = req.user._id;
 
@@ -145,7 +160,7 @@ export const getProfileStats = TryCatch(async (req, res) => {
   }
 
   const user = await User.findById(userId).select(
-    "username fullName email bio avatar solvedProblems solvedCountByDifficulty rating role"
+    "username fullName email bio avatar solvedProblems solvedCountByDifficulty rating role submissions"
   );
 
   if (!user) {
@@ -170,6 +185,7 @@ export const getProfileStats = TryCatch(async (req, res) => {
     bio: user.bio || "",
     avatar: user.avatar,
     rating: user.rating || 0,
+    computedRating: user.computedRating, 
     role: user.role || "user",
     solvedCountByDifficulty: user.solvedCountByDifficulty || {
       Easy: 0,
@@ -190,6 +206,7 @@ export const getProfileStats = TryCatch(async (req, res) => {
   });
 });
 
+// on submission it should be invalidated 
 export const getUserSubmissions = TryCatch(async (req, res) => {
   const {
     page = 1,
@@ -242,6 +259,7 @@ export const getUserSubmissions = TryCatch(async (req, res) => {
   });
 });
 
+// on submission it should be invalidated 
 export const getAllUsers = TryCatch(async (req, res) => {
   const {
     page = 1,
