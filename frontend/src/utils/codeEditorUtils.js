@@ -8,12 +8,19 @@ export const loadBoilerplate = (language, setCode) => {
 };
 
 export const formatSubmissionOutput = (submission) => {
+  if (!submission || typeof submission !== 'object') {
+    return "⚠️ No submission data available.";
+  }
+
   const verdict = submission.verdict;
+  console.log("Verdict:", verdict);
+
   if (!verdict) return "⚠️ No verdict available.";
   if (verdict === "Accepted")
     return `✅ Accepted\n⏱️ Execution Time: ${submission.executionTime} ms\n💾 Memory Used: ${submission.memoryUsed} KB`;
   return `ℹ️ Verdict: ${verdict}`;
 };
+
 
 export const handleRun = async (
   language,
@@ -61,6 +68,7 @@ export const handleSubmit = async (
 
   try {
     const res = await submitCode({ problemId, language, code }).unwrap();
+    console.log("Submit response:", res);
     setSubmissionId(res.data.submissionId);
     setOutput("⏳ Waiting for verdict...");
     toast.success("Code submitted");

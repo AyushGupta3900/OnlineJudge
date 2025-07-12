@@ -39,6 +39,10 @@ const NotFound = lazy(() => import("./pages/Static/NotFound"));
 
 const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 
+const Contests = lazy(() => import("./pages/Contest/Contests"));
+const ContestPage = lazy(() => import("./pages/Contest/ContestPage"));
+const CreateContest = lazy(() => import("./pages/Contest/CreateContest"));
+
 
 export default function App() {
   const { isLoading } = useAuthUser();
@@ -74,19 +78,19 @@ export default function App() {
     },
     success: {
       iconTheme: {
-        primary: "#10b981", // green
+        primary: "#10b981",
         secondary: "#1e2330",
       },
     },
     error: {
       iconTheme: {
-        primary: "#ef4444", // red
+        primary: "#ef4444", 
         secondary: "#1e2330",
       },
     },
     loading: {
       iconTheme: {
-        primary: "#3b82f6", // blue spinner
+        primary: "#3b82f6", 
         secondary: "#1e2330",
       },
     },
@@ -124,6 +128,11 @@ export default function App() {
           <Route path="/admin/edit-problem/:id" element={requireAuth(<UpdateProblem />)} />
           <Route path="/admin/contact-messages" element={requireAuth(<ContactMessages />)} />
           <Route path="/admin/users" element={requireAuth(<Users />)} />
+          <Route path="/admin/create-contest" element={requireAuth(<CreateContest />)} />
+
+          {/* Contest Routes */}
+          <Route path="/all-contests" element={requireAuth(<Contests />)} />
+          <Route path="/contest/:id" element={requireAuth(<ContestPage />)} />
 
           {/* Catch-All */}
           <Route path="*" element={<NotFound />} />

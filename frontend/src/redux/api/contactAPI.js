@@ -7,7 +7,6 @@ export const contactAPI = createApi({
     credentials: "include",
   }),
   tagTypes: ["ContactMessage"],
-
   endpoints: (builder) => ({
     sendContactMessage: builder.mutation({
       query: (body) => ({

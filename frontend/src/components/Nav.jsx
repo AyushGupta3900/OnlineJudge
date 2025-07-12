@@ -51,6 +51,9 @@ const Nav = () => {
           <Link to="/leaderboard" className={`text-white text-base font-medium ${gradientLink}`}>
             Leaderboard
           </Link>
+          <Link to="/all-contests" className={`text-white text-base font-medium ${gradientLink}`}>
+            Contests
+          </Link>
           {isAuthenticated && (
             <Link to="/profile" className={`text-white text-base font-medium ${gradientLink}`}>
               Profile
@@ -119,6 +122,15 @@ const Nav = () => {
                 className={`${gradientLink}`}
               >
                 Leaderboard
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/all-contests"
+                onClick={() => setIsOpen(false)}
+                className={`${gradientLink}`}
+              >
+                Contests
               </Link>
             </li>
             {isAuthenticated && (

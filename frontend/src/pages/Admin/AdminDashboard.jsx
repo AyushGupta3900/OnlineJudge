@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaUsers, FaEdit, FaTrash, FaEnvelope } from "react-icons/fa";
+import { FaPlus, FaUsers, FaEdit, FaTrash, FaEnvelope, FaFlagCheckered } from "react-icons/fa";
 import {
   useGetAllProblemsQuery,
   useDeleteProblemMutation,
@@ -128,6 +128,12 @@ const DashboardHeader = () => (
         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md transition cursor-pointer"
       >
         <FaPlus /> Add Problem
+      </Link>
+      <Link
+        to="/admin/create-contest"
+        className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded-md transition cursor-pointer"
+      >
+        <FaFlagCheckered /> Create Contest
       </Link>
     </div>
   </div>

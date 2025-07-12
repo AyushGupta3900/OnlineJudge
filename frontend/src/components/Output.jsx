@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -79,7 +78,7 @@ const OutputBox = ({
       </div>
 
       <div className="p-4 text-sm font-mono max-h-[200px] min-h-[110px] overflow-auto whitespace-pre-wrap">
-        {output || (
+        {output?.trim() || (
           <span className="text-gray-500">✨ Your output will appear here…</span>
         )}
       </div>

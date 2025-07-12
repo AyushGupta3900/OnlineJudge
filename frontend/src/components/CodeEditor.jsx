@@ -27,6 +27,7 @@ import {
   handleAIBoilerplate,
   loadBoilerplate,
   handleAIHint,
+  formatSubmissionOutput
 } from "../utils/codeEditorUtils.js";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
@@ -61,36 +62,51 @@ const CodeEditor = ({ problemId: propId }) => {
     if (code === null) loadBoilerplate(language, updateCode);
   }, [problemId, language, code, updateCode]);
 
-  useEffect(() => {
-    if (!submissionId) return;
+useEffect(() => {
+  if (!submissionId) return;
 
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetchSubmission(submissionId).unwrap();
-        const currentVerdict = res.submission?.verdict;
+  let elapsed = 0; 
+  const pollInterval = 3000; 
+  const maxTime = 12000;
 
-        if (!currentVerdict) {
-          setOutput("⚠️ Verdict not yet available.");
-          return;
-        }
+  const interval = setInterval(async () => {
+    elapsed += pollInterval;
 
-        setVerdict(currentVerdict);
+    if (elapsed >= maxTime) {
+      setOutput("⏳ Timeout: Failed to get verdict in 12s.");
+      clearInterval(interval);
+      setPollingInterval(null);
+      return;
+    }
 
-        if (currentVerdict !== "Pending") {
-          clearInterval(interval);
-          setPollingInterval(null);
-        }
-      } catch {
-        setOutput("❌ Failed to fetch verdict.");
+    try {
+      const res = await fetchSubmission(submissionId).unwrap();
+      const currentVerdict = res.submission?.verdict;
+      console.log(currentVerdict);
+
+      if (!currentVerdict) {
+        setOutput("⚠️ Verdict not yet available.");
+        return;
+      }
+
+      setVerdict(currentVerdict);
+
+      if (currentVerdict !== "Pending") {
+        setOutput(formatSubmissionOutput(res.submission));
         clearInterval(interval);
         setPollingInterval(null);
       }
-    }, 2000);
+    } catch {
+      setOutput("❌ Failed to fetch verdict.");
+      clearInterval(interval);
+      setPollingInterval(null);
+    }
+  }, pollInterval);
 
-    setPollingInterval(interval);
+  setPollingInterval(interval);
 
-    return () => clearInterval(interval);
-  }, [submissionId, fetchSubmission]);
+  return () => clearInterval(interval);
+}, [submissionId, fetchSubmission]);
 
   return (
     <div className="bg-[#0e1117] text-white p-4 space-y-5 rounded-xl shadow-inner border border-[#1c2030]">
