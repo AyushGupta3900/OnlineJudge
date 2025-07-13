@@ -33,3 +33,5 @@ compiler/node_modules/
 compiler/.env
 compiler/utils/codes
 compiler/utils/executeCode/outputs
+
+/keys

@@ -33,7 +33,6 @@ export const executeJava = (classname, input = "") => {
 
     const timeout = setTimeout(() => {
       child.kill("SIGKILL");
-      // also try deleting .class
       fs.unlink(classFile, () => {});
       return reject({ type: "timeout", error: "Execution timed out." });
     }, 5000);
@@ -58,8 +57,8 @@ export const executeJava = (classname, input = "") => {
       const elapsedMs = sec * 1000 + nanosec / 1e6;
 
       fs.readFile(memFile, "utf8", (err, memData) => {
-        fs.unlink(memFile, () => {}); // cleanup mem file
-        fs.unlink(classFile, () => {}); // cleanup class file
+        fs.unlink(memFile, () => {}); 
+        fs.unlink(classFile, () => {}); 
 
         const memoryKb = err ? null : parseInt(memData.trim(), 10);
 

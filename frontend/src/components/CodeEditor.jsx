@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaPlay, FaUndo, FaUpload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Editor from "@monaco-editor/react";
 import toast from "react-hot-toast";
 
@@ -35,6 +36,8 @@ const LANGUAGES = ["cpp", "python", "javascript", "java"];
 const CodeEditor = ({ problemId: propId }) => {
   const { id: routeId } = useParams();
   const problemId = propId || routeId;
+
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
@@ -166,7 +169,12 @@ const CodeEditor = ({ problemId: propId }) => {
             loading={running}
           />
           <ActionButton
-            onClick={() =>
+            onClick={() => {
+              if (!isAuthenticated) {
+                toast.error("Please log in to submit your code.");
+                return;
+              }
+
               handleSubmit(
                 problemId,
                 language,
@@ -176,8 +184,8 @@ const CodeEditor = ({ problemId: propId }) => {
                 setSubmissionId,
                 pollingInterval,
                 submitCode
-              )
-            }
+              );
+            }}
             label="Submit"
             icon={<FaUpload />}
             color="blue"
