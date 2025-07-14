@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useGetAllProblemsQuery } from "../../redux/api/problemAPI.js";
 import Pagination from "../../components/Pagination.jsx";
+import PageLoader from "../../components/PageLoader.jsx";
 
 const Problems = () => {
   const [search, setSearch] = useState("");
@@ -15,8 +16,8 @@ const Problems = () => {
     page: currentPage,
     search,
     difficulty: selectedDifficulty,
-    tag: "", 
-    status: selectedStatus, // ✅ pass to server
+    tag: "",
+    status: selectedStatus,
   });
 
   const problems = data?.data || [];
@@ -104,7 +105,7 @@ const Filters = ({
   >
     <input
       type="text"
-      placeholder="🔍 Search problems..."
+      placeholder="🔍 Search problems by name or tag..."
       className="w-full md:w-1/3 px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner"
       value={search}
       onChange={(e) => {
@@ -254,9 +255,7 @@ const TableView = ({ problems }) => (
                 ))}
               </div>
             </td>
-            <td className="px-6 py-3">
-              {problem.isSolved ? "✅" : "⭕"}
-            </td>
+            <td className="px-6 py-3">{problem.isSolved ? "✅" : "⭕"}</td>
           </tr>
         ))}
       </tbody>
@@ -266,26 +265,67 @@ const TableView = ({ problems }) => (
 
 // ================= Skeleton Loader =================
 const SkeletonLoader = ({ viewMode }) => {
+  return viewMode === "card" ? <CardSkeletonLoader /> : <TableSkeletonLoader />;
+};
+
+const CardSkeletonLoader = () => {
   const skeletons = Array.from({ length: 12 });
-  if (viewMode === "card") {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {skeletons.map((_, i) => (
-          <div
-            key={i}
-            className="bg-gray-800 p-6 rounded-2xl shadow animate-pulse min-h-[220px]"
-          >
-            <div className="h-6 bg-gray-700 mb-4 w-3/4 rounded"></div>
-            <div className="h-4 bg-gray-700 mb-2 w-1/2 rounded"></div>
-            <div className="h-4 bg-gray-700 mb-2 w-1/3 rounded"></div>
-          </div>
-        ))}
-      </div>
-    );
-  }
   return (
-    <div className="text-center text-blue-400 font-medium py-10">
-      Loading problems...
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {skeletons.map((_, i) => (
+        <div
+          key={i}
+          className="bg-gray-800 p-6 rounded-2xl shadow animate-pulse min-h-[220px]"
+        >
+          <div className="h-6 bg-gray-700 mb-4 w-3/4 rounded"></div>
+          <div className="h-4 bg-gray-700 mb-2 w-1/2 rounded"></div>
+          <div className="h-4 bg-gray-700 mb-2 w-1/3 rounded"></div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TableSkeletonLoader = () => {
+  const skeletonRows = Array.from({ length: 12});
+  return (
+    <div className="overflow-x-auto mt-4 bg-gray-800 rounded-xl shadow-xl animate-pulse">
+      <table className="min-w-full text-sm text-left">
+        <thead className="bg-gray-700 text-gray-300 uppercase text-xs tracking-wider">
+          <tr>
+            <th className="px-6 py-3">
+              <div className="h-4 bg-gray-600 rounded w-24"></div>
+            </th>
+            <th className="px-6 py-3">
+              <div className="h-4 bg-gray-600 rounded w-16"></div>
+            </th>
+            <th className="px-6 py-3">
+              <div className="h-4 bg-gray-600 rounded w-32"></div>
+            </th>
+            <th className="px-6 py-3">
+              <div className="h-4 bg-gray-600 rounded w-12"></div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {skeletonRows.map((_, i) => (
+            <tr key={i} className="border-b border-gray-700">
+              <td className="px-6 py-3">
+                <div className="h-5 bg-gray-700 rounded w-48"></div>
+              </td>
+              <td className="px-6 py-3">
+                <div className="h-5 bg-gray-700 rounded w-20"></div>
+              </td>
+              <td className="px-6 py-3">
+                <div className="h-5 bg-gray-700 rounded w-40"></div>
+              </td>
+              <td className="px-6 py-3">
+                <div className="h-5 bg-gray-700 rounded w-8"></div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

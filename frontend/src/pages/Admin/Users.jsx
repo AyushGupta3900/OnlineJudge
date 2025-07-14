@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import {
   useGetAllUsersQuery,
   useMakeAdminMutation,
+  useRemoveAdminMutation
 } from "../../redux/api/userAPI.js";
+import { useSelector } from "react-redux";
 import AdminPagination from "../../components/AdminPagination.jsx";
 import PageHeader from "../../components/PageHeader.jsx";
 
 const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadingUserId, setLoadingUserId] = useState(null);
+
+  const currentUser = useSelector((state) => state.auth.user);
 
   const usersPerPage = 10;
 
@@ -21,17 +26,25 @@ const Users = () => {
       search: searchTerm,
     });
 
-  const [makeUserAdmin, { isLoading: isPromoting }] = useMakeAdminMutation();
+  const [makeUserAdmin] = useMakeAdminMutation();
+  const [removeUserAdmin] = useRemoveAdminMutation();
 
   const users = data?.data || [];
   const totalPages = data?.totalPages || 1;
 
-  const handleMakeAdmin = async (id) => {
+  const handleAdminAction = async (id, action) => {
     try {
-      await makeUserAdmin(id).unwrap();
+      setLoadingUserId(id);
+      if (action === "make") {
+        await makeUserAdmin(id).unwrap();
+      } else {
+        await removeUserAdmin(id).unwrap();
+      }
       refetch();
     } catch (err) {
-      console.error("Failed to promote user:", err);
+      console.error("Failed to update user role:", err);
+    } finally {
+      setLoadingUserId(null);
     }
   };
 
@@ -69,8 +82,9 @@ const Users = () => {
           <>
             <UsersTable
               users={users}
-              isPromoting={isPromoting}
-              onMakeAdmin={handleMakeAdmin}
+              loadingUserId={loadingUserId}
+              onAdminAction={handleAdminAction}
+              isSuperadmin={currentUser?.isSuperadmin}
             />
 
             {totalPages > 1 && (
@@ -88,7 +102,7 @@ const Users = () => {
 };
 
 // 📌 Table
-const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
+const UsersTable = ({ users, loadingUserId, onAdminAction, isSuperadmin }) => (
   <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-md overflow-x-auto">
     {users.length === 0 ? (
       <p className="text-center py-8 text-gray-400">No users found.</p>
@@ -101,7 +115,7 @@ const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
             <th className="px-6 py-4">Role</th>
             <th className="px-6 py-4">Solved</th>
             <th className="px-6 py-4">Rating</th>
-            <th className="px-6 py-4">Actions</th>
+            {isSuperadmin && <th className="px-6 py-4">Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -125,17 +139,33 @@ const UsersTable = ({ users, isPromoting, onMakeAdmin }) => (
               </td>
               <td className="px-6 py-4">{user.solvedProblems?.length || 0}</td>
               <td className="px-6 py-4">{user.computedRating ?? "N/A"}</td>
-              <td className="px-6 py-4">
-                {user.role !== "admin" && (
-                  <button
-                    onClick={() => onMakeAdmin(user._id)}
-                    disabled={isPromoting}
-                    className="text-sm px-3 py-1 bg-green-600 hover:bg-green-500 rounded-md transition cursor-pointer"
-                  >
-                    {isPromoting ? "Promoting..." : "Make Admin"}
-                  </button>
-                )}
-              </td>
+              {isSuperadmin && (
+                <td className="px-6 py-4">
+                  {user.isSuperadmin ? (
+                    <span className="text-xs text-gray-400">Superadmin</span>
+                  ) : user.role === "admin" ? (
+                    <button
+                      onClick={() => onAdminAction(user._id, "remove")}
+                      disabled={loadingUserId === user._id}
+                      className="text-sm px-3 py-1 bg-red-600 hover:bg-red-500 rounded-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loadingUserId === user._id
+                        ? "Updating..."
+                        : "Remove Admin"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onAdminAction(user._id, "make")}
+                      disabled={loadingUserId === user._id}
+                      className="text-sm px-3 py-1 bg-green-600 hover:bg-green-500 rounded-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loadingUserId === user._id
+                        ? "Updating..."
+                        : "Make Admin"}
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

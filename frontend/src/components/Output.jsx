@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -6,17 +6,18 @@ import {
   FaCheckCircle,
   FaHourglassHalf,
   FaTimesCircle,
+  FaRobot,
 } from "react-icons/fa";
 
 import "highlight.js/styles/github-dark.css";
 
 const OutputBox = ({
-  output,
-  verdict,
-  onAIReview,
-  aiReviewVisible,
-  aiReviewLoading,
-  aiReviewText,
+  output = "",
+  verdict = "",
+  aiReviewVisible = false,
+  aiReviewLoading = false,
+  aiReviewText = "",
+  aiReviewRef, 
 }) => {
   const randomColorClasses = [
     "text-pink-400",
@@ -28,79 +29,139 @@ const OutputBox = ({
     "text-orange-400",
   ];
 
-  const getVerdictStyle = () => {
-    switch (verdict?.toLowerCase()) {
-      case "success":
-      case "accepted":
-        return {
-          border: "border-green-600",
-          icon: <FaCheckCircle className="text-green-400 text-lg" />,
-        };
-      case "pending":
-        return {
-          border: "border-yellow-600",
-          icon: (
-            <FaHourglassHalf className="text-yellow-400 text-lg animate-pulse" />
-          ),
-        };
-      case "error":
-        return {
-          border: "border-red-600",
-          icon: <FaTimesCircle className="text-red-400 text-lg" />,
-        };
-      default:
-        return { border: "border-gray-700", icon: null };
-    }
+  const randomColorClass = useMemo(() => {
+    const idx = Math.floor(Math.random() * randomColorClasses.length);
+    return randomColorClasses[idx];
+  }, []);
+
+  const verdictStyles = {
+    accepted: {
+      color: "bg-green-600/20 text-green-400",
+      icon: <FaCheckCircle className="text-green-400" />,
+      label: "Accepted",
+    },
+    success: {
+      color: "bg-green-600/20 text-green-400",
+      icon: <FaCheckCircle className="text-green-400" />,
+      label: "Success",
+    },
+    pending: {
+      color: "bg-yellow-600/20 text-yellow-400 animate-pulse",
+      icon: <FaHourglassHalf className="text-yellow-400" />,
+      label: "Pending",
+    },
+    "wrong answer": {
+      color: "bg-red-600/20 text-red-400",
+      icon: <FaTimesCircle className="text-red-400" />,
+      label: "WA",
+    },
+    "time limit exceeded": {
+      color: "bg-red-600/20 text-red-400",
+      icon: <FaTimesCircle className="text-red-400" />,
+      label: "TLE",
+    },
+    "memory limit exceeded": {
+      color: "bg-red-600/20 text-red-400",
+      icon: <FaTimesCircle className="text-red-400" />,
+      label: "MLE",
+    },
+    "compilation error": {
+      color: "bg-red-600/20 text-red-400",
+      icon: <FaTimesCircle className="text-red-400" />,
+      label: "Compilation Error",
+    },
+    "runtime error": {
+      color: "bg-red-600/20 text-red-400",
+      icon: <FaTimesCircle className="text-red-400" />,
+      label: "Runtime Error",
+    },
   };
 
-  const { border, icon } = getVerdictStyle();
+  const { color, icon, label } =
+    verdictStyles[verdict?.toLowerCase()] || {
+      color: "bg-gray-700/30 text-gray-400",
+      icon: null,
+      label: "No Verdict",
+    };
 
   const renderers = {
-    strong: ({ children }) => {
-      const colorClass =
-        randomColorClasses[Math.floor(Math.random() * randomColorClasses.length)];
-      return <strong className={colorClass}>{children}</strong>;
-    },
-    li: ({ children }) => <li className="mb-2">{children}</li>,
+    strong: ({ children }) => (
+      <strong className={randomColorClass}>{children}</strong>
+    ),
+    li: ({ children }) => <li className="mb-1">{children}</li>,
   };
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-xl border ${border} bg-[#1e2330] shadow-md overflow-hidden`}
+      className="rounded-2xl border border-[#2f3547] bg-[#161b29] min-h-40 shadow-lg overflow-hidden flex flex-col gap-2"
+      aria-live="polite"
     >
-      <div className="flex justify-between items-center px-4 py-2 border-b border-[#2a2f3d] bg-[#141824] relative">
-        <div className="flex items-center gap-2 text-sm font-medium text-blue-200">
+      {/* Header */}
+      <header className="flex justify-between items-center px-4 py-3 bg-[#1d2235] border-b border-[#2f3547]">
+        <div className="flex items-center gap-2 text-base font-semibold text-blue-200">
           {icon}
           <span>Program Output</span>
         </div>
-      </div>
+        <span
+          className={`px-2 py-0.5 text-xs rounded-full font-medium ${color}`}
+        >
+          {label}
+        </span>
+      </header>
 
-      <div className="p-4 text-sm font-mono max-h-[200px] min-h-[110px] overflow-auto whitespace-pre-wrap">
-        {output || (
+      {/* Output */}
+      <pre
+        className="px-4 py-3 text-sm font-mono bg-[#10131f] rounded-md m-4 text-gray-200 min-h-20 max-h-56 overflow-auto whitespace-pre-wrap shadow-inner"
+        aria-label="Output"
+      >
+        {output.trim() || (
           <span className="text-gray-500">✨ Your output will appear here…</span>
         )}
-      </div>
+      </pre>
 
+      {/* AI Review */}
       {aiReviewVisible && (
-        <div className="p-4 text-sm mt-2 bg-[#141824] border border-[#2a2f3d] rounded-md text-blue-200 max-h-64 overflow-auto">
-          {aiReviewLoading ? (
-            <span>🤖 Generating AI review...</span>
-          ) : (
-            <div className="prose prose-sm max-w-none prose-invert space-y-3 prose-pre:bg-[#0e1117] prose-code:text-sm">
-              <ReactMarkdown
-                rehypePlugins={[rehypeHighlight]}
-                components={renderers}
-              >
-                {aiReviewText}
-              </ReactMarkdown>
+        <motion.div
+          ref={aiReviewRef} // 👈 added ref
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="px-4 pb-4"
+        >
+          {/* AI Review Header */}
+          <div className="flex justify-between items-center px-4 py-3 bg-[#1d2235] border border-[#2f3547] rounded-t-xl">
+            <div className="flex items-center gap-2 text-base font-semibold text-blue-200">
+              <FaRobot className="text-yellow-400" />
+              <span>AI Review</span>
             </div>
-          )}
-        </div>
+          </div>
+
+          <div className="p-3 text-sm bg-[#202638] border-x border-b border-[#2f3547] rounded-b-xl text-blue-100 shadow-inner">
+            {aiReviewLoading ? (
+              <span>🤖 Generating AI review...</span>
+            ) : (
+              <div
+                className="
+                  prose prose-sm max-w-none prose-invert space-y-2 
+                  prose-pre:bg-[#0e1117] prose-code:text-sm
+                  max-h-64 overflow-y-auto pr-2
+                "
+              >
+                <ReactMarkdown
+                  rehypePlugins={[rehypeHighlight]}
+                  components={renderers}
+                >
+                  {aiReviewText}
+                </ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </motion.div>
       )}
-    </motion.div>
+    </motion.section>
   );
 };
 

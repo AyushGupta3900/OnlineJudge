@@ -7,7 +7,24 @@ import { useGetSubmissionsByProblemQuery } from "../../redux/api/submissionAPI.j
 import AdminPagination from "../../components/AdminPagination";
 import PageHeader from "../../components/PageHeader";
 
-// 🔷 TestCaseTable
+const FilterSelect = ({ label, value, onChange, options }) => (
+  <div className="flex flex-col">
+    <label className="text-xs text-gray-400 mb-1">{label}</label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-600"
+    >
+      <option value="">All</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
 const TestCaseTable = ({ testCaseResults = [] }) => (
   <div className="mt-3 overflow-x-auto">
     <table className="min-w-full text-xs text-left border border-gray-700">
@@ -57,7 +74,6 @@ const TestCaseTable = ({ testCaseResults = [] }) => (
   </div>
 );
 
-// 🔷 SubmissionCard
 const SubmissionCard = ({ submission, delay, expanded, toggleExpand }) => {
   const timeAgo = submission.createdAt
     ? formatDistanceToNow(new Date(submission.createdAt), { addSuffix: true })
@@ -130,7 +146,6 @@ const SubmissionCard = ({ submission, delay, expanded, toggleExpand }) => {
   );
 };
 
-// 🔷 SkeletonCard
 const SkeletonCard = ({ delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
@@ -151,28 +166,31 @@ const SkeletonCard = ({ delay }) => (
   </motion.div>
 );
 
-// 🔷 Main Component
 const SubmissionsPage = () => {
   const { id: problemId } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [expanded, setExpanded] = useState(null);
 
+  const [language, setLanguage] = useState("");
+  const [verdict, setVerdict] = useState("");
+
   const { data, isLoading, isError, isFetching } = useGetSubmissionsByProblemQuery({
     problemId,
     page: currentPage,
     limit: 5,
+    language,
+    verdict,
   });
 
   const handleToggleExpand = (id) => {
     setExpanded((prev) => (prev === id ? null : id));
   };
 
-  const heading = "Your Submissions";
-
-  // 🔷 Scroll to top on pagination
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
+
+  const heading = "Your Submissions";
 
   return (
     <motion.div
@@ -184,28 +202,49 @@ const SubmissionsPage = () => {
       <div className="max-w-6xl mx-auto">
         <PageHeader heading={heading} />
 
-        {isLoading ? (
-          <p className="text-blue-300 animate-pulse">Loading submissions...</p>
+        <div className="flex gap-4 mb-6">
+          <FilterSelect
+            label="Language"
+            value={language}
+            onChange={setLanguage}
+            options={["cpp", "python", "java", "javascript"]}
+          />
+          <FilterSelect
+            label="Verdict"
+            value={verdict}
+            onChange={setVerdict}
+            options={[
+              "Accepted",
+              "Wrong Answer",
+              "Time Limit Exceeded",
+              "Runtime Error",
+              "Compilation Error",
+            ]}
+          />
+        </div>
+
+        {(isLoading || isFetching) ? (
+          <div className="grid gap-6">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <SkeletonCard key={idx} delay={idx * 0.05} />
+            ))}
+          </div>
         ) : isError ? (
           <p className="text-red-500">⚠️ Failed to load submissions.</p>
-        ) : !data?.data?.length ? (
+        ) : !data?.submissions?.length ? (
           <p className="text-gray-400">No submissions yet for this problem.</p>
         ) : (
           <>
             <div className="grid gap-6">
-              {isFetching
-                ? Array.from({ length: 3 }).map((_, idx) => (
-                    <SkeletonCard key={idx} delay={idx * 0.05} />
-                  ))
-                : data.data.map((sub, idx) => (
-                    <SubmissionCard
-                      key={sub._id}
-                      submission={sub}
-                      delay={idx * 0.05}
-                      expanded={expanded}
-                      toggleExpand={handleToggleExpand}
-                    />
-                  ))}
+              {data.submissions.map((sub, idx) => (
+                <SubmissionCard
+                  key={sub._id}
+                  submission={sub}
+                  delay={idx * 0.05}
+                  expanded={expanded}
+                  toggleExpand={handleToggleExpand}
+                />
+              ))}
             </div>
 
             {data.totalPages > 1 && (

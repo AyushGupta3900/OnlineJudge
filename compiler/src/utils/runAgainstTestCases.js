@@ -81,10 +81,11 @@ export async function runCodeAgainstTestCases({
       try {
         const result = await execute(codeFile, test.input);
 
-        totalTimeMs += Number(result.timeMs || 0);
-        if (result.memoryKb != null) {
-          totalMemoryKb += Number(result.memoryKb);
-        }
+        const timeMs = Number(result.timeMs || 0);
+        const memoryKb = result.memoryKb != null ? Number(result.memoryKb) : 0;
+
+        totalTimeMs += timeMs;
+        totalMemoryKb += memoryKb;
 
         const expected = test.output.trim();
         const actual = result.output.trim();
@@ -93,15 +94,48 @@ export async function runCodeAgainstTestCases({
         if (passed) passedTestCases++;
         else wrongAnswer = true;
 
-        testCaseResults.push({
+        const thisTestCaseResult = {
           testCase: i + 1,
           input: test.input,
           expectedOutput: expected,
           actualOutput: actual,
-          executionTimeMs: result.timeMs?.toFixed(2) || "0.00",
-          memoryKb: result.memoryKb ?? null,
+          executionTimeMs: timeMs.toFixed(2),
+          memoryKb: memoryKb || null,
           status: passed ? "Passed" : "Failed",
-        });
+        };
+
+        // Check per-test-case time limit
+        if (timeMs > timeLimitMs) {
+          thisTestCaseResult.status = "Time Limit Exceeded";
+          testCaseResults.push(thisTestCaseResult);
+          return {
+            verdict: "Time Limit Exceeded",
+            executionTime: timeMs.toFixed(2),
+            memoryUsed: memoryKb || null,
+            passedTestCases,
+            output: "",
+            error: `Test case ${i + 1} exceeded time limit`,
+            testCaseResults,
+          };
+        }
+
+        // Check per-test-case memory limit
+        if (memoryKb > memoryLimitKb) {
+          thisTestCaseResult.status = "Memory Limit Exceeded";
+          testCaseResults.push(thisTestCaseResult);
+          return {
+            verdict: "Memory Limit Exceeded",
+            executionTime: timeMs.toFixed(2),
+            memoryUsed: memoryKb || null,
+            passedTestCases,
+            output: "",
+            error: `Test case ${i + 1} exceeded memory limit`,
+            testCaseResults,
+          };
+        }
+
+        testCaseResults.push(thisTestCaseResult);
+
       } catch (err) {
         testCaseResults.push({
           testCase: i + 1,
@@ -139,30 +173,6 @@ export async function runCodeAgainstTestCases({
       }
     }
 
-    if (totalTimeMs > timeLimitMs) {
-      return {
-        verdict: "Time Limit Exceeded",
-        executionTime: totalTimeMs.toFixed(2),
-        memoryUsed: totalMemoryKb || null,
-        passedTestCases,
-        output: "",
-        error: "Time Limit Exceeded",
-        testCaseResults,
-      };
-    }
-
-    if (totalMemoryKb > memoryLimitKb) {
-      return {
-        verdict: "Memory Limit Exceeded",
-        executionTime: totalTimeMs.toFixed(2),
-        memoryUsed: totalMemoryKb || null,
-        passedTestCases,
-        output: "",
-        error: "Memory Limit Exceeded",
-        testCaseResults,
-      };
-    }
-
     if (wrongAnswer) {
       return {
         verdict: "Wrong Answer",
@@ -194,8 +204,7 @@ export async function runCodeAgainstTestCases({
       error: err.message || "Something went wrong while running test cases.",
       testCaseResults: [],
     };
-  }
-  finally {
+  } finally {
     try {
       await fs.unlink(codeFile);
       console.log(`🧹 Deleted code file: ${codeFile}`);

@@ -4,6 +4,12 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useLogout from "../hooks/useLogout.js";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import "sweetalert2/dist/sweetalert2.min.css";
+
+const MySwal = withReactContent(Swal);
+
 const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -14,14 +20,46 @@ const Nav = () => {
   const isAdmin = authUser?.role === "admin";
 
   const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      await logout();
-      setIsOpen(false);
-    } catch (error) {
-      console.error("Logout failed", error);
-    } finally {
-      setIsLoggingOut(false);
+    const result = await MySwal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, logout",
+      background: "#1f2937",
+      color: "#f3f4f6",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setIsLoggingOut(true);
+        await logout();
+        setIsOpen(false);
+
+        MySwal.fire({
+          title: "Logged out!",
+          text: "You have been logged out successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+          background: "#1f2937",
+          color: "#f3f4f6",
+        });
+      } catch (error) {
+        console.error("Logout failed", error);
+
+        MySwal.fire({
+          title: "Error!",
+          text: "Failed to logout. Please try again.",
+          icon: "error",
+          background: "#1f2937",
+          color: "#f3f4f6",
+        });
+      } finally {
+        setIsLoggingOut(false);
+      }
     }
   };
 
@@ -65,14 +103,18 @@ const Nav = () => {
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="px-4 py-1.5 border border-white text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
+              className={`px-4 py-1.5 rounded-md font-medium transition text-white shadow cursor-pointer ${
+                isLoggingOut
+                  ? "bg-gray-700"
+                  : "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400"
+              }`}
             >
               {isLoggingOut ? "Logging out..." : "Logout"}
             </button>
           ) : (
             <Link
               to="/login"
-              className="px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition"
+              className="px-4 py-1.5 rounded-md font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 shadow transition"
             >
               Login
             </Link>
@@ -148,7 +190,11 @@ const Nav = () => {
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="w-full py-2 border border-white rounded-md text-white hover:bg-blue-600 transition"
+                  className={`w-full py-2 rounded-md font-medium shadow text-white cursor-pointer ${
+                    isLoggingOut
+                      ? "bg-gray-700"
+                      : "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400"
+                  }`}
                 >
                   {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
@@ -156,7 +202,7 @@ const Nav = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="w-full block text-center py-2 bg-blue-600 rounded-md text-white hover:bg-blue-500 transition"
+                  className="w-full block text-center py-2 rounded-md font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 shadow transition"
                 >
                   Login
                 </Link>

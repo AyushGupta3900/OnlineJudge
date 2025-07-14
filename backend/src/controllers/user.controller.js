@@ -322,18 +322,52 @@ export const makeAdmin = TryCatch(async (req, res) => {
     throw new AppError("User not found", 404);
   }
 
+  // 🚨 Check if the user isSuperadmin
+  if (user.isSuperadmin) {
+    throw new AppError("Cannot change role of a superadmin", 403);
+  }
+
+  // 🚨 Check if already admin
   if (user.role === "admin") {
     throw new AppError("User is already an admin", 400);
   }
 
   user.role = "admin";
   await user.save();
-  
+
   await deleteKeysByPattern("users:*");
 
   res.status(200).json({
     success: true,
     message: "User promoted to admin successfully",
+    user,
+  });
+});
+
+export const removeAdmin = TryCatch(async (req, res) => {
+  const userId = req.params.id;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.isSuperadmin) {
+    throw new AppError("Cannot remove admin privileges from a superadmin", 403);
+  }
+
+  if (user.role !== "admin") {
+    throw new AppError("User is not an admin", 400);
+  }
+
+  user.role = "user";
+  await user.save();
+
+  await deleteKeysByPattern("users:*");
+
+  res.status(200).json({
+    success: true,
+    message: "Admin privileges removed successfully",
     user,
   });
 });

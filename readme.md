@@ -140,3 +140,77 @@ VITE_COMPILER_URL=http://localhost:5008/
 - docker image prune -a -f
 - docker build --no-cache -t compiler-server .
 - docker run --env-file .env -d -p 5008:5008 codex-compiler
+
+## Building multiarchitecture image 
+- docker buildx create --use
+- docker buildx inspect --bootstrap
+- docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest \
+  --push .
+
+## Deploying on AWS 
+
+- brew install awscli 
+- Create a IAM user 
+- Give username 
+- attach permissions -> AdministratorAccess
+- Create the Acess Key on aws 
+- aws configure 
+- AWS Access Key ID [None]: YOUR_ACCESS_KEY
+- AWS Secret Access Key [None]: YOUR_SECRET_KEY
+- Default region name [None]: ap-south-1
+- Default output format [None]: json
+- Make a ECR registry 
+- create a repository 
+- tag the image on your local system 
+- docker push image_url 
+- create the ec2 instance 
+- create a key value pair in ec2 instance 
+- add it to the keys folder of the project 
+- Edit the network settings and add the exposed port of the project 
+- Open the ec2 instance on you cmd in the keys folder using push commands 
+- sudo yum install docker 
+- sudo service docker start 
+- sudo usermod -aG ec2-user 
+- sudo reboot 
+- ssh ""
+-  docker pull image_url_on_url (655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest)
+- docker run --env-file .env -d -p 5008:5008 \
+  655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
+docker ps
+- check the docker 
+- curl http://localhost:5008/
+- docker ps
+- Allocate Elastic Ip to the EC2 instance 
+- After deploying on was register the IPV4 Elastic IP on the domain 
+- ping codex-online-judge.duckdns.org
+- Install and configure nginx 
+- sudo amazon-linux-extras enable nginx1
+- sudo yum install nginx -y
+- sudo systemctl enable nginx
+- sudo systemctl start nginx
+- sudo systemctl status nginx
+- sudo amazon-linux-extras install epel -y
+- sudo yum install certbot python2-certbot-nginx -y
+- sudo certbot --nginx -d codex-online-judge.duckdns.org
+- Open the ports 80 and 443 in security groups 
+- sudo vim /etc/nginx/conf.d/codex-online-judge.conf
+```
+server {
+    listen 80;
+
+    server_name codex-online-judge.duckdns.org;
+
+    location / {
+        proxy_pass         http://127.0.0.1:5008;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+- sudo nginx -t
+- sudo systemctl restart nginx

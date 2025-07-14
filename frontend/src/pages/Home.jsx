@@ -1,13 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const PageLoader = () => (
-  <div className="flex flex-col gap-4 justify-center items-center min-h-screen bg-black text-white">
-    <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-    <p className="text-cyan-400 text-lg">Loading Home Page…</p>
-  </div>
-);
+import PageLoader from "../components/PageLoader"
 
 const Home = () => {
   const [faqs, setFaqs] = useState([]);
@@ -29,7 +23,7 @@ const Home = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <PageLoader />;
+  if (loading) return <PageLoader/>;
 
   return (
     <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen px-6 py-10">
@@ -66,8 +60,6 @@ const Home = () => {
 
 export default Home;
 
-// 💡 Your sections below remain the same ⬇️
-
 const HeroSection = () => (
   <motion.section
     initial={{ opacity: 0, y: -50 }}
@@ -78,18 +70,18 @@ const HeroSection = () => (
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse blur-3xl pointer-events-none"></div>
 
     <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 text-transparent bg-clip-text drop-shadow-lg">
-      Sharpen Your Coding Skills
+    Master Your Coding Skills
     </h2>
 
     <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-      Ace your interviews and master DSA by solving expertly curated problems across all difficulty levels.
+      Get ready for DSA interviews and online assessments with high-quality, handpicked coding problems.
     </p>
 
     <Link
       to="/problems"
       className="inline-block px-10 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-white text-lg font-semibold rounded-full shadow-xl transition-transform hover:-translate-y-1 hover:scale-105"
     >
-      🚀 Start Solving
+      Start Solving
     </Link>
 
     <p className="text-sm text-gray-500 italic">
@@ -107,16 +99,16 @@ const CoursesSection = () => (
     className="mt-28 text-center max-w-4xl mx-auto space-y-6 px-4"
   >
     <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-500 text-transparent bg-clip-text">
-      Dive Into Our Courses
+      Explore the Courses
     </h2>
     <p className="text-base text-gray-400">
-      Beginner to advanced — courses in Data Structures, Algorithms, and System Design crafted by experts.
+      Beginner to advanced — courses in different domains like Data Structures, Algorithms, and System Design crafted by experts.
     </p>
     <Link
       to="/courses"
       className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white text-lg font-semibold rounded-full shadow-xl transition-transform hover:-translate-y-1 hover:scale-105"
     >
-      📘 Browse Courses
+      Browse Our Courses
     </Link>
   </motion.section>
 );
@@ -189,7 +181,7 @@ const FAQSection = ({ faqs }) => (
         to="/contact"
         className="inline-block px-6 py-2 text-sm bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-full shadow-md transition-transform hover:-translate-y-1 hover:scale-105"
       >
-        📩 Contact Support
+        Contact Support
       </Link>
     </div>
   </motion.section>

@@ -62,37 +62,45 @@ export const getSubmissionsByUserOnProblem = TryCatch(async (req, res) => {
     throw new AppError("Invalid problem ID", 400);
   }
 
-  const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.max(1, parseInt(req.query.limit) || 10);
-
-  const redisKey = `userSubmissions:${userId}:${problemId}:${page}:${limit}`;
-
+  const {
+    page = 1,
+    limit = 10,
+    verdict,
+    language,
+    sortBy = "createdAt",
+    order = "desc",
+  } = req.query;
+  const redisKey = `userSubmissions:${userId}:${problemId}:${page}:${limit}:${verdict || "all"}:${language || "all"}:${sortBy}:${order}`;
+  
   const cached = await redisClient.get(redisKey);
   if (cached) {
     return res.status(200).json({
       success: true,
-      message: "User submissions fetched from cache",
+      message: "User submissions fetched successfully (from cache)",
       ...JSON.parse(cached),
     });
   }
+  
+  const query = { user: userId, problem: problemId };
+  if (verdict) query.verdict = verdict;
+  if (language) query.language = language;
 
   const { results, total, totalPages } = await paginateQuery({
     model: Submission,
-    query: { user: userId, problem: problemId },
-    page,
-    limit,
-    sortBy: "createdAt",
-    order: "desc",
+    query,
+    page: Number(page),
+    limit: Number(limit),
+    sortBy,
+    order,
     populate: { path: "problem", select: "title" },
   });
-
+  
   const response = {
-    data: results,
+    submissions: results,
     total,
     totalPages,
-    page,
+    page: Number(page),
   };
-
   await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
   res.status(200).json({
@@ -106,23 +114,6 @@ export const getSingleSubmission = TryCatch(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 
-  const redisKey = `submission:${submissionId}`;
-
-  const cached = await redisClient.get(redisKey);
-  if (cached) {
-    const submission = JSON.parse(cached);
-    if (submission.user._id !== userId.toString()) {
-      throw new AppError("Unauthorized", 403);
-    }
-
-    return res.status(200).json({
-      success: true,
-      submission,
-      source: "cache",
-    });
-  }
-
-  // Fetch from DB
   const submission = await Submission.findById(submissionId)
     .populate("problem", "title")
     .populate("user", "username");
@@ -134,9 +125,6 @@ export const getSingleSubmission = TryCatch(async (req, res) => {
   if (submission.user._id.toString() !== userId.toString()) {
     throw new AppError("Unauthorized", 403);
   }
-
-  await redisClient.set(redisKey, JSON.stringify(submission), 'EX', 60);
-
 
   return res.status(200).json({
     success: true,

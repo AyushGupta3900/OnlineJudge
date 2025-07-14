@@ -194,19 +194,26 @@ const BadgesGrid = ({ solvedCount }) => {
   if (!badges.length) return null;
 
   return (
-    <motion.div className="mt-8 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-center text-yellow-400 mb-4">
-        Earned Badges
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mt-12 max-w-5xl mx-auto px-4"
+    >
+      <h2 className="text-3xl font-extrabold text-center text-yellow-300 mb-8 tracking-tight">
+        🏅 Earned Badges
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center">
         {badges.map((b, idx) => (
           <motion.div
             key={idx}
-            whileHover={{ scale: 1.05 }}
-            className="bg-gray-800 rounded-lg p-3 text-center shadow border border-gray-700"
+            whileHover={{ scale: 1.06, rotate: 1 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gradient-to-br from-gray-800 to-gray-900/80 backdrop-blur-sm rounded-xl px-4 py-6 text-center shadow-lg border border-gray-700 hover:shadow-xl transition"
           >
-            <div className="text-xl mb-1 text-teal-300">{b.icon}</div>
-            <div className="text-sm">{b.label}</div>
+            <div className="text-3xl mb-2 text-teal-300 drop-shadow">{b.icon}</div>
+            <div className="text-sm font-medium text-gray-200">{b.label}</div>
           </motion.div>
         ))}
       </div>
@@ -215,12 +222,19 @@ const BadgesGrid = ({ solvedCount }) => {
 };
 
 const DifficultyPie = ({ pieData }) => (
-  <motion.div className="mt-10 max-w-4xl mx-auto">
-    <div className="bg-gray-900 rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-center text-pink-300 mb-4">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className="mt-12 max-w-5xl mx-auto px-4"
+  >
+    <div className="bg-gray-900 rounded-2xl shadow-xl p-8">
+      <h2 className="text-3xl font-extrabold text-center text-pink-400 mb-8 tracking-tight">
         Problem Difficulty Distribution
       </h2>
-      <div className="flex flex-col md:flex-row items-center justify-around">
+
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        {/* Pie Chart */}
         <div className="w-full md:w-1/2 h-80">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -230,9 +244,9 @@ const DifficultyPie = ({ pieData }) => (
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
+                innerRadius={60}
                 outerRadius={100}
-                paddingAngle={5}
+                paddingAngle={3}
                 label={({ name, percent }) =>
                   `${name} (${(percent * 100).toFixed(0)}%)`
                 }
@@ -242,23 +256,32 @@ const DifficultyPie = ({ pieData }) => (
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ backgroundColor: "#1e293b", color: "#f8fafc" }}
-              />
-              <Legend
-                verticalAlign="bottom"
-                wrapperStyle={{ color: "#f8fafc" }}
+                contentStyle={{
+                  backgroundColor: "#1e293b",
+                  color: "#f8fafc",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #334155",
+                }}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-6 md:mt-0 md:w-1/3 text-center space-y-3">
+
+        {/* Legend */}
+        <div className="w-full md:w-1/3 space-y-4">
           {pieData.map((item) => (
             <div
               key={item.name}
-              className="flex justify-between px-4 py-2 bg-gray-800 rounded shadow text-sm"
+              className="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3 shadow-sm"
             >
-              <span className="text-gray-300">{item.name}</span>
-              <span style={{ color: item.fill }}>{item.value}</span>
+              <div className="flex items-center gap-3">
+                <span
+                  className="inline-block w-3 h-3 rounded-full"
+                  style={{ backgroundColor: item.fill }}
+                />
+                <span className="text-gray-200 font-medium">{item.name}</span>
+              </div>
+              <span className="text-gray-300 font-semibold">{item.value}</span>
             </div>
           ))}
         </div>
@@ -266,6 +289,7 @@ const DifficultyPie = ({ pieData }) => (
     </div>
   </motion.div>
 );
+
 
 const ProfilePage = () => {
   const navigate = useNavigate();

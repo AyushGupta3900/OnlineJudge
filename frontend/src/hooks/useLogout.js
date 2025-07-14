@@ -19,7 +19,6 @@ const useLogout = () => {
     dispatch(clearCredentials());
     await persistor.purge(); 
 
-    toast.success("Logout successful!");
     navigate("/login");
   };
 

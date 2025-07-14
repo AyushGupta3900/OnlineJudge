@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaPlay, FaUndo, FaUpload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Editor from "@monaco-editor/react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import {
   useSubmitCodeMutation,
@@ -32,6 +34,7 @@ import {
 } from "../utils/codeEditorUtils.js";
 
 const LANGUAGES = ["cpp", "python", "javascript", "java"];
+const MySwal = withReactContent(Swal);
 
 const CodeEditor = ({ problemId: propId }) => {
   const { id: routeId } = useParams();
@@ -62,6 +65,8 @@ const CodeEditor = ({ problemId: propId }) => {
   const [hintVisible, setHintVisible] = useState(false);
   const [hintText, setHintText] = useState("");
 
+  const aiReviewRef = useRef(null);
+
   useEffect(() => {
     if (!code) {
       loadBoilerplate(language, updateCode);
@@ -73,7 +78,7 @@ const CodeEditor = ({ problemId: propId }) => {
 
     let elapsed = 0;
     const pollInterval = 2000;
-    const maxTime = 10000;
+    const maxTime = 120000;
 
     const interval = setInterval(async () => {
       elapsed += pollInterval;
@@ -113,6 +118,38 @@ const CodeEditor = ({ problemId: propId }) => {
     return () => clearInterval(interval);
   }, [submissionId, fetchSubmission]);
 
+  const confirmReset = async () => {
+    const result = await MySwal.fire({
+      title: "Reset Editor?",
+      text: "All unsaved changes will be lost.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, reset",
+      cancelButtonText: "Cancel",
+      background: "#1f2937",
+      color: "#f8fafc",
+      iconColor: "#f87171",
+      customClass: {
+        popup: "rounded-xl",
+        confirmButton:
+          "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded",
+        cancelButton:
+          "bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded",
+      },
+    });
+    if (result.isConfirmed) {
+      handleReset(
+        language,
+        updateCode,
+        setInput,
+        setOutput,
+        setVerdict,
+        setSubmissionId,
+        pollingInterval
+      );
+    }
+  };
+
   return (
     <div className="bg-[#0e1117] text-white p-4 space-y-5 rounded-xl shadow-inner border border-[#1c2030]">
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
@@ -144,17 +181,7 @@ const CodeEditor = ({ problemId: propId }) => {
 
         <div className="flex flex-wrap justify-end gap-3">
           <ActionButton
-            onClick={() =>
-              handleReset(
-                language,
-                updateCode,
-                setInput,
-                setOutput,
-                setVerdict,
-                setSubmissionId,
-                pollingInterval
-              )
-            }
+            onClick={confirmReset}
             label="Reset"
             icon={<FaUndo />}
             color="gray"
@@ -209,6 +236,7 @@ const CodeEditor = ({ problemId: propId }) => {
         aiReviewVisible={aiReviewVisible}
         aiReviewLoading={aiReviewLoading}
         aiReviewText={aiReviewText}
+        aiReviewRef={aiReviewRef}
       />
 
       <textarea
@@ -220,7 +248,7 @@ const CodeEditor = ({ problemId: propId }) => {
       />
 
       <FloatingAIButtons
-        onReview={() =>
+        onReview={() => {
           handleAIReview(
             code,
             language,
@@ -228,8 +256,14 @@ const CodeEditor = ({ problemId: propId }) => {
             setAiReviewVisible,
             setAiReviewText,
             getAIReview
-          )
-        }
+          );
+          setTimeout(() => {
+            aiReviewRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }, 300);
+        }}
         onBoilerplate={() =>
           handleAIBoilerplate(
             problemId,

@@ -16,8 +16,8 @@ const submissionApi = baseApi.injectEndpoints({
       keepUnusedDataFor: 0,
     }),
     getSubmissionsByProblem: builder.query({
-      query: ({ problemId, page = 1, limit = 10 }) => {
-        const params = new URLSearchParams({ page, limit });
+      query: ({ problemId, page = 1, limit = 10, language, verdict }) => {
+        const params = new URLSearchParams({ page, limit, language, verdict });
         return `/submission/user/${problemId}?${params.toString()}`;
       },
       providesTags: ['Submission'],

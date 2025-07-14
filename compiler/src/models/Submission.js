@@ -61,7 +61,7 @@ const submissionSchema = new mongoose.Schema(
         memoryKb: Number,
         status: {
           type: String,
-          enum: ["Passed", "Failed","Error"],
+          enum: ["Passed", "Failed","Time Limit Exceeded","Memory Limit Exceeded","Error"],
         },
         error: String,
       },

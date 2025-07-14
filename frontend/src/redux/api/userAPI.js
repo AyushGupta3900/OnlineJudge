@@ -51,6 +51,13 @@ const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+    removeAdmin: builder.mutation({
+      query: (id) => ({
+        url: `/user/admin/remove/${id}`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
@@ -62,4 +69,5 @@ export const {
   useGetAllUserSubmissionsQuery,
   useGetAllUsersQuery,
   useMakeAdminMutation,
+  useRemoveAdminMutation
 } = userApi;

@@ -10,8 +10,49 @@ export const loadBoilerplate = (language, setCode) => {
 export const formatSubmissionOutput = (submission) => {
   const verdict = submission.verdict;
   if (!verdict) return "⚠️ No verdict available.";
-  if (verdict === "Accepted")
-    return `✅ Accepted\n⏱️ Execution Time: ${submission.executionTime} ms\n💾 Memory Used: ${submission.memoryUsed} KB`;
+
+  if (verdict === "Accepted") {
+    return (
+      `✅ Accepted\n` +
+      `🚀 Execution Time: ${submission.executionTime} ms\n` +
+      `📦 Memory Used: ${submission.memoryUsed} KB\n` +
+      `🧪 Test Cases Passed: ${submission.passedTestCases} / ${submission.totalTestCases}`
+    );
+  }
+
+  if (verdict === "Wrong Answer") {
+    return (
+      `❌ 🔍 Wrong Answer\n` +
+      `🚀 Execution Time: ${submission.executionTime} ms\n` +
+      `📦 Memory Used: ${submission.memoryUsed} KB\n` +
+      `🧪 Test Cases Passed: ${submission.passedTestCases} / ${submission.totalTestCases}`
+    );
+  }
+
+  if (
+    verdict === "Time Limit Exceeded" ||
+    verdict === "Memory Limit Exceeded"
+  ) {
+    return (
+      `⏳ ⚠️ ${verdict}\n` +
+      `🧪 Test Cases Passed: ${submission.passedTestCases} / ${submission.totalTestCases}`
+    );
+  }
+
+  if (verdict === "Compilation Error") {
+    return (
+      `🛠️ 🧨 Compilation Error\n` +
+      `📄 Message: ${submission.error || "No details provided."}`
+    );
+  }
+
+  if (verdict === "Runtime Error") {
+    return (
+      `💥 🐞 Runtime Error\n` +
+      `📄 Message: ${submission.error || "No details provided."}`
+    );
+  }
+
   return `ℹ️ Verdict: ${verdict}`;
 };
 

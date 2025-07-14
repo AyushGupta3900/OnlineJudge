@@ -27,11 +27,11 @@
   ],
   "testimonials": [
     {
-      "name": "Aarav K.",
+      "name": "Aditya Kumar",
       "text": "CodeX helped me ace my FAANG interview! The structured problem sets and UI made daily practice fun."
     },
     {
-      "name": "Priya S.",
+      "name": "Umesh Kumar Verma",
       "text": "The peer ranking and instant feedback gave me the push I needed to stay consistent and grow faster."
     },
     {
@@ -47,19 +47,19 @@
     {
       "icon": "🧠",
       "title": "Handpicked DSA Problems",
-      "description": "Curated challenges across all major DSA topics to sharpen your edge.",
+      "description":  "Practice the most important DSA topics with handpicked problems to level up your skills.",
       "bgColor": "bg-gradient-to-br from-cyan-600 to-blue-700"
     },
     {
       "icon": "🏆",
       "title": "Structured Courses",
-      "description": "Guided learning paths with increasing difficulty to master concepts step by step.",
+      "description": "Step-by-step learning paths that get harder as you go, helping you master each concept.",
       "bgColor": "bg-gradient-to-br from-purple-600 to-pink-700"
     },
     {
       "icon": "📜",
       "title": "Insightful Analytics",
-      "description": "Analyze your progress, revisit attempts, and grow with clear metrics.",
+      "description": "Track your progress, review your past attempts, and improve with clear insights.",
       "bgColor": "bg-gradient-to-br from-pink-600 to-red-700"
     }
   ],

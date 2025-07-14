@@ -8,13 +8,11 @@ const medalColors = ["text-yellow-400", "text-gray-300", "text-orange-400"];
 
 const Leaderboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const usersPerPage = 8;
+  const usersPerPage = 10;
 
   const { data, isLoading, isFetching, isError } = useGetLeaderboardQuery({
     page: currentPage,
     limit: usersPerPage,
-    search,
   });
 
   const heading = "Leaderboard";
@@ -27,20 +25,6 @@ const Leaderboard = () => {
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <PageHeader heading={heading} />
-
-        {/* Search Box */}
-        <div className="flex justify-end mb-4">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1); // reset to first page
-            }}
-            placeholder="Search by username or name..."
-            className="bg-gray-800 text-white px-4 py-2 rounded-md border border-gray-700 w-full max-w-sm"
-          />
-        </div>
 
         {isLoading ? (
           <PageLoadingSkeleton />
@@ -58,7 +42,7 @@ const Leaderboard = () => {
               <>
                 <LeaderboardTable
                   users={users}
-                  startRank={(currentPage - 1) * usersPerPage + 4}
+                  startRank={4}
                 />
                 {totalPages > 1 && (
                   <AdminPagination
@@ -88,7 +72,7 @@ const TopThree = ({ users }) => {
           key={user._id}
           className="bg-gray-900 rounded-xl shadow-lg p-4 flex flex-col items-center justify-center gap-2"
         >
-          <FaMedal className={`text-4xl ${medalColors[index]}`} />
+          <FaMedal className={`text-4xl ${medalColors[index] || "text-yellow-200"}`} />
           <h2 className="text-xl font-bold">
             {user.fullName || user.username || "Unknown"}
           </h2>
@@ -155,7 +139,7 @@ const PageLoadingSkeleton = () => (
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
-          className="bg-gray-800 rounded-xl h-32 w-full"
+          className="bg-gray-800 rounded-xl h-50 w-full"
         ></div>
       ))}
     </div>
@@ -166,7 +150,7 @@ const PageLoadingSkeleton = () => (
 
 const LeaderboardTableSkeleton = () => (
   <div className="space-y-2 animate-pulse">
-    {[...Array(8)].map((_, i) => (
+    {[...Array(10)].map((_, i) => (
       <div
         key={i}
         className="bg-gray-800 rounded-md h-10 w-full"

@@ -151,7 +151,9 @@ export const editProblem = TryCatch(async (req, res) => {
   const problem = await Problem.findById(problemId);
   if (!problem) throw new AppError("Problem not found", 404);
 
-  if (problem.createdBy.toString() !== req.user._id.toString()) {
+  const isSuperadmin = req.user.isSuperadmin === true;
+
+  if (!isSuperadmin && problem.createdBy.toString() !== req.user._id.toString()) {
     throw new AppError("Unauthorized to edit this problem", 403);
   }
 
@@ -171,31 +173,39 @@ export const editProblem = TryCatch(async (req, res) => {
 });
 
 // on deleting problem invalidate getAllProblems, getProblem, ProfileStats, Submissions(All Submissions, Problem Submissions)
-
 export const deleteProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
-  const userId = req.user?._id;
 
   const problem = await Problem.findById(problemId);
   if (!problem) throw new AppError("Problem not found", 404);
 
-  if (problem.createdBy.toString() !== req.user._id.toString()) {
+  const isSuperadmin = req.user.isSuperadmin === true;
+
+  if (!isSuperadmin && problem.createdBy.toString() !== req.user._id.toString()) {
     throw new AppError("Unauthorized to delete this problem", 403);
   }
 
+  // Delete all submissions of this problem
   await Submission.deleteMany({ problem: problemId });
+
+  // Remove problem from all user submission arrays
   await User.updateMany({}, { $pull: { submissions: { problemId } } });
+
+  // Update solvedProblems and difficulty counts
   const users = await User.find({ solvedProblems: problemId });
   for (const user of users) {
     user.solvedProblems.pull(problemId);
+
     if (
       problem.difficulty &&
       user.solvedCountByDifficulty[problem.difficulty] > 0
     ) {
       user.solvedCountByDifficulty[problem.difficulty] -= 1;
     }
+
     await user.save();
   }
+
   await problem.deleteOne();
 
   await deleteKeysByPattern("problems:*");
