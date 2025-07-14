@@ -17,7 +17,7 @@ const ProblemPage = () => {
     isLoading: isStatusLoading,
     isError: isStatusError,
   } = useGetProblemStatusQuery(id);
-
+  console.log(problemData)
   const problem = problemData?.data;
   const isSolved = statusData?.status === "solved";
 
@@ -182,23 +182,38 @@ const SampleTestCases = ({ testCases }) => (
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 * index }}
           key={index}
-          className="bg-[#1e2330] p-4 rounded-md space-y-1 border border-[#2a2f3d]"
+          className="bg-[#1e2330] p-4 rounded-md space-y-2 border border-[#2a2f3d]"
         >
           <p className="text-sm text-gray-400">Test Case {index + 1}</p>
-          <p>
-            <span className="text-blue-400 font-medium">Input:</span> {test.input}
-          </p>
-          <p>
-            <span className="text-green-400 font-medium">Output:</span> {test.output}
-          </p>
-          <p>
-            <span className="text-yellow-400 font-medium">Explanation:</span> {test.explanation}
-          </p>
+
+          <div>
+            <span className="text-blue-400 font-medium">Input:</span>
+            <pre className="bg-[#0e1117] p-2 mt-1 rounded text-gray-300 whitespace-pre-wrap text-sm">
+              {test.input}
+            </pre>
+          </div>
+
+          <div>
+            <span className="text-green-400 font-medium">Output:</span>
+            <pre className="bg-[#0e1117] p-2 mt-1 rounded text-gray-300 whitespace-pre-wrap text-sm">
+              {test.output}
+            </pre>
+          </div>
+
+          {test.explanation && (
+            <div>
+              <span className="text-yellow-400 font-medium">Explanation:</span>
+              <pre className="bg-[#0e1117] p-2 mt-1 rounded text-gray-300 whitespace-pre-wrap text-sm">
+                {test.explanation}
+              </pre>
+            </div>
+          )}
         </motion.div>
       ))}
     </div>
   </section>
 );
+
 
 const SolvedState = ({ isSolved, problemId }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-4">
