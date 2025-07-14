@@ -19,9 +19,16 @@ export const signupUser = TryCatch(async (req, res) => {
     throw new AppError("Invalid email format", 400);
   }
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
+  // 🔷 Check email uniqueness
+  const existingEmail = await User.findOne({ email });
+  if (existingEmail) {
     throw new AppError("Email already exists, please use a different one", 400);
+  }
+
+  // 🔷 Check username uniqueness
+  const existingUsername = await User.findOne({ username });
+  if (existingUsername) {
+    throw new AppError("Username already exists, please choose a different one", 400);
   }
 
   const idx = Math.floor(Math.random() * 100) + 1;
