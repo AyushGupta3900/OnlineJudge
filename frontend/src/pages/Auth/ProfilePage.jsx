@@ -135,7 +135,7 @@ const HeroSection = ({ user }) => (
   <motion.div className="max-w-3xl mx-auto bg-gray-900 rounded-xl shadow-lg overflow-hidden">
     <div className="h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative block">
       <motion.img
-        src={user.avatar || "/logo.png"}
+        src={"/logo.png"}
         alt="Avatar"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
