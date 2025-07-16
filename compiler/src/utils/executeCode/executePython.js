@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv"
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -11,14 +11,14 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-const GNU_TIME = "/opt/homebrew/bin/gtime";
-// const GNU_TIME = "/usr/bin/time";
+// const GNU_TIME = "/opt/homebrew/bin/gtime";
+const GNU_TIME = "/usr/bin/time";
 
-export const executePython = (filepath, input = "") => {
+export const executePython = (filepath, input = "", timeLimitMs = 5000) => {
   return new Promise((resolve, reject) => {
     const startTime = process.hrtime();
-
     const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
+    let settled = false;
 
     const child = spawn(
       GNU_TIME,
@@ -30,9 +30,12 @@ export const executePython = (filepath, input = "") => {
     let stderr = "";
 
     const timeout = setTimeout(() => {
-      child.kill("SIGKILL");
-      return reject({ type: "timeout", error: "Execution timed out." });
-    }, 5000);
+      if (!settled) {
+        settled = true;
+        child.kill("SIGKILL");
+        reject({ type: "timeout", error: "Execution timed out." });
+      }
+    }, timeLimitMs);
 
     child.stdout.on("data", (data) => {
       stdout += data.toString();
@@ -48,27 +51,30 @@ export const executePython = (filepath, input = "") => {
     child.stdin.end();
 
     child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
 
       const [sec, nanosec] = process.hrtime(startTime);
       const elapsedMs = sec * 1000 + nanosec / 1e6;
 
       fs.readFile(memFile, "utf8", (err, memData) => {
-        fs.unlink(memFile, () => {}); 
+        fs.unlink(memFile, () => {});
 
         const memoryKb = err ? null : parseInt(memData.trim(), 10);
+
         if (code !== 0) {
           return reject({
             type: "runtime",
             code,
-            stderr,
+            stderr: stderr.trim(),
             timeMs: elapsedMs,
             memoryKb,
           });
         }
 
         return resolve({
-          output: stdout,
+          output: stdout.trim(),
           timeMs: elapsedMs,
           memoryKb,
         });
@@ -76,8 +82,11 @@ export const executePython = (filepath, input = "") => {
     });
 
     child.on("error", (err) => {
-      clearTimeout(timeout);
-      return reject({ type: "spawn", error: err.message });
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        reject({ type: "spawn", error: err.message });
+      }
     });
   });
 };

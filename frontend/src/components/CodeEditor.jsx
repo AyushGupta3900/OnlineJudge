@@ -46,7 +46,7 @@ const CodeEditor = ({ problemId: propId }) => {
   const [output, setOutput] = useState("");
   const [verdict, setVerdict] = useState(null);
   const [submissionId, setSubmissionId] = useState(null);
-  const [pollingInterval, setPollingInterval] = useState(null);
+  const [verdictToastId, setVerdictToastId] = useState(null);
 
   const [submitCode, { isLoading: submitting }] = useSubmitCodeMutation();
   const [runCode, { isLoading: running }] = useRunCodeMutation();
@@ -66,12 +66,14 @@ const CodeEditor = ({ problemId: propId }) => {
   const [hintText, setHintText] = useState("");
 
   const aiReviewRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
 
-  useEffect(() => {
-    if (!code) {
-      loadBoilerplate(language, updateCode);
-    }
-  }, [problemId]);
+useEffect(() => {
+  if (code == null) {
+    loadBoilerplate(language, updateCode);
+  }
+}, [problemId, code, language, updateCode]);
+
 
   useEffect(() => {
     if (!submissionId) return;
@@ -80,13 +82,17 @@ const CodeEditor = ({ problemId: propId }) => {
     const pollInterval = 2000;
     const maxTime = 120000;
 
-    const interval = setInterval(async () => {
+    pollingIntervalRef.current = setInterval(async () => {
       elapsed += pollInterval;
 
       if (elapsed >= maxTime) {
-        setOutput("⏳ Timeout: Failed to get verdict in 10s.");
-        clearInterval(interval);
-        setPollingInterval(null);
+        setOutput("⏳ Timeout: Failed to get verdict in time.");
+        if (verdictToastId) {
+          toast.error("⏳ Timeout: Failed to get verdict.", { id: verdictToastId });
+          setVerdictToastId(null);
+        }
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
         return;
       }
 
@@ -103,20 +109,35 @@ const CodeEditor = ({ problemId: propId }) => {
 
         if (currentVerdict !== "Pending") {
           setOutput(formatSubmissionOutput(res.submission));
-          clearInterval(interval);
-          setPollingInterval(null);
+
+          if (verdictToastId) {
+            if (currentVerdict === "Accepted") {
+              toast.success("Verdict: Accepted", { id: verdictToastId });
+            } else {
+              toast.error(`Verdict: ${currentVerdict}`, { id: verdictToastId });
+            }
+            setVerdictToastId(null);
+          }
+
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
         }
       } catch {
         setOutput("❌ Failed to fetch verdict.");
-        clearInterval(interval);
-        setPollingInterval(null);
+        if (verdictToastId) {
+          toast.error("❌ Failed to fetch verdict", { id: verdictToastId });
+          setVerdictToastId(null);
+        }
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     }, pollInterval);
 
-    setPollingInterval(interval);
-
-    return () => clearInterval(interval);
-  }, [submissionId, fetchSubmission]);
+    return () => {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    };
+  }, [submissionId, fetchSubmission, verdictToastId]);
 
   const confirmReset = async () => {
     const result = await MySwal.fire({
@@ -145,7 +166,7 @@ const CodeEditor = ({ problemId: propId }) => {
         setOutput,
         setVerdict,
         setSubmissionId,
-        pollingInterval
+        pollingIntervalRef
       );
     }
   };
@@ -164,7 +185,8 @@ const CodeEditor = ({ problemId: propId }) => {
               setOutput("");
               setVerdict(null);
               setSubmissionId(null);
-              if (pollingInterval) clearInterval(pollingInterval);
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
               toast.success(
                 `Language changed to ${e.target.value.toUpperCase()}`
               );
@@ -196,22 +218,24 @@ const CodeEditor = ({ problemId: propId }) => {
             loading={running}
           />
           <ActionButton
-            onClick={() => {
+            onClick={async () => {
               if (!isAuthenticated) {
                 toast.error("Please log in to submit your code.");
                 return;
               }
 
-              handleSubmit(
+              const toastId = await handleSubmit(
                 problemId,
                 language,
                 code,
                 setOutput,
                 setVerdict,
                 setSubmissionId,
-                pollingInterval,
+                pollingIntervalRef,
                 submitCode
               );
+
+              if (toastId) setVerdictToastId(toastId);
             }}
             label="Submit"
             icon={<FaUpload />}

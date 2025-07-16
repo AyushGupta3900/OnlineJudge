@@ -5,25 +5,36 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const outputPath = path.join(__dirname, "outputs");
 
+const outputPath = path.join(__dirname, "outputs");
 if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-export const executeJs = (filepath, input = "") => {
+// const GNU_TIME = "/opt/homebrew/bin/gtime";
+const GNU_TIME = "/usr/bin/time";
+
+export const executeJs = (filepath, input = "", timeLimitMs = 5000) => {
   return new Promise((resolve, reject) => {
     const startTime = process.hrtime();
+    const memFile = path.join(outputPath, `mem_${Date.now()}.txt`);
+    let settled = false;
 
-    const child = spawn("node", [filepath], { cwd: outputPath });
+    const child = spawn(
+      GNU_TIME,
+      ["-f", "%M", "-o", memFile, "node", filepath]
+    );
 
     let stdout = "";
     let stderr = "";
 
     const timeout = setTimeout(() => {
-      child.kill("SIGKILL");
-      return reject({ type: "timeout", error: "Execution timed out." });
-    }, 5000);
+      if (!settled) {
+        settled = true;
+        child.kill("SIGKILL");
+        reject({ type: "timeout", error: "Execution timed out." });
+      }
+    }, timeLimitMs);
 
     child.stdout.on("data", (data) => {
       stdout += data.toString();
@@ -39,21 +50,42 @@ export const executeJs = (filepath, input = "") => {
     child.stdin.end();
 
     child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
 
       const [sec, nanosec] = process.hrtime(startTime);
       const elapsedMs = sec * 1000 + nanosec / 1e6;
 
-      if (code !== 0) {
-        return reject({ type: "runtime", code, stderr, timeMs: elapsedMs });
-      }
+      fs.readFile(memFile, "utf8", (err, memData) => {
+        fs.unlink(memFile, () => {});
 
-      return resolve({ output: stdout, timeMs: elapsedMs });
+        const memoryKb = err ? null : parseInt(memData.trim(), 10);
+
+        if (code !== 0) {
+          return reject({
+            type: "runtime",
+            code,
+            stderr: stderr.trim(),
+            timeMs: elapsedMs,
+            memoryKb,
+          });
+        }
+
+        return resolve({
+          output: stdout.trim(),
+          timeMs: elapsedMs,
+          memoryKb,
+        });
+      });
     });
 
     child.on("error", (err) => {
-      clearTimeout(timeout);
-      return reject({ type: "spawn", error: err.message });
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        reject({ type: "spawn", error: err.message });
+      }
     });
   });
 };

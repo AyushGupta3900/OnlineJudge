@@ -80,6 +80,7 @@ export const handleRun = async (
   }
 };
 
+
 export const handleSubmit = async (
   problemId,
   language,
@@ -92,7 +93,8 @@ export const handleSubmit = async (
 ) => {
   if (!problemId) {
     setOutput("⚠️ Problem ID not found.");
-    return;
+    toast.error("⚠️ Problem ID not found");
+    return null;
   }
 
   setOutput("📤 Submitting code...");
@@ -100,16 +102,27 @@ export const handleSubmit = async (
   setSubmissionId(null);
   if (pollingInterval) clearInterval(pollingInterval);
 
+  const submittingToastId = toast.loading("Submitting code…");
+
   try {
     const res = await submitCode({ problemId, language, code }).unwrap();
     setSubmissionId(res.data.submissionId);
-    setOutput("⏳ Waiting for verdict...");
-    toast.success("Code submitted");
+
+    setOutput("⏳ Waiting for verdict…");
+
+    toast.loading("Waiting for verdict…", { id: submittingToastId });
+
+    return submittingToastId; 
+
   } catch {
     setOutput("❌ Submission failed.");
     setVerdict("error");
+    toast.error("Submission failed", { id: submittingToastId });
+
+    return null;
   }
 };
+
 
 export const handleReset = (
   language,

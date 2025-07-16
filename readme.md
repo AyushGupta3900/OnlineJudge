@@ -139,6 +139,7 @@ VITE_COMPILER_URL=http://localhost:5008/
 - docker rm $(docker ps -aq) || true
 - docker image prune -a -f
 - docker build --no-cache -t compiler-server .
+- docker run -p 5008:5008 compiler-server
 - docker run --env-file .env -d -p 5008:5008 codex-compiler
 
 ## Building multiarchitecture image 

@@ -3,17 +3,16 @@ import path from "path";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
 
-import { executeCpp } from "./executeCode/executeCpp.js";
+import { compileCpp, runCpp, cleanCppBinary } from "./executeCode/executeCpp.js";
+import { compileJava, runJava, cleanJavaClassFiles } from "./executeCode/executeJava.js";
 import { executePython } from "./executeCode/executePython.js";
-import { executeJava } from "./executeCode/executeJava.js";
 import { executeJs } from "./executeCode/executeJS.js";
 
-// Get __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Directory to save temporary code files
 const codeDir = path.join(__dirname, "codes");
+
+await fs.mkdir(codeDir, { recursive: true });
 
 const extensionMap = {
   cpp: "cpp",
@@ -22,16 +21,6 @@ const extensionMap = {
   javascript: "js",
 };
 
-const executorMap = {
-  cpp: executeCpp,
-  python: executePython,
-  java: executeJava,
-  javascript: executeJs,
-};
-
-/**
- * Run user-submitted code against provided test cases.
- */
 export async function runCodeAgainstTestCases({
   code,
   testCases,
@@ -40,176 +29,170 @@ export async function runCodeAgainstTestCases({
   memoryLimit = 256,
 }) {
   const ext = extensionMap[language];
-  if (!ext) {
-    return {
-      verdict: "Internal Error",
-      executionTime: 0,
-      memoryUsed: null,
-      passedTestCases: 0,
-      output: "",
-      error: `Unsupported language: ${language}`,
-      testCaseResults: [],
-    };
-  }
-
   const jobId = uuid();
-  const codeFile = path.join(codeDir, `${jobId}.${ext}`);
+
+  if (!ext) return errorResponse("Runtime Error", `Unsupported language: ${language}`, testCases.length);
+
+  const codeFile =
+    language === "java"
+      ? path.join(codeDir, "Main.java")
+      : path.join(codeDir, `${jobId}.${ext}`);
 
   const timeLimitMs = timeLimit * 1000;
   const memoryLimitKb = memoryLimit * 1024;
 
+  let compiledArtifact = null;
+  let passedTestCases = 0;
+  let totalTimeMs = 0;
+  let totalMemoryKb = 0;
+
+  const testCaseResults = [];
+
   try {
-    // Ensure temp directory exists
-    await fs.mkdir(codeDir, { recursive: true });
+    const finalCode =
+      language === "java"
+        ? code.replace(/public\s+class\s+\w+/, "public class Main")
+        : code;
 
-    // writing code into the codefile
-    await fs.writeFile(codeFile, code);
+    await fs.writeFile(codeFile, finalCode);
 
-    const execute = executorMap[language];
-    if (!execute) throw new Error(`No executor defined for: ${language}`);
-
-    let totalTimeMs = 0;
-    let totalMemoryKb = 0;
-    let passedTestCases = 0;
-    let wrongAnswer = false;
-
-    const testCaseResults = [];
+    const executeFn = await getExecutor(language, codeFile);
 
     for (let i = 0; i < testCases.length; i++) {
-      const test = testCases[i];
+      const { input, output: expectedOutput = "" } = testCases[i];
+      const expected = expectedOutput.trim();
+
+      const result = {
+        testCase: i + 1,
+        input,
+        expectedOutput: expected,
+        actualOutput: "",
+        executionTimeMs: 0,
+        memoryKb: null,
+        status: "Error",
+        error: "",
+      };
 
       try {
-        const result = await execute(codeFile, test.input);
+        const { output, timeMs = 0, memoryKb = 0 } = await executeFn(input);
+        const actual = (output || "").trim();
+        const passed = actual === expected;
 
-        const timeMs = Number(result.timeMs || 0);
-        const memoryKb = result.memoryKb != null ? Number(result.memoryKb) : 0;
+        result.actualOutput = actual;
+        result.executionTimeMs = timeMs.toFixed(2);
+        result.memoryKb = memoryKb;
+        result.status = passed ? "Passed" : "Failed";
 
         totalTimeMs += timeMs;
         totalMemoryKb += memoryKb;
 
-        const expected = test.output.trim();
-        const actual = result.output.trim();
-        const passed = expected === actual;
-
         if (passed) passedTestCases++;
-        else wrongAnswer = true;
 
-        const thisTestCaseResult = {
-          testCase: i + 1,
-          input: test.input,
-          expectedOutput: expected,
-          actualOutput: actual,
-          executionTimeMs: timeMs.toFixed(2),
-          memoryKb: memoryKb || null,
-          status: passed ? "Passed" : "Failed",
-        };
-
-        // Check per-test-case time limit
         if (timeMs > timeLimitMs) {
-          thisTestCaseResult.status = "Time Limit Exceeded";
-          testCaseResults.push(thisTestCaseResult);
-          return {
-            verdict: "Time Limit Exceeded",
-            executionTime: timeMs.toFixed(2),
-            memoryUsed: memoryKb || null,
-            passedTestCases,
-            output: "",
-            error: `Test case ${i + 1} exceeded time limit`,
-            testCaseResults,
-          };
+          result.status = "Time Limit Exceeded";
+          return earlyExit("Time Limit Exceeded", `Test case ${i + 1} exceeded time limit`, [...testCaseResults, result]);
         }
 
-        // Check per-test-case memory limit
         if (memoryKb > memoryLimitKb) {
-          thisTestCaseResult.status = "Memory Limit Exceeded";
-          testCaseResults.push(thisTestCaseResult);
-          return {
-            verdict: "Memory Limit Exceeded",
-            executionTime: timeMs.toFixed(2),
-            memoryUsed: memoryKb || null,
-            passedTestCases,
-            output: "",
-            error: `Test case ${i + 1} exceeded memory limit`,
-            testCaseResults,
-          };
+          result.status = "Memory Limit Exceeded";
+          return earlyExit("Memory Limit Exceeded", `Test case ${i + 1} exceeded memory limit`, [...testCaseResults, result]);
         }
-
-        testCaseResults.push(thisTestCaseResult);
 
       } catch (err) {
-        testCaseResults.push({
-          testCase: i + 1,
-          input: test.input,
-          expectedOutput: test.output.trim(),
-          actualOutput: "",
-          executionTimeMs: "0.00",
-          memoryKb: null,
-          status: "Error",
-          error: err.stderr || err.error,
-        });
+        result.error = err.stderr || err.error || "Unknown error";
+        result.status =
+          err.type === "timeout"
+            ? "Time Limit Exceeded"
+            : err.type === "compile"
+            ? "Compilation Error"
+            : "Runtime Error";
 
-        const baseErrorResult = {
-          executionTime: totalTimeMs.toFixed(2),
-          memoryUsed: totalMemoryKb || null,
-          passedTestCases,
-          output: "",
-          error: err.stderr || err.error,
-          testCaseResults,
-        };
-
-        if (err.type === "compile") {
-          return { verdict: "Compilation Error", ...baseErrorResult };
-        }
-
-        if (err.type === "timeout") {
-          return {
-            verdict: "Time Limit Exceeded",
-            ...baseErrorResult,
-            error: "Time Limit Exceeded",
-          };
-        }
-
-        return { verdict: "Runtime Error", ...baseErrorResult };
+        return earlyExit(result.status, result.error, [...testCaseResults, result]);
       }
+
+      testCaseResults.push(result);
     }
 
-    if (wrongAnswer) {
-      return {
-        verdict: "Wrong Answer",
-        executionTime: totalTimeMs.toFixed(2),
-        memoryUsed: totalMemoryKb || null,
-        passedTestCases,
-        output: "",
-        error: "",
-        testCaseResults,
-      };
-    }
+    const verdict = passedTestCases === testCases.length ? "Accepted" : "Wrong Answer";
 
     return {
-      verdict: "Accepted",
+      verdict,
       executionTime: totalTimeMs.toFixed(2),
-      memoryUsed: totalMemoryKb || null,
+      memoryUsed: totalMemoryKb,
       passedTestCases,
-      output: testCaseResults.map((tc) => tc.actualOutput).join("\n"),
+      totalTestCases: testCases.length,
+      output: testCaseResults.map(tc => tc.actualOutput).join("\n"),
       error: "",
       testCaseResults,
     };
+
   } catch (err) {
+    if (err.verdict) {
+      return errorResponse(err.verdict, err.error || err.message || "Failed", testCases.length);
+    }
+    return errorResponse("Runtime Error", err.message || "Something went wrong.", testCases.length);
+  } finally {
+    await safeCleanup(codeFile, language, compiledArtifact);
+  }
+
+  async function getExecutor(lang, filePath) {
+    if (lang === "cpp") {
+      const binary = await compileCpp(filePath).catch(err => {
+        if (err.type === "compile") throw { verdict: "Compilation Error", error: err.stderr || err.error };
+        throw err;
+      });
+      compiledArtifact = binary;
+      return input => runCpp(binary, input, timeLimitMs);
+    }
+    if (lang === "java") {
+      const { classDir, className } = await compileJava(filePath).catch(err => {
+        if (err.type === "compile") throw { verdict: "Compilation Error", error: err.stderr || err.error };
+        throw err;
+      });
+      compiledArtifact = classDir;
+      return input => runJava(classDir, className, input, timeLimitMs);
+    }
+    if (lang === "python") return input => executePython(filePath, input, timeLimitMs);
+    if (lang === "javascript") return input => executeJs(filePath, input, timeLimitMs);
+  }
+
+  function earlyExit(verdict, error, results) {
     return {
-      verdict: "Internal Error",
+      verdict,
+      executionTime: totalTimeMs.toFixed(2),
+      memoryUsed: totalMemoryKb,
+      passedTestCases,
+      totalTestCases: testCases.length,
+      output: "",
+      error,
+      testCaseResults: results,
+    };
+  }
+
+  function errorResponse(verdict, error, totalTestCases) {
+    return {
+      verdict,
       executionTime: 0,
       memoryUsed: null,
       passedTestCases: 0,
+      totalTestCases,
       output: "",
-      error: err.message || "Something went wrong while running test cases.",
+      error,
       testCaseResults: [],
     };
-  } finally {
-    try {
-      await fs.unlink(codeFile);
-      console.log(`🧹 Deleted code file: ${codeFile}`);
-    } catch (err) {
-      console.warn(`⚠️ Could not delete code file: ${codeFile} (${err.message})`);
+  }
+
+  async function safeCleanup(codeFile, lang, artifact) {
+    const tasks = [];
+    if (codeFile) tasks.push(fs.unlink(codeFile).catch(() => {}));
+    if (artifact) {
+      if (lang === "cpp" && typeof cleanCppBinary === "function") {
+        tasks.push(Promise.resolve(cleanCppBinary(artifact)).catch(() => {}));
+      }
+      if (lang === "java" && typeof cleanJavaClassFiles === "function") {
+        tasks.push(Promise.resolve(cleanJavaClassFiles(artifact)).catch(() => {}));
+      }
     }
+    await Promise.allSettled(tasks);
   }
 }

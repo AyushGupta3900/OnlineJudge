@@ -20,7 +20,14 @@ export const generateFile = async (language, code) => {
   const ext = extensions[language];
   if (!ext) throw new Error("Unsupported language");
 
-  const filename = `${uuid()}.${ext}`;
+  let filename;
+
+  if (language === "java") {
+    filename = `Main.java`; 
+  } else {
+    filename = `${uuid()}.${ext}`;
+  }
+
   const filepath = path.join(codeDir, filename);
   await fs.writeFile(filepath, code);
   return filepath;
