@@ -145,10 +145,13 @@ VITE_COMPILER_URL=http://localhost:5008/
 ## Building multiarchitecture image 
 - docker buildx create --use
 - docker buildx inspect --bootstrap
-- docker buildx build \
+- docker buildx build --platform linux/amd64 -t codex-compiler .
+- docker tag codex-compiler:latest 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
+- docker push 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
+```- docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -t 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest \
-  --push .
+  --push .```
 
 ## Deploying on AWS 
 

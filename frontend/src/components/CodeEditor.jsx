@@ -68,12 +68,14 @@ const CodeEditor = ({ problemId: propId }) => {
   const aiReviewRef = useRef(null);
   const pollingIntervalRef = useRef(null);
 
-useEffect(() => {
-  if (code == null) {
-    loadBoilerplate(language, updateCode);
-  }
-}, [problemId, code, language, updateCode]);
+  const hasLoadedBoilerplateRef = useRef(false);
 
+  useEffect(() => {
+    if (!hasLoadedBoilerplateRef.current && (!code || code.trim() === "")) {
+      loadBoilerplate(language, updateCode);
+      hasLoadedBoilerplateRef.current = true;
+    }
+  }, [problemId, language, updateCode]);
 
   useEffect(() => {
     if (!submissionId) return;
@@ -88,7 +90,9 @@ useEffect(() => {
       if (elapsed >= maxTime) {
         setOutput("⏳ Timeout: Failed to get verdict in time.");
         if (verdictToastId) {
-          toast.error("⏳ Timeout: Failed to get verdict.", { id: verdictToastId });
+          toast.error("⏳ Timeout: Failed to get verdict.", {
+            id: verdictToastId,
+          });
           setVerdictToastId(null);
         }
         clearInterval(pollingIntervalRef.current);
@@ -339,7 +343,9 @@ const HintModal = ({ visible, onClose, hintText, loading }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-[#0e1117] border border-[#2a2f3d] rounded-lg shadow-lg p-6 max-w-lg w-full text-white">
-        <h2 className="text-lg font-semibold text-yellow-400 mb-3">💡 AI Hint</h2>
+        <h2 className="text-lg font-semibold text-yellow-400 mb-3">
+          💡 AI Hint
+        </h2>
         <div className="text-sm whitespace-pre-wrap text-gray-300 max-h-[300px] overflow-y-auto">
           {loading ? "Generating hint…" : hintText || "No hint available."}
         </div>
