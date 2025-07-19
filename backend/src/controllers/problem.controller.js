@@ -46,7 +46,6 @@ export const getAllProblems = TryCatch(async (req, res) => {
     limit: Number.MAX_SAFE_INTEGER,
     sortBy,
     order,
-    select: "-hiddenTestCases", 
     populate: { path: "createdBy", select: "username email" },
   });
 
@@ -58,10 +57,10 @@ export const getAllProblems = TryCatch(async (req, res) => {
   }
 
   let problemsWithStatus = allResults.map(problem => {
-    return {
-      ...problem.toObject(),
-      isSolved: solvedSet.has(problem._id.toString()),
-    };
+    const obj = problem.toObject();
+    obj.isSolved = solvedSet.has(problem._id.toString());
+    delete obj.hiddenTestCases; 
+    return obj;
   });
 
   if (status === "solved") {
