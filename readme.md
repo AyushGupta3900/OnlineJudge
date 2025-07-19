@@ -1,220 +1,136 @@
 # 💻 CodeX — MERN Online Judge Platform
 
-CodeX is a modern, feature-rich **DSA (Data Structures & Algorithms) practice platform** built with the **MERN stack**, Docker, Redux, and other cutting-edge technologies.  
-It allows users to solve coding problems, run and submit code, track progress, view leaderboards, and much more — all with an intuitive interface and robust backend architecture.
+> 🚀 **A scalable, full-stack DSA practice & coding platform, powered by MERN, Docker & AWS.**
+
+CodeX is a modern, feature-rich **Data Structures & Algorithms (DSA) practice platform** built on the **MERN stack**, Docker, Redux Toolkit, and AWS.  
+It lets users solve coding problems, run and submit code in a sandboxed environment, track progress, view leaderboards — all with a blazing-fast, intuitive interface and a robust backend.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
 ### 👩‍💻 For Users
-- 🔍 **DSA Problem Bank**
-  - Browse, search, sort, and filter problems by difficulty (`Easy`, `Medium`, `Hard`) and status (`Solved`, `Unsolved`).
-- 📝 **Code Editor**
-  - Write, run (with custom input), and submit code.
-  - Code is cached — remains intact even after page reload.
-- ⏱️ **Submission Metrics**
-  - Get **time and space complexity** results upon submission.
-- 📊 **Submissions Dashboard**
-  - View submission history for each problem and see all submissions on your profile.
-- 🏆 **Leaderboard**
-  - Compete with others based on solved problems, accuracy, and a calculated rating.
-- 👤 **Profile Management**
-  - Update or delete your profile, and view problem-solving distribution by difficulty.
+✅ Browse, filter, and solve DSA problems by **difficulty** and **status**  
+✅ In-browser **code editor** with syntax highlighting & custom input  
+✅ Get **execution time & memory** usage for each submission  
+✅ View all your submissions & **problem history**  
+✅ Compete on a live **leaderboard** & improve your rating  
+✅ Manage your **profile**, track solved count & progress
 
 ### 🧑‍💼 For Admin
-- 🧩 **Admin Dashboard**
-  - Create, update, and delete DSA problems.
-  - View and respond to `Contact Me` messages sent by users.
+✅ Web-based **admin dashboard**  
+✅ Create, edit & delete DSA problems  
+✅ View and respond to user **contact messages**
 
 ---
 
+## 📸 Screenshots
+
+| 🏠 Home Page | 📝 Code Editor |
+|--------------|----------------|
+| ![Home](screenshots/1.png) | ![Editor](screenshots/3.png) |
+
+| 🏆 Leaderboard | 👤 Profile Page |
+|----------------|-----------------|
+| ![Leaderboard](screenshots/4.png) | ![Profile](screenshots/5.png) |
+
+| 🧑‍💼 Admin Dashboard | |
+|-----------------------|--|
+| ![Admin](screenshots/6.png) | |
 ## 🧰 Tech Stack & Architecture
 
-### 🌍 Frontend
-- React + Redux Toolkit + Redux Persist
-- React Router DOM
-- Framer Motion, Recharts, SweetAlert2
+### 🌐 Frontend
+- ⚛️ **React** + **Redux Toolkit** + **Redux Persist**
+- React Router DOM, Framer Motion, Recharts, SweetAlert2
 - TailwindCSS + DaisyUI
-- Vite for blazing fast builds
-- Lazy Loading & Code Splitting
-- Modular, maintainable components
-
-### 🖥️ Backend 1 (CRUD Server)
-- Node.js + Express
-- MongoDB + Mongoose
-- JWT-based Authentication (cookies)
-- Problem CRUD APIs, Leaderboard, Profile management, Contact messages
-
-### 🖥️ Backend 2 (Compiler Server)
-- Node.js + Express
-- Docker-based code execution
-- Handles both `Run` and `Submit` requests
-- Calculates time and space complexity safely
+- Vite for blazing-fast builds, lazy loading & Suspense, skeleton loaders
+- Deployed on **Vercel**
+- Features:
+  - User Auth & Profile (Login/Signup, onboarding, update/delete profile)
+  - Problem Solving Interface with editor, language selector, AI utilities (review, boilerplate, hint), custom input, run/reset/submit
+  - Leaderboard showing user rankings & rating
+  - Problems Page with list/search/sort by difficulty & status in card/table view
+  - Admin Panel for CRUD operations, user & message management, admin role management
+  - User Submissions pages (per-problem & all)
 
 ---
 
-## 📦 Project Structure
-
-```
-CodeX/
-├── backend/ # CRUD server
-│ └── package.json
-│ └── .env
-├── compiler/ # Docker-based code runner
-│ └── package.json
-│ └── .env
-├── frontend/ # React frontend
-│ └── package.json
-│ └── .env
-└── README.md
-```
-
-Each service runs independently and communicates via REST APIs.
-
----
-
-## 🧪 Installation & Setup
-
-### Prerequisites
-✅ Node.js ≥ 18  
-✅ MongoDB (local or Atlas)  
-✅ Docker  
+### 🖥️ Backend 1: CRUD Server
+- Node.js + Express.js
+- MongoDB Atlas + Mongoose
+- JWT-based authentication with HttpOnly cookies
+- Redis caching with invalidation
+- REST APIs hosted on **Railway**
+- Features:
+  - Auth endpoints: login, signup, logout, onboarding, user info
+  - User endpoints: leaderboard, profile stats, submissions, admin actions (make/remove admin, view users)
+  - Problem endpoints: CRUD, batch create, per-user status
+  - Submissions: save, retrieve, track per test case results
+  - AI Utilities: code review, hint, boilerplate, testcase generation
+  - Contact Messages: submit/view
+  - Middleware:
+    - `authMiddleware`, `optionalAuth`, `adminOnly`, `superadminOnly`
+  - Centralized error handling with custom error class
+  - Caching common queries using Redis
+- Endpoints:
+  - **Auth:** `/api/auth/*` (signup, login, logout, onboarding, me)
+  - **User:** `/api/user/*` (update-account, delete-account, leaderboard, profile-stats, submissions, admin actions)
+  - **Problem:** `/api/problem/*` (all, by id, status, admin CRUD, batch-create)
+  - **Submission:** `/api/submission/*` (submit, by user, by id)
+  - **AI:** `/api/ai/*` (review, generate-hint, generate-boilerplate, generate-testcases)
+  - **Contact:** `/api/contact/*` (submit, admin/all)
 
 ---
 
-### 📄 Environment Variables
+### 🖥️ Backend 2: Compiler Server
+- Node.js + Express.js
+- Docker-based sandboxed, horizontally scalable code execution
+- Hosted on **AWS EC2 + ECR + Elastic IP**
+- Handles both `/run` & `/submit` requests:
+  - **/run:** executes code with custom input on-demand
+  - **/submit:** full submission processing through a message queue
+- RabbitMQ used as message queue for submissions
+- Workers:
+  - Compiler workers (inside Docker containers) pull submissions from RabbitMQ
+  - Compiled languages: compile once, then run binary on all test cases
+  - Interpreted languages: run script per test case
+  - Stops execution on first failure or timeout (TLE, MLE, RE)
+  - Updates verdict & results in MongoDB, cleans up files
+  - Horizontally scalable at both container & worker level
+- Deployed with NGINX reverse proxy & SSL (Certbot) for HTTPS
+- Future-ready for WebSocket-based real-time verdicts
 
-#### Backend (CRUD) `.env`:
-```env
-PORT=5005
-ORIGIN_URL=http://localhost:5173
-COMPILER_BASE_URL=http://localhost:5008
+---
 
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority&appName=<appName>
+### 🗃️ Other Components
 
-JWT_SECRET_KEY=<your_jwt_secret_here>
-JWT_EXPIRES_IN=7d
-NODE_ENV=development
+| Layer                | Technology                        |
+|-----------------------|-----------------------------------|
+| **Database**         | MongoDB Atlas                     |
+| **Message Queue**     | RabbitMQ (cloud hosted)           |
+| **Cache**             | Redis                             |
+| **Frontend Hosting**  | Vercel                            |
+| **CRUD Hosting**      | Railway                           |
+| **Compiler Hosting**  | AWS (EC2 + Docker + Elastic IP)   |
+| **Containerization**  | Docker                            |
+| **Authentication**    | JWT + HTTP-only cookies           |
+
+### 📊 Deployment Diagram
+
 ```
-
-#### Backend (COMPILER) `.env`:
-```env
-PORT=5008
-ORIGIN_URL=http://localhost:5173
-
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority&appName=<appName>
+            +-------------------+
+            |      Users        |
+            +-------------------+
+                    |
+                    v
+            [ Vercel Frontend ]
+                    |
+        +-----------+-----------+
+        |                       |
+  [ CRUD Backend ]        [ Compiler Backend ]
+(Railway, REST APIs)   (AWS EC2 + Docker, REST)
+        |
+ [ MongoDB Atlas ]
+        |
+  [ Redis Cache ]
 ```
-
-#### Frontend `.env`:
-```env
-VITE_API_URL=http://localhost:5005/api/v1
-VITE_COMPILER_URL=http://localhost:5008/
-```
-
-### Clone the repository
-
-- git clone https://github.com/AyushGupta3900/SummerProject.git
-- cd SummerProject
-
-### Setup Backend (CRUD)
-
-- cd backend
-- cp .env.example .env   # and fill in your credentials
-- npm install
-- npm run dev
-
-### Setup Frontend
-
-- cd ../frontend
-- cp .env.example .env   # and fill in your URLs
-- npm install
-- npm run dev
-  
-### Setup Compiler (Docker-based)
-
-- cd ../compiler
-- cp .env.example .env   # and fill in your credentials
-- docker stop $(docker ps -q) || true
-- docker rm $(docker ps -aq) || true
-- docker image prune -a -f
-- docker build --no-cache -t compiler-server .
-- docker run -p 5008:5008 compiler-server
-- docker run --env-file .env -d -p 5008:5008 codex-compiler
-
-## Building multiarchitecture image 
-- docker buildx create --use
-- docker buildx inspect --bootstrap
-- docker buildx build --platform linux/amd64 -t codex-compiler .
-- docker tag codex-compiler:latest 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
-- docker push 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
-```- docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t 655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest \
-  --push .```
-
-## Deploying on AWS 
-
-- brew install awscli 
-- Create a IAM user 
-- Give username 
-- attach permissions -> AdministratorAccess
-- Create the Acess Key on aws 
-- aws configure 
-- AWS Access Key ID [None]: YOUR_ACCESS_KEY
-- AWS Secret Access Key [None]: YOUR_SECRET_KEY
-- Default region name [None]: ap-south-1
-- Default output format [None]: json
-- Make a ECR registry 
-- create a repository 
-- tag the image on your local system 
-- docker push image_url 
-- create the ec2 instance 
-- create a key value pair in ec2 instance 
-- add it to the keys folder of the project 
-- Edit the network settings and add the exposed port of the project 
-- Open the ec2 instance on you cmd in the keys folder using push commands 
-- sudo yum install docker 
-- sudo service docker start 
-- sudo usermod -aG ec2-user 
-- sudo reboot 
-- ssh ""
--  docker pull image_url_on_url (655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest)
-- docker run --env-file .env -d -p 5008:5008 \
-  655232707800.dkr.ecr.ap-southeast-2.amazonaws.com/codex-compiler:latest
-docker ps
-- check the docker 
-- curl http://localhost:5008/
-- docker ps
-- Allocate Elastic Ip to the EC2 instance 
-- After deploying on was register the IPV4 Elastic IP on the domain 
-- ping codex-online-judge.duckdns.org
-- Install and configure nginx 
-- sudo amazon-linux-extras enable nginx1
-- sudo yum install nginx -y
-- sudo systemctl enable nginx
-- sudo systemctl start nginx
-- sudo systemctl status nginx
-- sudo amazon-linux-extras install epel -y
-- sudo yum install certbot python2-certbot-nginx -y
-- sudo certbot --nginx -d codex-online-judge.duckdns.org
-- Open the ports 80 and 443 in security groups 
-- sudo vim /etc/nginx/conf.d/codex-online-judge.conf
-```
-server {
-    listen 80;
-
-    server_name codex-online-judge.duckdns.org;
-
-    location / {
-        proxy_pass         http://127.0.0.1:5008;
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade $http_upgrade;
-        proxy_set_header   Connection 'upgrade';
-        proxy_set_header   Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-- sudo nginx -t
-- sudo systemctl restart nginx

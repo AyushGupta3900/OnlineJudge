@@ -1,29 +1,23 @@
-FROM node:20-slim
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Install compilers and GNU time
-RUN apt-get update && apt-get install -y \
-    g++ \
-    openjdk-17-jdk \
+RUN apk add --no-cache \
+    openjdk17 \
     python3 \
-    python3-pip \
-    time \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    py3-pip \
+    g++ \
+    make \
+    bash \
+    time
 
-# Install pm2 globally
 RUN npm install -g pm2
 
-# Copy dependencies and install
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --only=production
 
-# Copy app source
 COPY . .
 
-# Expose HTTP port
 EXPOSE 5008
 
-# Start HTTP server + 3 workers
 CMD ["pm2-runtime", "ecosystem.config.cjs"]

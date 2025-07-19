@@ -46,6 +46,7 @@ export const getAllProblems = TryCatch(async (req, res) => {
     limit: Number.MAX_SAFE_INTEGER,
     sortBy,
     order,
+    select: "-hiddenTestCases", 
     populate: { path: "createdBy", select: "username email" },
   });
 
@@ -62,7 +63,6 @@ export const getAllProblems = TryCatch(async (req, res) => {
       isSolved: solvedSet.has(problem._id.toString()),
     };
   });
-
 
   if (status === "solved") {
     problemsWithStatus = problemsWithStatus.filter(p => p.isSolved);
@@ -83,7 +83,7 @@ export const getAllProblems = TryCatch(async (req, res) => {
     page: Number(page),
   };
 
-await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
+  await redisClient.set(redisKey, JSON.stringify(response), 'EX', 60);
 
   res.status(200).json({
     success: true,
@@ -222,7 +222,6 @@ export const deleteProblem = TryCatch(async (req, res) => {
 
 export const getProblem = TryCatch(async (req, res) => {
   const problemId = req.params.id;
-  console.log(problemId)
   if (!problemId) throw new AppError("Problem ID is required", 400);
 
   const redisKey = `problem:${problemId}`;
@@ -234,12 +233,12 @@ export const getProblem = TryCatch(async (req, res) => {
       data: JSON.parse(cached),
     });
   }
-  const problem = await Problem.findById(problemId).populate(
-    "createdBy",
-    "username email"
-  );
+
+  const problem = await Problem.findById(problemId)
+    .populate("createdBy", "username email")
+    .select("-hiddenTestCases");
+
   if (!problem) throw new AppError("Problem not found", 404);
-  console.log(problem)
 
   await redisClient.set(redisKey, JSON.stringify(problem), "EX", 60);
 
